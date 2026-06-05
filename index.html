@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Audit Data Dosen Serdos 2026 - Firebase Cloud</title>
+    <title>Audit Data Dosen V6 - Firebase Fixed</title>
     <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js"></script>
@@ -39,7 +39,7 @@
             position: relative;
         }
 
-        .firebase-badge {
+        .firebase-status {
             position: absolute;
             top: 15px;
             right: 20px;
@@ -47,18 +47,12 @@
             border-radius: 20px;
             font-size: 12px;
             font-weight: 600;
-            background: rgba(255,255,255,0.2);
-            border: 1px solid rgba(255,255,255,0.4);
-        }
-
-        .firebase-badge.connected {
-            background: #28a745;
-            color: white;
-        }
-
-        .firebase-badge.disconnected {
             background: #dc3545;
             color: white;
+        }
+
+        .firebase-status.connected {
+            background: #28a745;
         }
 
         header h1 {
@@ -94,10 +88,6 @@
             min-width: 120px;
         }
 
-        .tab-button:hover {
-            background: #efefef;
-        }
-
         .tab-button.active {
             color: #667eea;
             border-bottom-color: #667eea;
@@ -105,6 +95,8 @@
 
         .content {
             padding: 20px;
+            max-height: 70vh;
+            overflow-y: auto;
         }
 
         .tab-content {
@@ -155,30 +147,6 @@
             font-size: 12px;
             color: #0066cc;
             border-left: 4px solid #0066cc;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .sync-indicator {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-
-        .sync-indicator.online {
-            background: #28a745;
-        }
-
-        .sync-indicator.offline {
-            background: #dc3545;
-            animation: none;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
         }
 
         .stats {
@@ -205,37 +173,6 @@
         .stat-label {
             font-size: 12px;
             opacity: 0.9;
-        }
-
-        .chart-container {
-            position: relative;
-            height: 300px;
-            margin: 20px 0;
-            background: #f9f9f9;
-            border-radius: 10px;
-            padding: 15px;
-        }
-
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin: 20px 0;
-        }
-
-        .grid-3 {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin: 20px 0;
-        }
-
-        .insight-card {
-            background: white;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
         }
 
         .form-group {
@@ -297,17 +234,23 @@
             background: #28a745;
         }
 
+        .btn-danger {
+            background: #dc3545;
+        }
+
         .btn-small {
             padding: 5px 10px;
             font-size: 12px;
             width: auto;
+            display: inline-block;
+            margin: 2px;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 15px;
-            font-size: 13px;
+            font-size: 12px;
         }
 
         thead {
@@ -315,7 +258,7 @@
         }
 
         th {
-            padding: 12px;
+            padding: 10px;
             text-align: left;
             font-weight: 600;
             color: #333;
@@ -323,7 +266,7 @@
         }
 
         td {
-            padding: 12px;
+            padding: 10px;
             border-bottom: 1px solid #eee;
         }
 
@@ -354,53 +297,48 @@
             color: #721c24;
         }
 
-        .recommendation-box {
-            background: #f9f9f9;
-            border-left: 4px solid #667eea;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            overflow-y: auto;
         }
 
-        .recommendation-box.p1 {
-            border-left-color: #28a745;
-            background: #f0fff4;
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
         }
 
-        .recommendation-box.p2 {
-            border-left-color: #ffc107;
-            background: #fffbf0;
-        }
-
-        .recommendation-box.followup {
-            border-left-color: #dc3545;
-            background: #fff5f5;
-        }
-
-        .rec-title {
-            font-weight: 600;
-            font-size: 14px;
-            margin-bottom: 8px;
-            color: #333;
-        }
-
-        .rec-content {
-            font-size: 13px;
-            color: #666;
-            line-height: 1.5;
-        }
-
-        .homebase-section {
-            background: #f5f5f5;
-            padding: 15px;
-            border-radius: 8px;
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 20px;
-            border-left: 4px solid #667eea;
         }
 
-        .homebase-section h4 {
-            margin-bottom: 10px;
-            color: #333;
+        .modal-header h2 {
+            margin: 0;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+            padding: 0;
+            width: auto;
+            height: auto;
         }
 
         footer {
@@ -419,46 +357,33 @@
             .stats {
                 grid-template-columns: repeat(2, 1fr);
             }
-            .grid-2 {
-                grid-template-columns: 1fr;
-            }
-            .grid-3 {
-                grid-template-columns: 1fr;
-            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <div class="firebase-badge disconnected" id="firebaseBadge">
-                <span id="badgeText">🔴 Connecting...</span>
-            </div>
-            <h1>🔥 Audit Data Dosen Serdos 2026</h1>
-            <p>Cloud Database + Grafik + Rekomendasi + Per Homebase</p>
+            <div class="firebase-status disconnected" id="firebaseStatus">🔴 Not Connected</div>
+            <h1>🔥 Audit Data Dosen V6</h1>
+            <p>Firebase + Edit Dosen + CSV Update</p>
         </header>
 
         <div class="tabs">
             <button class="tab-button active" onclick="switchTab('dashboard')">📊 Dashboard</button>
+            <button class="tab-button" onclick="switchTab('import')">📥 Import/Update CSV</button>
             <button class="tab-button" onclick="switchTab('input')">➕ Input Data</button>
             <button class="tab-button" onclick="switchTab('daftar')">📖 Daftar Dosen</button>
-            <button class="tab-button" onclick="switchTab('homebase')">🏢 Per Homebase</button>
-            <button class="tab-button" onclick="switchTab('rekomendasi')">🎯 Rekomendasi</button>
-            <button class="tab-button" onclick="switchTab('settings')">⚙️ Pengaturan</button>
+            <button class="tab-button" onclick="switchTab('settings')">⚙️ Settings</button>
         </div>
 
         <div class="content">
             <!-- TAB 1: DASHBOARD -->
             <div id="dashboard" class="tab-content active">
-                <h2>📊 Dashboard Lengkap</h2>
+                <h2>📊 Dashboard</h2>
                 <div id="dashboardAlert"></div>
 
                 <div class="sync-status">
-                    <div>
-                        <span class="sync-indicator offline" id="syncIndicator"></span>
-                        <span id="syncText">Menyambung ke Firebase...</span>
-                    </div>
-                    <span id="syncTime">-</span>
+                    <span id="syncText">🔄 Menyambung ke Firebase...</span>
                 </div>
 
                 <div class="stats">
@@ -480,32 +405,54 @@
                     </div>
                 </div>
 
-                <!-- CHARTS -->
-                <div class="grid-2">
-                    <div>
-                        <h3 style="margin-bottom: 15px;">📊 Distribusi Eligibilitas</h3>
-                        <div class="chart-container">
-                            <canvas id="pieChart"></canvas>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 style="margin-bottom: 15px;">📈 Perbandingan Status</h3>
-                        <div class="chart-container">
-                            <canvas id="barChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- KEY INSIGHTS -->
-                <div style="background: #f0f8ff; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #667eea;">
-                    <h3 style="margin-bottom: 15px;">💡 Key Insights</h3>
-                    <div id="insightsContainer"></div>
+                <div style="background: #f5f5f5; padding: 15px; border-radius: 6px;">
+                    <h3>Firebase Connection Info</h3>
+                    <p style="font-size: 12px; color: #666; margin-top: 10px;">
+                        <strong>Status:</strong> <span id="firebaseInfo">Not Connected</span><br>
+                        <strong>Data Source:</strong> <span id="dataSource">localStorage</span><br>
+                        <strong>Last Sync:</strong> <span id="lastSync">-</span>
+                    </p>
                 </div>
             </div>
 
-            <!-- TAB 2: INPUT DATA -->
+            <!-- TAB 2: IMPORT/UPDATE CSV -->
+            <div id="import" class="tab-content">
+                <h2>📥 Import / Update Data dari CSV</h2>
+                <div id="importAlert"></div>
+
+                <div style="background: #f0f8ff; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                    <h3>📋 Cara Import/Update CSV:</h3>
+                    <ol style="font-size: 13px; margin-left: 20px;">
+                        <li>Download CSV dari Google Sheets</li>
+                        <li>Click "📂 Pilih File CSV" atau drag-drop</li>
+                        <li>Aplikasi akan: ADD dosen baru + UPDATE dosen yang sudah ada (by NIDN)</li>
+                        <li>Dashboard auto-update ✓</li>
+                    </ol>
+                </div>
+
+                <div class="form-group">
+                    <label>📂 Upload File CSV (Drag & Drop atau Click)</label>
+                    <div style="border: 2px dashed #667eea; padding: 30px; text-align: center; border-radius: 8px; cursor: pointer; background: #f9f9f9;"
+                        ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" id="dropZone">
+                        <p style="color: #667eea; font-weight: 600; margin-bottom: 10px;">📁 Drag CSV File Di Sini</p>
+                        <p style="color: #999; font-size: 12px;">atau click untuk browse</p>
+                        <input type="file" id="csvFile" accept=".csv" onchange="handleFileSelect(event)" style="display: none;">
+                        <button style="margin-top: 15px; width: 200px;" onclick="document.getElementById('csvFile').click()">Pilih File CSV</button>
+                    </div>
+                </div>
+
+                <div id="importProgress" style="display: none; margin-top: 15px;">
+                    <p>Processing...</p>
+                    <div style="background: #ddd; height: 20px; border-radius: 10px; overflow: hidden;">
+                        <div style="background: linear-gradient(90deg, #667eea, #764ba2); height: 100%; width: 0%; transition: width 0.3s;" id="progressBar"></div>
+                    </div>
+                    <p id="progressText" style="font-size: 12px; color: #666;">0%</p>
+                </div>
+            </div>
+
+            <!-- TAB 3: INPUT DATA -->
             <div id="input" class="tab-content">
-                <h2>➕ Input Data Dosen</h2>
+                <h2>➕ Input Data Dosen Baru</h2>
                 <div id="inputAlert"></div>
 
                 <form id="dosenForm" onsubmit="return submitForm(event)">
@@ -522,8 +469,8 @@
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="homebase">Homebase/Prodi</label>
-                            <input type="text" id="homebase" placeholder="Contoh: Teknik Sipil" required>
+                            <label for="homebase">Homebase</label>
+                            <input type="text" id="homebase" placeholder="Engineering, Economics, etc" required>
                         </div>
                         <div class="form-group">
                             <label for="jabatan">Jabatan</label>
@@ -592,11 +539,11 @@
                         </div>
                     </div>
 
-                    <button type="submit">💾 Simpan ke Firebase</button>
+                    <button type="submit">💾 Simpan Dosen</button>
                 </form>
             </div>
 
-            <!-- TAB 3: DAFTAR DOSEN -->
+            <!-- TAB 4: DAFTAR DOSEN -->
             <div id="daftar" class="tab-content">
                 <h2>📖 Daftar Dosen</h2>
 
@@ -622,86 +569,154 @@
                 </div>
             </div>
 
-            <!-- TAB 4: PER HOMEBASE -->
-            <div id="homebase" class="tab-content">
-                <h2>🏢 Data Per Homebase/Prodi</h2>
-                <div id="homebaseContainer"></div>
-            </div>
-
-            <!-- TAB 5: REKOMENDASI -->
-            <div id="rekomendasi" class="tab-content">
-                <h2>🎯 Rekomendasi Per Dosen</h2>
-
-                <div class="recommendation-box p1">
-                    <div class="rec-title">✅ P1 (ELIGIBLE) - <span id="p1CountRek">0</span> Dosen</div>
-                    <div id="p1RecommendationList"></div>
-                </div>
-
-                <div class="recommendation-box p2">
-                    <div class="rec-title">◐ P2 (CONDITIONAL) - <span id="p2CountRek">0</span> Dosen</div>
-                    <div id="p2RecommendationList"></div>
-                </div>
-
-                <div class="recommendation-box followup">
-                    <div class="rec-title">✕ FOLLOW-UP - <span id="followupCountRek">0</span> Dosen</div>
-                    <div id="followupRecommendationList"></div>
-                </div>
-            </div>
-
-            <!-- TAB 6: SETTINGS -->
+            <!-- TAB 5: SETTINGS -->
             <div id="settings" class="tab-content">
-                <h2>⚙️ Pengaturan Firebase</h2>
+                <h2>⚙️ Firebase Settings</h2>
                 <div id="settingsAlert"></div>
 
                 <div style="background: #f5f5f5; padding: 15px; border-radius: 6px; margin-bottom: 20px;">
                     <h3>🔥 Firebase Configuration</h3>
-                    <p style="font-size: 13px; color: #666; margin-bottom: 15px;">
-                        Update Firebase config untuk koneksi ke cloud database.
+                    <p style="font-size: 12px; color: #666; margin-bottom: 15px;">
+                        Copy dari Firebase Console → Project Settings → Your apps → Firebase SDK snippet
                     </p>
                     
                     <div class="form-group">
                         <label>API Key</label>
-                        <input type="text" id="apiKey" placeholder="Paste Firebase API Key">
+                        <input type="text" id="apiKey" placeholder="">
                     </div>
                     <div class="form-group">
                         <label>Auth Domain</label>
-                        <input type="text" id="authDomain" placeholder="Paste Firebase Auth Domain">
+                        <input type="text" id="authDomain" placeholder="">
                     </div>
                     <div class="form-group">
                         <label>Project ID</label>
-                        <input type="text" id="projectId" placeholder="Paste Firebase Project ID">
+                        <input type="text" id="projectId" placeholder="">
                     </div>
                     <div class="form-group">
                         <label>Storage Bucket</label>
-                        <input type="text" id="storageBucket" placeholder="Paste Firebase Storage Bucket">
+                        <input type="text" id="storageBucket" placeholder="">
                     </div>
                     <div class="form-group">
                         <label>Messaging Sender ID</label>
-                        <input type="text" id="messagingSenderId" placeholder="Paste Firebase Sender ID">
+                        <input type="text" id="messagingSenderId" placeholder="">
                     </div>
                     <div class="form-group">
                         <label>App ID</label>
-                        <input type="text" id="appId" placeholder="Paste Firebase App ID">
+                        <input type="text" id="appId" placeholder="">
                     </div>
 
-                    <button onclick="saveFirebaseConfig()">🔐 Simpan & Reconnect Firebase</button>
+                    <button onclick="saveConfig()">🔐 Save & Connect Firebase</button>
                 </div>
 
                 <div style="background: #f5f5f5; padding: 15px; border-radius: 6px;">
-                    <h3>📊 Status Koneksi</h3>
-                    <p style="font-size: 13px; color: #666; margin-top: 10px;">
-                        <strong>Firebase Status:</strong> <span id="firebaseStatusText">Disconnected</span><br>
-                        <strong>Total Dosen:</strong> <span id="totalDosenInfo">0</span><br>
-                        <strong>Last Sync:</strong> <span id="lastSyncTime">-</span>
-                    </p>
+                    <h3>📊 Connection Test</h3>
+                    <button class="btn-success" onclick="testConnection()" style="margin-top: 10px;">🧪 Test Firebase Connection</button>
+                    <p id="testResult" style="font-size: 12px; margin-top: 10px; color: #666;"></p>
                 </div>
             </div>
         </div>
 
         <footer>
-            <p>© 2026 Universitas Cordova - Audit Data Dosen Serdos 2026</p>
-            <p>🔥 Powered by Firebase + Analytics + Per Homebase</p>
+            <p>© 2026 Universitas Cordova - Audit Data Dosen</p>
+            <p>V6: Firebase + Edit + CSV Update</p>
         </footer>
+    </div>
+
+    <!-- EDIT MODAL -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>✏️ Edit Dosen</h2>
+                <button class="close-btn" onclick="closeEditModal()">×</button>
+            </div>
+            <form id="editForm" onsubmit="return submitEditForm(event)">
+                <input type="hidden" id="editId">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>NIDN</label>
+                        <input type="text" id="editNidn" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Nama</label>
+                        <input type="text" id="editNama" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Homebase</label>
+                        <input type="text" id="editHomebase" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Jabatan</label>
+                        <select id="editJabatan" required>
+                            <option value="">-- Pilih --</option>
+                            <option value="Guru Besar/Profesor">Guru Besar/Profesor</option>
+                            <option value="Lektor Kepala">Lektor Kepala</option>
+                            <option value="Lektor">Lektor</option>
+                            <option value="Asisten Ahli">Asisten Ahli</option>
+                            <option value="Tidak Ada">Tidak Ada</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>TMT JF</label>
+                        <input type="date" id="editTmtJF" required>
+                    </div>
+                    <div class="form-group">
+                        <label>LKD 4 Semester</label>
+                        <select id="editLkd" required>
+                            <option value="Ada">Ada</option>
+                            <option value="Tidak">Tidak</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>PEKERTI/AA</label>
+                        <select id="editPekerti" required>
+                            <option value="Ada PEKERTI">Ada PEKERTI</option>
+                            <option value="Ada AA">Ada AA</option>
+                            <option value="Belum Ada">Belum Ada</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Pendidikan</label>
+                        <select id="editPendidikan" required>
+                            <option value="S1">S1</option>
+                            <option value="S2">S2</option>
+                            <option value="S3">S3</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Karya Ilmiah</label>
+                        <select id="editKaryaIlmiah" required>
+                            <option value="Ada">Ada</option>
+                            <option value="Tidak Ada">Tidak Ada</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Tugas Belajar</label>
+                        <select id="editTugasBelajar" required>
+                            <option value="Tidak TB">Tidak TB</option>
+                            <option value="TB Sambil Bekerja">TB Sambil Bekerja</option>
+                            <option value="TB Penuh">TB Penuh</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <button type="submit">💾 Simpan Perubahan</button>
+                    <button type="button" class="btn-secondary" onclick="closeEditModal()">Batal</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <script>
@@ -709,78 +724,108 @@
         let db, auth;
         let isOnline = false;
         let daftarDosen = [];
-        let pieChart, barChart;
+        let firebaseReady = false;
 
-        const DEFAULT_CONFIG = {
-            apiKey: "AIzaSyD0j2K-rG6H5pV3wX7mN8oP0qR1sT2uV3w",
-            authDomain: "audit-dosen-serdos-2026.firebaseapp.com",
-            projectId: "audit-dosen-serdos-2026",
-            storageBucket: "audit-dosen-serdos-2026.appspot.com",
-            messagingSenderId: "123456789012",
-            appId: "1:123456789012:web:abc123def456ghi789"
-        };
+        // Load config from localStorage
+        function loadConfig() {
+            return {
+                apiKey: localStorage.getItem('firebaseApiKey') || '',
+                authDomain: localStorage.getItem('firebaseAuthDomain') || '',
+                projectId: localStorage.getItem('firebaseProjectId') || '',
+                storageBucket: localStorage.getItem('firebaseStorageBucket') || '',
+                messagingSenderId: localStorage.getItem('firebaseMessagingSenderId') || '',
+                appId: localStorage.getItem('firebaseAppId') || ''
+            };
+        }
 
-        function initFirebase() {
+        // Save config to localStorage
+        function saveConfig() {
             const config = {
-                apiKey: localStorage.getItem('firebaseApiKey') || DEFAULT_CONFIG.apiKey,
-                authDomain: localStorage.getItem('firebaseAuthDomain') || DEFAULT_CONFIG.authDomain,
-                projectId: localStorage.getItem('firebaseProjectId') || DEFAULT_CONFIG.projectId,
-                storageBucket: localStorage.getItem('firebaseStorageBucket') || DEFAULT_CONFIG.storageBucket,
-                messagingSenderId: localStorage.getItem('firebaseMessagingSenderId') || DEFAULT_CONFIG.messagingSenderId,
-                appId: localStorage.getItem('firebaseAppId') || DEFAULT_CONFIG.appId
+                firebaseApiKey: document.getElementById('apiKey').value,
+                firebaseAuthDomain: document.getElementById('authDomain').value,
+                firebaseProjectId: document.getElementById('projectId').value,
+                firebaseStorageBucket: document.getElementById('storageBucket').value,
+                firebaseMessagingSenderId: document.getElementById('messagingSenderId').value,
+                firebaseAppId: document.getElementById('appId').value
             };
 
+            for (const [key, value] of Object.entries(config)) {
+                localStorage.setItem(key, value);
+            }
+
+            showAlert('settingsAlert', '✅ Config saved! Reconnecting...', 'success');
+            setTimeout(() => location.reload(), 1500);
+        }
+
+        // Initialize Firebase
+        function initFirebase() {
+            const config = loadConfig();
+
+            // Check if all fields are filled
+            if (!config.apiKey || !config.projectId) {
+                showAlert('dashboardAlert', '⚠️ Firebase config belum diisi. Ke tab Settings dan isi config.', 'warning');
+                setFirebaseStatus(false);
+                loadDataFromLocalStorage();
+                return;
+            }
+
             try {
+                // Delete previous app if exists
                 if (firebase.apps.length > 0) {
                     firebase.app().delete();
                 }
-                
+
+                // Initialize
                 firebase.initializeApp(config);
                 db = firebase.firestore();
                 auth = firebase.auth();
 
+                // Anonymous auth
                 auth.signInAnonymously()
                     .then(() => {
-                        setOnlineStatus(true);
+                        console.log('✅ Firebase Connected!');
+                        firebaseReady = true;
+                        setFirebaseStatus(true);
                         loadDataFromFirebase();
                         setupRealtimeListener();
                     })
                     .catch(error => {
-                        console.error("Auth error:", error);
-                        setOnlineStatus(false);
+                        console.error('❌ Auth Error:', error.message);
+                        firebaseReady = false;
+                        setFirebaseStatus(false);
                         loadDataFromLocalStorage();
                     });
 
             } catch (error) {
-                console.error("Firebase init error:", error);
-                setOnlineStatus(false);
+                console.error('❌ Firebase Error:', error.message);
+                firebaseReady = false;
+                setFirebaseStatus(false);
                 loadDataFromLocalStorage();
             }
         }
 
-        function setOnlineStatus(online) {
+        function setFirebaseStatus(online) {
             isOnline = online;
-            const badge = document.getElementById('firebaseBadge');
-            const badgeText = document.getElementById('badgeText');
-            const indicator = document.getElementById('syncIndicator');
+            const status = document.getElementById('firebaseStatus');
             const syncText = document.getElementById('syncText');
+            const info = document.getElementById('firebaseInfo');
+            const source = document.getElementById('dataSource');
 
             if (online) {
-                badge.className = 'firebase-badge connected';
-                badgeText.textContent = '🟢 Connected to Firebase';
-                indicator.className = 'sync-indicator online';
-                syncText.textContent = '✅ Connected to Firebase - Data syncing real-time';
-                document.getElementById('firebaseStatusText').textContent = 'Online ✓';
+                status.className = 'firebase-status connected';
+                status.textContent = '🟢 Connected';
+                syncText.innerHTML = '✅ Connected to Firebase - Data syncing real-time';
+                info.textContent = 'Online ✓';
+                source.textContent = 'Firebase Firestore';
             } else {
-                badge.className = 'firebase-badge disconnected';
-                badgeText.textContent = '🔴 Offline Mode';
-                indicator.className = 'sync-indicator offline';
-                syncText.textContent = '⚠️ Offline - Data using localStorage';
-                document.getElementById('firebaseStatusText').textContent = 'Offline (localStorage)';
+                status.className = 'firebase-status disconnected';
+                status.textContent = '🔴 Not Connected';
+                syncText.innerHTML = '⚠️ Offline Mode - Using localStorage';
+                info.textContent = 'Offline (localStorage)';
+                source.textContent = 'localStorage (offline)';
             }
 
-            document.getElementById('syncTime').textContent = new Date().toLocaleTimeString('id-ID');
-            document.getElementById('lastSyncTime').textContent = new Date().toLocaleTimeString('id-ID');
+            document.getElementById('lastSync').textContent = new Date().toLocaleTimeString('id-ID');
         }
 
         function loadDataFromLocalStorage() {
@@ -790,7 +835,7 @@
         }
 
         async function loadDataFromFirebase() {
-            if (!isOnline || !db) {
+            if (!firebaseReady || !db) {
                 loadDataFromLocalStorage();
                 return;
             }
@@ -804,13 +849,13 @@
                 localStorage.setItem('daftarDosen', JSON.stringify(daftarDosen));
                 updateUI();
             } catch (error) {
-                console.error("Load error:", error);
+                console.error('Load error:', error);
                 loadDataFromLocalStorage();
             }
         }
 
         function setupRealtimeListener() {
-            if (!isOnline || !db) return;
+            if (!firebaseReady || !db) return;
 
             db.collection("dosen").onSnapshot(
                 snapshot => {
@@ -821,9 +866,11 @@
                     localStorage.setItem('daftarDosen', JSON.stringify(daftarDosen));
                     updateUI();
                 },
-                error => console.error("Listener error:", error)
+                error => console.error('Listener error:', error)
             );
         }
+
+        // ===== FORM FUNCTIONS =====
 
         function submitForm(event) {
             event.preventDefault();
@@ -853,22 +900,239 @@
             localStorage.setItem('daftarDosen', JSON.stringify(daftarDosen));
 
             // Save to Firebase
-            if (isOnline && db) {
+            if (firebaseReady && db) {
                 db.collection("dosen").doc(dosen.id.toString()).set(dosen)
-                    .then(() => {
-                        showAlert('inputAlert', `✅ ${dosen.nama} saved to Firebase!`, 'success');
-                    })
-                    .catch(error => {
-                        showAlert('inputAlert', `⚠️ Saved locally: ${error.message}`, 'warning');
-                    });
+                    .then(() => showAlert('inputAlert', `✅ ${dosen.nama} saved!`, 'success'))
+                    .catch(e => showAlert('inputAlert', `⚠️ Saved locally: ${e.message}`, 'warning'));
             } else {
-                showAlert('inputAlert', `✅ ${dosen.nama} saved (will sync when online)`, 'info');
+                showAlert('inputAlert', `✅ ${dosen.nama} saved (offline)`, 'info');
             }
 
             document.getElementById('dosenForm').reset();
             updateUI();
             return false;
         }
+
+        // ===== EDIT FUNCTIONS =====
+
+        function openEditModal(id) {
+            const dosen = daftarDosen.find(d => d.id == id);
+            if (!dosen) return;
+
+            document.getElementById('editId').value = dosen.id;
+            document.getElementById('editNidn').value = dosen.nidn;
+            document.getElementById('editNama').value = dosen.nama;
+            document.getElementById('editHomebase').value = dosen.homebase;
+            document.getElementById('editJabatan').value = dosen.jabatan;
+            document.getElementById('editTmtJF').value = dosen.tmtJF;
+            document.getElementById('editLkd').value = dosen.lkd;
+            document.getElementById('editPekerti').value = dosen.pekerti;
+            document.getElementById('editPendidikan').value = dosen.pendidikan;
+            document.getElementById('editKaryaIlmiah').value = dosen.karyaIlmiah;
+            document.getElementById('editTugasBelajar').value = dosen.tugasBelajar;
+
+            document.getElementById('editModal').style.display = 'block';
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+
+        function submitEditForm(event) {
+            event.preventDefault();
+
+            const id = parseInt(document.getElementById('editId').value);
+            const index = daftarDosen.findIndex(d => d.id == id);
+
+            if (index === -1) return;
+
+            const dosen = daftarDosen[index];
+            dosen.nidn = document.getElementById('editNidn').value;
+            dosen.nama = document.getElementById('editNama').value;
+            dosen.homebase = document.getElementById('editHomebase').value;
+            dosen.jabatan = document.getElementById('editJabatan').value;
+            dosen.tmtJF = document.getElementById('editTmtJF').value;
+            dosen.lkd = document.getElementById('editLkd').value;
+            dosen.pekerti = document.getElementById('editPekerti').value;
+            dosen.pendidikan = document.getElementById('editPendidikan').value;
+            dosen.karyaIlmiah = document.getElementById('editKaryaIlmiah').value;
+            dosen.tugasBelajar = document.getElementById('editTugasBelajar').value;
+            dosen.masaKerja = calculateMasaKerja(dosen.tmtJF);
+
+            const eligibility = calculateEligibility(dosen);
+            dosen.eligibilitas = eligibility.kategori;
+            dosen.syaratTerpenuhi = eligibility.syaratCount;
+
+            // Save to localStorage
+            localStorage.setItem('daftarDosen', JSON.stringify(daftarDosen));
+
+            // Update Firebase
+            if (firebaseReady && db) {
+                db.collection("dosen").doc(id.toString()).set(dosen)
+                    .then(() => showAlert('dashboardAlert', `✅ ${dosen.nama} updated!`, 'success'))
+                    .catch(e => showAlert('dashboardAlert', `⚠️ Updated locally: ${e.message}`, 'warning'));
+            } else {
+                showAlert('dashboardAlert', `✅ ${dosen.nama} updated (offline)`, 'info');
+            }
+
+            closeEditModal();
+            updateUI();
+            return false;
+        }
+
+        // ===== CSV IMPORT/UPDATE =====
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            document.getElementById('dropZone').style.background = '#f0f8ff';
+        }
+
+        function handleDragLeave(e) {
+            document.getElementById('dropZone').style.background = '#f9f9f9';
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            document.getElementById('dropZone').style.background = '#f9f9f9';
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileSelect({ target: { files: files } });
+            }
+        }
+
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const csv = event.target.result;
+                processCSV(csv);
+            };
+            reader.readAsText(file);
+        }
+
+        function processCSV(csv) {
+            document.getElementById('importProgress').style.display = 'block';
+            document.getElementById('progressBar').style.width = '0%';
+
+            try {
+                const lines = csv.split('\n').filter(l => l.trim());
+                if (lines.length < 2) {
+                    showAlert('importAlert', '❌ CSV tidak valid!', 'danger');
+                    document.getElementById('importProgress').style.display = 'none';
+                    return;
+                }
+
+                const headers = lines[0].split(',').map(h => h.trim());
+                const namaIdx = headers.findIndex(h => h.toLowerCase().includes('nama'));
+                const nidnIdx = headers.findIndex(h => h.toLowerCase().includes('nidn'));
+                const jabatanIdx = headers.findIndex(h => h.toLowerCase().includes('jabatan'));
+                const masaKerjaIdx = headers.findIndex(h => h.toLowerCase().includes('masa kerja'));
+                const bkdIdx = headers.findIndex(h => h.toLowerCase().includes('bkd'));
+                const pekertIdx = headers.findIndex(h => h.toLowerCase().includes('pekerti'));
+                const publikasiIdx = headers.findIndex(h => h.toLowerCase().includes('publikasi'));
+                const pendidikanIdx = headers.findIndex(h => h.toLowerCase().includes('pendidikan'));
+                const homebaseIdx = headers.findIndex(h => h.toLowerCase().includes('homebase'));
+
+                let addCount = 0, updateCount = 0;
+
+                for (let i = 1; i < lines.length; i++) {
+                    const values = lines[i].split(',').map(v => v.trim());
+                    const nama = namaIdx >= 0 ? values[namaIdx] : '';
+                    const nidn = nidnIdx >= 0 ? values[nidnIdx] : '';
+
+                    if (!nama || !nidn) continue;
+
+                    const jabatan = jabatanIdx >= 0 ? values[jabatanIdx].split('-')[0].trim() : '';
+                    const masaKerjaText = masaKerjaIdx >= 0 ? values[masaKerjaIdx] : '';
+                    const bkd = bkdIdx >= 0 ? values[bkdIdx] : '';
+                    const pekerti = pekertIdx >= 0 ? values[pekertIdx] : '';
+                    const publikasi = publikasiIdx >= 0 ? values[publikasiIdx] : '';
+                    const pendidikan = pendidikanIdx >= 0 ? values[pendidikanIdx] : 'S1';
+                    const homebase = homebaseIdx >= 0 ? values[homebaseIdx] : 'Unknown';
+
+                    const masaKerjaNum = extractYears(masaKerjaText);
+                    const tmtJF = calculateTMTFromMasaKerja(masaKerjaNum);
+
+                    const dosen = {
+                        id: Date.now() + i,
+                        nidn,
+                        nama,
+                        homebase,
+                        jabatan: jabatan || 'Tidak Ada',
+                        tmtJF,
+                        masaKerja: masaKerjaNum,
+                        lkd: parseLKD(bkd),
+                        pekerti: pekerti || 'Belum Ada',
+                        pendidikan: extractPendidikan(pendidikan),
+                        karyaIlmiah: publikasi ? 'Ada' : 'Tidak Ada',
+                        tugasBelajar: 'Tidak TB',
+                        tanggalInput: new Date().toLocaleDateString('id-ID')
+                    };
+
+                    const eligibility = calculateEligibility(dosen);
+                    dosen.eligibilitas = eligibility.kategori;
+                    dosen.syaratTerpenuhi = eligibility.syaratCount;
+
+                    // Check if dosen exists (by NIDN)
+                    const existingIndex = daftarDosen.findIndex(d => d.nidn === nidn);
+                    if (existingIndex >= 0) {
+                        // UPDATE
+                        dosen.id = daftarDosen[existingIndex].id;
+                        daftarDosen[existingIndex] = dosen;
+                        updateCount++;
+                    } else {
+                        // ADD NEW
+                        daftarDosen.push(dosen);
+                        addCount++;
+                    }
+
+                    const progress = Math.round((i / (lines.length - 1)) * 100);
+                    document.getElementById('progressBar').style.width = progress + '%';
+                    document.getElementById('progressText').textContent = progress + '%';
+                }
+
+                localStorage.setItem('daftarDosen', JSON.stringify(daftarDosen));
+
+                document.getElementById('importProgress').style.display = 'none';
+                showAlert('importAlert', `✅ Selesai! Added: ${addCount}, Updated: ${updateCount}`, 'success');
+
+                document.getElementById('csvFile').value = '';
+                updateUI();
+
+            } catch (error) {
+                document.getElementById('importProgress').style.display = 'none';
+                showAlert('importAlert', `❌ Error: ${error.message}`, 'danger');
+            }
+        }
+
+        function extractYears(text) {
+            if (!text) return 0;
+            const match = text.match(/(\d+)\s*Tahun/);
+            return match ? parseInt(match[1]) : 0;
+        }
+
+        function calculateTMTFromMasaKerja(years) {
+            const now = new Date();
+            const tmt = new Date(now.getFullYear() - years, now.getMonth(), now.getDate());
+            return tmt.toISOString().split('T')[0];
+        }
+
+        function parseLKD(text) {
+            if (!text || text === '-') return 'Tidak';
+            if (text.toLowerCase().includes('melaporkan') || text.toLowerCase().includes('ada')) return 'Ada';
+            return 'Tidak';
+        }
+
+        function extractPendidikan(text) {
+            if (!text) return 'S1';
+            if (text.includes('S3')) return 'S3';
+            if (text.includes('S2')) return 'S2';
+            return 'S1';
+        }
+
+        // ===== CORE FUNCTIONS =====
 
         function calculateMasaKerja(tmtJF) {
             const tmt = new Date(tmtJF);
@@ -896,92 +1160,23 @@
         function updateUI() {
             updateDashboard();
             displayDosenTable();
-            displayPerHomebase();
-            displayRecommendations();
-            document.getElementById('totalDosenInfo').textContent = daftarDosen.length;
         }
 
         function updateDashboard() {
-            const p1 = daftarDosen.filter(d => d.eligibilitas === 'P1');
-            const p2 = daftarDosen.filter(d => d.eligibilitas === 'P2');
-            const followup = daftarDosen.filter(d => d.eligibilitas === 'Follow-up');
+            const p1 = daftarDosen.filter(d => d.eligibilitas === 'P1').length;
+            const p2 = daftarDosen.filter(d => d.eligibilitas === 'P2').length;
+            const followup = daftarDosen.filter(d => d.eligibilitas === 'Follow-up').length;
 
             document.getElementById('totalDosen').textContent = daftarDosen.length;
-            document.getElementById('countP1').textContent = p1.length;
-            document.getElementById('countP2').textContent = p2.length;
-            document.getElementById('countFollowup').textContent = followup.length;
-
-            // Insights
-            const total = daftarDosen.length;
-            if (total > 0) {
-                const p1Pct = Math.round((p1.length / total) * 100);
-                const p2Pct = Math.round((p2.length / total) * 100);
-                const followupPct = Math.round((followup.length / total) * 100);
-
-                document.getElementById('insightsContainer').innerHTML = `
-                    <div class="insight-card">
-                        <strong>${p1Pct}% (${p1.length} dosen)</strong> siap Serdos 2026 - eligible semua kriteria
-                    </div>
-                    <div class="insight-card">
-                        <strong>${p2Pct}% (${p2.length} dosen)</strong> perlu improvement - publikasi, PEKERTI, BKD
-                    </div>
-                    <div class="insight-card">
-                        <strong>${followupPct}% (${followup.length} dosen)</strong> perlu persiapan jangka panjang
-                    </div>
-                `;
-            }
-
-            updateCharts(daftarDosen.length, p1.length, p2.length, followup.length);
-        }
-
-        function updateCharts(total, p1, p2, followup) {
-            const piectx = document.getElementById('pieChart');
-            if (!piectx) return;
-            
-            if (pieChart) pieChart.destroy();
-            pieChart = new Chart(piectx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['P1 (Eligible)', 'P2 (Conditional)', 'Follow-up'],
-                    datasets: [{
-                        data: [p1, p2, followup],
-                        backgroundColor: ['#28a745', '#ffc107', '#dc3545'],
-                        borderColor: ['#ffffff', '#ffffff', '#ffffff'],
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom' } }
-                }
-            });
-
-            const barctx = document.getElementById('barChart');
-            if (barChart) barChart.destroy();
-            barChart = new Chart(barctx, {
-                type: 'bar',
-                data: {
-                    labels: ['P1 Eligible', 'P2 Conditional', 'Follow-up'],
-                    datasets: [{
-                        label: 'Jumlah Dosen',
-                        data: [p1, p2, followup],
-                        backgroundColor: ['#28a745', '#ffc107', '#dc3545']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    indexAxis: 'y',
-                    plugins: { legend: { display: false } },
-                    scales: { x: { beginAtZero: true, max: Math.max(total, 10) } }
-                }
-            });
+            document.getElementById('countP1').textContent = p1;
+            document.getElementById('countP2').textContent = p2;
+            document.getElementById('countFollowup').textContent = followup;
         }
 
         function displayDosenTable() {
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
+
             daftarDosen.forEach((dosen, i) => {
                 const row = tbody.insertRow();
                 row.innerHTML = `
@@ -991,111 +1186,25 @@
                     <td>${dosen.homebase || '-'}</td>
                     <td>${dosen.jabatan}</td>
                     <td><span class="badge ${dosen.eligibilitas.toLowerCase()}">${dosen.eligibilitas}</span></td>
-                    <td><button class="btn-small btn-secondary" onclick="deleteDosen(${dosen.id})">Hapus</button></td>
+                    <td>
+                        <button class="btn-small" onclick="openEditModal(${dosen.id})">✏️ Edit</button>
+                        <button class="btn-small btn-danger" onclick="deleteDosen(${dosen.id})">🗑️ Delete</button>
+                    </td>
                 `;
             });
-        }
-
-        function displayPerHomebase() {
-            const homebaseMap = {};
-            daftarDosen.forEach(dosen => {
-                const hb = dosen.homebase || 'Tidak Ada Homebase';
-                if (!homebaseMap[hb]) homebaseMap[hb] = [];
-                homebaseMap[hb].push(dosen);
-            });
-
-            let html = '';
-            for (const [homebase, dosenList] of Object.entries(homebaseMap)) {
-                const p1 = dosenList.filter(d => d.eligibilitas === 'P1').length;
-                const p2 = dosenList.filter(d => d.eligibilitas === 'P2').length;
-                const followup = dosenList.filter(d => d.eligibilitas === 'Follow-up').length;
-
-                html += `
-                    <div class="homebase-section">
-                        <h4>${homebase} (Total: ${dosenList.length})</h4>
-                        <p style="font-size: 12px; color: #666; margin-bottom: 10px;">
-                            P1: ${p1} | P2: ${p2} | Follow-up: ${followup}
-                        </p>
-                        <table style="font-size: 12px;">
-                            <thead>
-                                <tr>
-                                    <th>Nama</th>
-                                    <th>NIDN</th>
-                                    <th>Jabatan</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${dosenList.map(d => `
-                                    <tr>
-                                        <td>${d.nama}</td>
-                                        <td>${d.nidn}</td>
-                                        <td>${d.jabatan}</td>
-                                        <td><span class="badge ${d.eligibilitas.toLowerCase()}">${d.eligibilitas}</span></td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                    </div>
-                `;
-            }
-
-            document.getElementById('homebaseContainer').innerHTML = html || '<p>Belum ada data</p>';
-        }
-
-        function displayRecommendations() {
-            const p1 = daftarDosen.filter(d => d.eligibilitas === 'P1');
-            const p2 = daftarDosen.filter(d => d.eligibilitas === 'P2');
-            const followup = daftarDosen.filter(d => d.eligibilitas === 'Follow-up');
-
-            document.getElementById('p1CountRek').textContent = p1.length;
-            document.getElementById('p1RecommendationList').innerHTML = p1.map(d => `
-                <div style="background: white; padding: 10px; margin-bottom: 10px; border-radius: 6px; border-left: 3px solid #28a745;">
-                    <strong>${d.nama}</strong> (${d.nidn})<br>
-                    <small style="color: #666;">Homebase: ${d.homebase || '-'} | Jabatan: ${d.jabatan}</small><br>
-                    <small style="color: #28a745; margin-top: 5px; display: block;"><strong>Aksi:</strong> Siapkan dokumentasi lengkap untuk submit ke KemenDiktistek</small>
-                </div>
-            `).join('') || '<p style="font-size: 12px; color: #999;">Tidak ada dosen P1</p>';
-
-            document.getElementById('p2CountRek').textContent = p2.length;
-            document.getElementById('p2RecommendationList').innerHTML = p2.map(d => `
-                <div style="background: white; padding: 10px; margin-bottom: 10px; border-radius: 6px; border-left: 3px solid #ffc107;">
-                    <strong>${d.nama}</strong> (${d.nidn})<br>
-                    <small style="color: #666;">Homebase: ${d.homebase || '-'} | Jabatan: ${d.jabatan}</small><br>
-                    <small style="color: #856404; margin-top: 5px; display: block;"><strong>Gaps:</strong> ${getGaps(d).join(', ')}</small>
-                    <small style="color: #856404; display: block;"><strong>Deadline:</strong> July-August 2026</small>
-                </div>
-            `).join('') || '<p style="font-size: 12px; color: #999;">Tidak ada dosen P2</p>';
-
-            document.getElementById('followupCountRek').textContent = followup.length;
-            document.getElementById('followupRecommendationList').innerHTML = followup.map(d => `
-                <div style="background: white; padding: 10px; margin-bottom: 10px; border-radius: 6px; border-left: 3px solid #dc3545;">
-                    <strong>${d.nama}</strong> (${d.nidn})<br>
-                    <small style="color: #666;">Homebase: ${d.homebase || '-'} | Jabatan: ${d.jabatan || 'TIDAK ADA JF'}</small><br>
-                    <small style="color: #721c24; margin-top: 5px; display: block;"><strong>Target:</strong> Serdos 2027/2028</small>
-                </div>
-            `).join('') || '<p style="font-size: 12px; color: #999;">Tidak ada dosen Follow-up</p>';
-        }
-
-        function getGaps(dosen) {
-            const gaps = [];
-            if (!dosen.karyaIlmiah || dosen.karyaIlmiah === 'Tidak Ada') gaps.push('Publikasi');
-            if (dosen.pekerti === 'Belum Ada') gaps.push('PEKERTI/AA');
-            if (dosen.lkd !== 'Ada') gaps.push('BKD 4 semester');
-            return gaps.length > 0 ? gaps : ['Minor gaps'];
         }
 
         function deleteDosen(id) {
-            if (confirm('Yakin hapus?')) {
-                daftarDosen = daftarDosen.filter(d => d.id !== id);
-                localStorage.setItem('daftarDosen', JSON.stringify(daftarDosen));
-                
-                if (isOnline && db) {
-                    db.collection("dosen").doc(id.toString()).delete().catch(e => console.error(e));
-                }
-                
-                updateUI();
+            if (!confirm('Yakin hapus?')) return;
+
+            daftarDosen = daftarDosen.filter(d => d.id !== id);
+            localStorage.setItem('daftarDosen', JSON.stringify(daftarDosen));
+
+            if (firebaseReady && db) {
+                db.collection("dosen").doc(id.toString()).delete().catch(e => console.error(e));
             }
+
+            updateUI();
         }
 
         function filterTable() {
@@ -1115,35 +1224,61 @@
             event.target.classList.add('active');
         }
 
-        function saveFirebaseConfig() {
-            localStorage.setItem('firebaseApiKey', document.getElementById('apiKey').value);
-            localStorage.setItem('firebaseAuthDomain', document.getElementById('authDomain').value);
-            localStorage.setItem('firebaseProjectId', document.getElementById('projectId').value);
-            localStorage.setItem('firebaseStorageBucket', document.getElementById('storageBucket').value);
-            localStorage.setItem('firebaseMessagingSenderId', document.getElementById('messagingSenderId').value);
-            localStorage.setItem('firebaseAppId', document.getElementById('appId').value);
-            
-            showAlert('settingsAlert', '✅ Config saved! Refreshing...', 'success');
-            setTimeout(() => location.reload(), 1500);
-        }
-
         function showAlert(id, msg, type) {
             const el = document.getElementById(id);
+            if (!el) return;
             el.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
             setTimeout(() => el.innerHTML = '', 5000);
         }
 
+        function testConnection() {
+            const result = document.getElementById('testResult');
+            result.textContent = 'Testing...';
+
+            if (!firebaseReady) {
+                result.textContent = '❌ Firebase not connected. Check settings.';
+                return;
+            }
+
+            db.collection("test").add({ test: true })
+                .then(() => {
+                    result.textContent = '✅ Firebase connection OK!';
+                    db.collection("test").get().then(snapshot => {
+                        snapshot.forEach(doc => doc.ref.delete());
+                    });
+                })
+                .catch(e => {
+                    result.textContent = `❌ Connection failed: ${e.message}`;
+                });
+        }
+
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
+            // Load config from input fields
+            const config = loadConfig();
+            document.getElementById('apiKey').value = config.apiKey;
+            document.getElementById('authDomain').value = config.authDomain;
+            document.getElementById('projectId').value = config.projectId;
+            document.getElementById('storageBucket').value = config.storageBucket;
+            document.getElementById('messagingSenderId').value = config.messagingSenderId;
+            document.getElementById('appId').value = config.appId;
+
             initFirebase();
         });
 
         window.addEventListener('online', () => {
-            setOnlineStatus(true);
-            loadDataFromFirebase();
+            if (firebaseReady) setFirebaseStatus(true);
         });
         
-        window.addEventListener('offline', () => setOnlineStatus(false));
+        window.addEventListener('offline', () => setFirebaseStatus(false));
+
+        // Close modal when click outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('editModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        };
     </script>
 </body>
 </html>
