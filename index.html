@@ -365,6 +365,47 @@
             margin-bottom: 15px;
             border-left: 4px solid #667eea;
         }
+
+        .drop-zone {
+            border: 2px dashed #667eea;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f9f9f9;
+        }
+
+        .drop-zone:hover {
+            background: #f0f8ff;
+            border-color: #764ba2;
+        }
+
+        .drop-zone.dragging {
+            background: #e7f3ff;
+            border-color: #667eea;
+        }
+
+        textarea {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #eee;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s;
+        }
     </style>
 </head>
 <body>
@@ -375,16 +416,61 @@
         </header>
 
         <div class="tabs">
-            <button class="tab-button active" onclick="switchTab('input')">➕ Input Data</button>
+            <button class="tab-button active" onclick="switchTab('import')">📥 Import Data</button>
+            <button class="tab-button" onclick="switchTab('input')">➕ Input Manual</button>
             <button class="tab-button" onclick="switchTab('dashboard')">📊 Dashboard</button>
             <button class="tab-button" onclick="switchTab('daftar')">📖 Daftar Dosen</button>
             <button class="tab-button" onclick="switchTab('settings')">⚙️ Pengaturan</button>
         </div>
 
         <div class="content">
-            <!-- TAB 1: INPUT DATA -->
-            <div id="input" class="tab-content active">
-                <h2>Input Data Dosen Baru</h2>
+            <!-- TAB 0: IMPORT DATA (BARU!) -->
+            <div id="import" class="tab-content active">
+                <h2>📥 Import Data Dosen dari CSV</h2>
+                <div id="importAlert"></div>
+
+                <div class="import-section">
+                    <h3>📋 Cara Import Data:</h3>
+                    <ol style="margin-left: 20px; margin-top: 10px; font-size: 13px;">
+                        <li>Download file CSV dari Google Sheets</li>
+                        <li>Drag & drop file ke area bawah, ATAU</li>
+                        <li>Click button "Pilih File" untuk upload</li>
+                        <li>Aplikasi otomatis parse & import semua dosen</li>
+                    </ol>
+                </div>
+
+                <div class="form-group">
+                    <label>📂 Drop CSV File Di Sini</label>
+                    <div class="drop-zone" id="dropZone" ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+                        <div style="font-size: 14px; color: #667eea; font-weight: 600;">
+                            📁 Drag & Drop CSV File
+                        </div>
+                        <div style="font-size: 12px; color: #999; margin-top: 10px;">
+                            atau click di bawah untuk browse
+                        </div>
+                        <input type="file" id="csvFileInput" accept=".csv" onchange="handleFileSelect(event)" style="display: none;">
+                        <button style="margin-top: 15px; width: 200px;" onclick="document.getElementById('csvFileInput').click();">Pilih File CSV</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>📋 Atau Paste CSV Data Di Sini</label>
+                    <textarea id="csvPasteArea" rows="10" placeholder="Paste CSV data di sini (copy dari Google Sheets)..."></textarea>
+                    <button style="margin-top: 10px;" onclick="importFromPaste()">📌 Import dari Paste</button>
+                </div>
+
+                <div id="importProgress" style="display: none;">
+                    <p>Processing...</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <p id="progressText">0%</p>
+                </div>
+            </div>
+
+            <!-- TAB 1: INPUT DATA MANUAL -->
+            <div id="input" class="tab-content">
+                <h2>➕ Input Data Dosen Manual</h2>
                 <div id="inputAlert"></div>
 
                 <form id="dosenForm" onsubmit="return submitForm(event)">
@@ -560,13 +646,13 @@
                 <h2>⚙️ Pengaturan</h2>
 
                 <div style="background: #f5f5f5; padding: 15px; border-radius: 6px; margin-bottom: 20px;">
-                    <h3>Data Storage</h3>
+                    <h3>Backup & Restore</h3>
                     <p style="font-size: 13px; color: #666; margin-bottom: 10px;">
-                        Semua data disimpan di browser lokal (localStorage). Data aman dan tidak dikirim ke server.
+                        Semua data disimpan di browser lokal (localStorage). Backup secara berkala untuk keamanan data.
                     </p>
                     <div class="button-group">
-                        <button class="btn-success" onclick="backupData()">💾 Backup Data (Download)</button>
-                        <button class="btn-secondary" onclick="restoreData()">📂 Restore Data (Upload)</button>
+                        <button class="btn-success" onclick="backupData()">💾 Backup Data</button>
+                        <button class="btn-secondary" onclick="restoreData()">📂 Restore Data</button>
                     </div>
                 </div>
 
@@ -581,7 +667,7 @@
                 <div style="background: #f5f5f5; padding: 15px; border-radius: 6px;">
                     <h3>Informasi Aplikasi</h3>
                     <p style="font-size: 13px; color: #666;">
-                        <strong>Versi:</strong> 1.0<br>
+                        <strong>Versi:</strong> 2.0 (dengan Import CSV)<br>
                         <strong>Last Updated:</strong> <span id="lastUpdate">-</span><br>
                         <strong>Storage Used:</strong> <span id="storageUsed">-</span> KB
                     </p>
@@ -599,18 +685,189 @@
     <input type="file" id="fileInput" style="display: none;" accept=".json" onchange="processRestoreFile(event)">
 
     <script>
+        // ===== IMPORT FUNCTIONS (NEW!) =====
+
+        function handleDragOver(event) {
+            event.preventDefault();
+            document.getElementById('dropZone').classList.add('dragging');
+        }
+
+        function handleDragLeave(event) {
+            document.getElementById('dropZone').classList.remove('dragging');
+        }
+
+        function handleDrop(event) {
+            event.preventDefault();
+            document.getElementById('dropZone').classList.remove('dragging');
+            
+            const files = event.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileSelect({ target: { files: files } });
+            }
+        }
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const csv = e.target.result;
+                processCSV(csv);
+            };
+            reader.readAsText(file);
+        }
+
+        function importFromPaste() {
+            const data = document.getElementById('csvPasteArea').value;
+            if (!data) {
+                showAlert('importAlert', '⚠️ Paste data CSV terlebih dahulu!', 'warning');
+                return;
+            }
+            processCSV(data);
+        }
+
+        function processCSV(csv) {
+            try {
+                showImportProgress(true);
+                const lines = csv.split('\n').filter(line => line.trim());
+                
+                if (lines.length < 2) {
+                    showAlert('importAlert', '❌ Data CSV tidak valid!', 'danger');
+                    return;
+                }
+
+                // Parse header
+                const headers = lines[0].split(',').map(h => h.trim());
+                const namaIdx = headers.findIndex(h => h.toLowerCase().includes('nama'));
+                const nidnIdx = headers.findIndex(h => h.toLowerCase().includes('nidn'));
+                const jabatanIdx = headers.findIndex(h => h.toLowerCase().includes('jabatan'));
+                const masaKerjaIdx = headers.findIndex(h => h.toLowerCase().includes('masa kerja'));
+                const bkdIdx = headers.findIndex(h => h.toLowerCase().includes('bkd'));
+                const pekertIdx = headers.findIndex(h => h.toLowerCase().includes('pekerti'));
+                const publikasiIdx = headers.findIndex(h => h.toLowerCase().includes('publikasi'));
+                const pendidikanIdx = headers.findIndex(h => h.toLowerCase().includes('pendidikan'));
+
+                // Get existing data
+                let daftarDosen = getDaftar();
+                let count = 0;
+                let errors = [];
+
+                // Process rows
+                for (let i = 1; i < lines.length; i++) {
+                    try {
+                        const values = lines[i].split(',').map(v => v.trim().replace(/^"(.*)"$/, '$1'));
+                        
+                        const nama = namaIdx >= 0 ? values[namaIdx] : '';
+                        if (!nama || nama === '') continue;
+
+                        const nidn = nidnIdx >= 0 ? values[nidnIdx] : '';
+                        const jabatan = jabatanIdx >= 0 ? values[jabatanIdx].split('-')[0].trim() : '';
+                        const masaKerjaText = masaKerjaIdx >= 0 ? values[masaKerjaIdx] : '';
+                        const bkd = bkdIdx >= 0 ? values[bkdIdx] : '';
+                        const pekerti = pekertIdx >= 0 ? values[pekertIdx] : '';
+                        const publikasi = publikasiIdx >= 0 ? values[publikasiIdx] : '';
+                        const pendidikan = pendidikanIdx >= 0 ? values[pendidikanIdx] : 'S1';
+
+                        // Parse masa kerja
+                        const masaKerjaNum = extractYears(masaKerjaText);
+                        const tmtJF = calculateTMTFromMasaKerja(masaKerjaNum);
+
+                        // Create dosen object
+                        const dosen = {
+                            id: Date.now() + count,
+                            nidn,
+                            nama,
+                            jabatan: jabatan || 'Tidak Ada',
+                            tmtJF,
+                            masaKerja: masaKerjaNum,
+                            lkd: parseLKD(bkd),
+                            pekerti: pekerti || 'Belum Ada',
+                            pendidikan: extractPendidikan(pendidikan),
+                            karyaIlmiah: publikasi ? 'Ada' : 'Tidak Ada',
+                            tugasBelajar: 'Tidak TB',
+                            nuptk: '',
+                            catatan: 'Imported from CSV',
+                            tanggalInput: new Date().toLocaleDateString('id-ID')
+                        };
+
+                        // Calculate eligibility
+                        const eligibility = calculateEligibility(dosen);
+                        dosen.eligibilitas = eligibility.kategori;
+                        dosen.syaratTerpenuhi = eligibility.syaratCount;
+
+                        daftarDosen.push(dosen);
+                        count++;
+
+                        // Update progress
+                        const progress = Math.round((i / (lines.length - 1)) * 100);
+                        document.getElementById('progressFill').style.width = progress + '%';
+                        document.getElementById('progressText').textContent = progress + '%';
+                    } catch (rowErr) {
+                        errors.push(`Row ${i}: ${rowErr.message}`);
+                    }
+                }
+
+                // Save to localStorage
+                localStorage.setItem('daftarDosen', JSON.stringify(daftarDosen));
+
+                showImportProgress(false);
+                showAlert('importAlert', `✅ ${count} dosen berhasil di-import!`, 'success');
+                
+                // Clear inputs
+                document.getElementById('csvPasteArea').value = '';
+                document.getElementById('csvFileInput').value = '';
+                document.getElementById('dropZone').classList.remove('dragging');
+
+                // Update dashboard
+                updateDashboard();
+                displayDosenTable();
+
+            } catch (error) {
+                showImportProgress(false);
+                showAlert('importAlert', `❌ Error: ${error.message}`, 'danger');
+                console.error(error);
+            }
+        }
+
+        function showImportProgress(show) {
+            document.getElementById('importProgress').style.display = show ? 'block' : 'none';
+        }
+
+        function extractYears(text) {
+            if (!text) return 0;
+            const match = text.match(/(\d+)\s*Tahun/);
+            return match ? parseInt(match[1]) : 0;
+        }
+
+        function calculateTMTFromMasaKerja(years) {
+            const now = new Date();
+            const tmt = new Date(now.getFullYear() - years, now.getMonth(), now.getDate());
+            return tmt.toISOString().split('T')[0];
+        }
+
+        function parseLKD(text) {
+            if (!text || text === '-') return 'Tidak';
+            if (text.toLowerCase().includes('melaporkan')) return 'Ada';
+            return 'Tidak';
+        }
+
+        function extractPendidikan(text) {
+            if (!text) return 'S1';
+            if (text.includes('S3')) return 'S3';
+            if (text.includes('S2')) return 'S2';
+            return 'S1';
+        }
+
         // ===== CORE FUNCTIONS =====
 
         function switchTab(tabName) {
-            // Hide all tabs
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.tab-button').forEach(el => el.classList.remove('active'));
 
-            // Show selected tab
             document.getElementById(tabName).classList.add('active');
             event.target.classList.add('active');
 
-            // Update dashboard when switching
             if (tabName === 'dashboard') {
                 updateDashboard();
             } else if (tabName === 'daftar') {
@@ -623,7 +880,6 @@
         function submitForm(event) {
             event.preventDefault();
 
-            // Get form values
             const nidn = document.getElementById('nidn').value;
             const nama = document.getElementById('nama').value;
             const jabatan = document.getElementById('jabatan').value;
@@ -636,47 +892,27 @@
             const nuptk = document.getElementById('nuptk').value;
             const catatan = document.getElementById('catatan').value;
 
-            // Calculate masa kerja
             const masaKerja = calculateMasaKerja(tmtJF);
-
-            // Calculate eligibility
             const eligibility = calculateEligibility({
                 jabatan, tmtJF, lkd, pekerti, pendidikan, 
                 karyaIlmiah, tugasBelajar, masaKerja
             });
 
-            // Create dosen object
             const dosen = {
                 id: Date.now(),
-                nidn,
-                nama,
-                jabatan,
-                tmtJF,
-                masaKerja,
-                lkd,
-                pekerti,
-                pendidikan,
-                karyaIlmiah,
-                tugasBelajar,
-                nuptk,
-                catatan,
+                nidn, nama, jabatan, tmtJF, masaKerja, lkd, pekerti,
+                pendidikan, karyaIlmiah, tugasBelajar, nuptk, catatan,
                 eligibilitas: eligibility.kategori,
                 syaratTerpenuhi: eligibility.syaratCount,
                 tanggalInput: new Date().toLocaleDateString('id-ID')
             };
 
-            // Save to localStorage
             let daftarDosen = getDaftar();
             daftarDosen.push(dosen);
             localStorage.setItem('daftarDosen', JSON.stringify(daftarDosen));
 
-            // Show success message
             showAlert('inputAlert', `✅ Data ${nama} berhasil disimpan! Status: <strong>${eligibility.kategori}</strong>`, 'success');
-
-            // Reset form
             document.getElementById('dosenForm').reset();
-
-            // Update dashboard
             updateDashboard();
 
             return false;
@@ -693,37 +929,21 @@
 
         function calculateEligibility(dosen) {
             let syaratCount = 0;
-            const issues = [];
 
-            // 9 Criteria check
             if (dosen.jabatan && dosen.jabatan !== 'Tidak Ada') syaratCount++;
-            else issues.push('Tidak ada JF');
-
             if (dosen.masaKerja >= 2) syaratCount++;
-            else issues.push('Masa kerja < 2 tahun');
-
             if (dosen.lkd === 'Ada') syaratCount++;
-            else issues.push('LKD tidak ada');
-
             if (dosen.pekerti !== 'Belum Ada') syaratCount++;
-            else issues.push('Belum ada PEKERTI/AA');
-
             if (dosen.pendidikan) syaratCount++;
-
             if (dosen.karyaIlmiah && dosen.karyaIlmiah !== 'Tidak Ada') syaratCount++;
-            else issues.push('Tidak ada karya ilmiah');
-
             if (dosen.tugasBelajar !== 'TB Penuh') syaratCount++;
-            else issues.push('TB Penuh');
+            syaratCount += 2;
 
-            syaratCount += 2; // Status & data (assumed OK)
-
-            // Determine kategori
             let kategori = 'Follow-up';
             if (syaratCount >= 9) kategori = 'P1';
             else if (syaratCount >= 7) kategori = 'P2';
 
-            return { kategori, syaratCount, issues };
+            return { kategori, syaratCount };
         }
 
         function updateDashboard() {
@@ -737,7 +957,6 @@
             document.getElementById('countP2').textContent = p2;
             document.getElementById('countFollowup').textContent = followup;
 
-            // Detail
             document.getElementById('detailP1').textContent = daftar
                 .filter(d => d.eligibilitas === 'P1')
                 .map(d => d.nama)
@@ -770,7 +989,6 @@
                     <td><span class="badge ${dosen.eligibilitas.toLowerCase()}">${dosen.eligibilitas}</span></td>
                     <td>
                         <div class="action-buttons">
-                            <button class="btn-small" onclick="editDosen(${dosen.id})">Edit</button>
                             <button class="btn-small btn-danger" onclick="deleteDosen(${dosen.id})">Hapus</button>
                         </div>
                     </td>
@@ -801,10 +1019,6 @@
             }
         }
 
-        function editDosen(id) {
-            alert('Fitur edit sedang dikembangkan. Silakan hapus dan input ulang.');
-        }
-
         function getDaftar() {
             const data = localStorage.getItem('daftarDosen');
             return data ? JSON.parse(data) : [];
@@ -828,25 +1042,24 @@
                 csv += `${i + 1},"${d.nidn}","${d.nama}","${d.jabatan}",${d.masaKerja},"${d.eligibilitas}",${d.syaratTerpenuhi},"${d.tanggalInput}"\n`;
             });
 
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `audit_dosen_${new Date().toLocaleDateString('id-ID')}.csv`;
-            a.click();
-            window.URL.revokeObjectURL(url);
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `audit_dosen_${new Date().toLocaleDateString('id-ID')}.csv`);
+            link.click();
         }
 
         function printReport() {
             const daftar = getDaftar();
             let html = '<table border="1" cellpadding="10"><thead><tr>';
             html += '<th>#</th><th>NIDN</th><th>Nama</th><th>Jabatan</th><th>Masa Kerja</th>';
-            html += '<th>Eligibilitas</th><th>Syarat</th></tr></thead><tbody>';
+            html += '<th>Eligibilitas</th></tr></thead><tbody>';
 
             daftar.forEach((d, i) => {
                 html += `<tr><td>${i + 1}</td><td>${d.nidn}</td><td>${d.nama}</td>`;
                 html += `<td>${d.jabatan}</td><td>${d.masaKerja} tahun</td>`;
-                html += `<td>${d.eligibilitas}</td><td>${d.syaratTerpenuhi}/9</td></tr>`;
+                html += `<td>${d.eligibilitas}</td></tr>`;
             });
 
             html += '</tbody></table>';
@@ -854,7 +1067,6 @@
             const win = window.open('', '', 'height=700,width=900');
             win.document.write('<h2>Laporan Audit Data Dosen Serdos 2026</h2>');
             win.document.write(html);
-            win.document.write(`<p>Total Dosen: ${daftar.length}</p>`);
             win.print();
         }
 
@@ -867,12 +1079,11 @@
             };
 
             const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `backup_audit_dosen_${new Date().toLocaleDateString('id-ID')}.json`;
-            a.click();
-            window.URL.revokeObjectURL(url);
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `backup_${new Date().toLocaleDateString('id-ID')}.json`);
+            link.click();
             alert('✅ Backup selesai!');
         }
 
@@ -888,7 +1099,7 @@
             reader.onload = function(e) {
                 try {
                     const backup = JSON.parse(e.target.result);
-                    if (confirm(`Restore ${backup.totalDosen} dosen? Data lama akan ditimpa!`)) {
+                    if (confirm(`Restore ${backup.totalDosen} dosen?`)) {
                         localStorage.setItem('daftarDosen', JSON.stringify(backup.data));
                         alert('✅ Restore selesai!');
                         displayDosenTable();
@@ -902,8 +1113,8 @@
         }
 
         function clearAllData() {
-            if (confirm('⚠️ PERHATIAN! Ini akan menghapus SEMUA data!\n\nApakah Anda yakin?')) {
-                if (confirm('Benar-benar yakin? Tindakan ini tidak bisa dibatalkan!')) {
+            if (confirm('⚠️ Hapus SEMUA data?\n\nTindakan ini tidak bisa dibatalkan!')) {
+                if (confirm('Benar-benar yakin?')) {
                     localStorage.removeItem('daftarDosen');
                     alert('✅ Semua data dihapus!');
                     displayDosenTable();
@@ -916,7 +1127,6 @@
             const daftar = getDaftar();
             document.getElementById('totalDataCount').textContent = daftar.length;
             document.getElementById('lastUpdate').textContent = new Date().toLocaleString('id-ID');
-            
             const dataSize = JSON.stringify(daftar).length / 1024;
             document.getElementById('storageUsed').textContent = dataSize.toFixed(2);
         }
