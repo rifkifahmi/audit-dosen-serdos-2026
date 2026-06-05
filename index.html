@@ -27,6 +27,46 @@
             overflow: hidden;
         }
 
+        /* SETUP SCREEN (First Time) */
+        .setup-container {
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 40px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .setup-container h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .setup-container p {
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .setup-info {
+            background: #f0f7ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .setup-info strong {
+            display: block;
+            margin-bottom: 8px;
+            color: #667eea;
+        }
+
         /* LOGIN SCREEN */
         .login-container {
             max-width: 400px;
@@ -121,6 +161,15 @@
             background: #5568d3;
         }
 
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
         .alert {
             padding: 15px;
             border-radius: 5px;
@@ -144,6 +193,12 @@
             border-left: 4px solid #ff8787;
         }
 
+        .alert-info {
+            background: #d0ebff;
+            color: #1971c2;
+            border-left: 4px solid #4c6ef5;
+        }
+
         /* MAIN APP */
         header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -162,6 +217,17 @@
             text-align: right;
         }
 
+        .settings-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-right: 10px;
+        }
+
         .logout-btn {
             background: rgba(255,255,255,0.2);
             color: white;
@@ -170,10 +236,9 @@
             border-radius: 5px;
             cursor: pointer;
             font-weight: 600;
-            margin-top: 10px;
         }
 
-        .logout-btn:hover {
+        .settings-btn:hover, .logout-btn:hover {
             background: rgba(255,255,255,0.3);
         }
 
@@ -226,16 +291,6 @@
             display: flex;
             gap: 10px;
             margin-top: 20px;
-        }
-
-        .btn-secondary {
-            background: #f0f0f0;
-            color: #333;
-            flex: 1;
-        }
-
-        .btn-secondary:hover {
-            background: #e0e0e0;
         }
 
         .dashboard {
@@ -318,6 +373,50 @@
             color: #c92a2a;
         }
 
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal.show {
+            display: block;
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: #999;
+        }
+
         @media (max-width: 768px) {
             .form-row {
                 grid-template-columns: 1fr;
@@ -330,8 +429,39 @@
     </style>
 </head>
 <body>
+    <!-- SETUP SCREEN (First Time) -->
+    <div id="setupScreen">
+        <div class="setup-container">
+            <h1>⚙️ Setup Database</h1>
+            <p>Konfigurasi URL Apps Script untuk menghubungkan dengan Google Sheets</p>
+
+            <div class="setup-info">
+                <strong>📌 Cara mendapatkan Apps Script URL:</strong>
+                1. Buka Google Sheets yang sudah dibuat<br>
+                2. Klik: Extensions → Apps Script<br>
+                3. Deploy → Manage deployments<br>
+                4. Copy URL dari "Published" atau latest deployment<br>
+                5. Paste di form di bawah
+            </div>
+
+            <div class="form-group">
+                <label>Apps Script URL *</label>
+                <input type="text" id="setupUrl" placeholder="https://script.google.com/macros/d/..." required>
+            </div>
+
+            <div id="setupError" class="alert alert-error"></div>
+
+            <button class="btn btn-primary" onclick="saveSetup()">Simpan & Lanjut ke Login</button>
+
+            <p style="margin-top: 20px; font-size: 12px; color: #999; text-align: center;">
+                URL akan disimpan di browser Anda (localStorage)<br>
+                Bisa diubah kapan saja dari menu Settings
+            </p>
+        </div>
+    </div>
+
     <!-- LOGIN SCREEN -->
-    <div id="loginScreen">
+    <div id="loginScreen" style="display: none;">
         <div class="login-container">
             <h1>🎓 Audit Data Dosen Serdos 2026</h1>
             <p style="text-align: center; margin-bottom: 25px; color: #999;">
@@ -378,6 +508,10 @@
                 <button class="btn btn-primary" onclick="register()">Daftar</button>
                 <div id="registerError" class="alert alert-error"></div>
             </div>
+
+            <p style="text-align: center; margin-top: 20px; font-size: 12px; color: #999;">
+                <button class="btn btn-secondary" style="width: auto;" onclick="changeSetup()">⚙️ Ubah Database URL</button>
+            </p>
         </div>
     </div>
 
@@ -387,10 +521,11 @@
             <header>
                 <div>
                     <h1>🎓 Audit Data Dosen Serdos 2026</h1>
-                    <p>Universitas Cordova | Google Sheets Version</p>
+                    <p>Universitas Cordova</p>
                 </div>
                 <div class="user-info">
                     <p id="userEmail" style="font-weight: 600;"></p>
+                    <button class="settings-btn" onclick="openSettings()">⚙️ Settings</button>
                     <button class="logout-btn" onclick="logout()">Logout</button>
                 </div>
             </header>
@@ -576,13 +711,118 @@
         </div>
     </div>
 
+    <!-- SETTINGS MODAL -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>⚙️ Settings</h2>
+                <button class="close-btn" onclick="closeSettings()">&times;</button>
+            </div>
+
+            <div class="form-group">
+                <label>Apps Script URL</label>
+                <input type="text" id="settingsUrl" placeholder="https://script.google.com/macros/d/...">
+            </div>
+
+            <div id="settingsError" class="alert alert-error"></div>
+            <div id="settingsSuccess" class="alert alert-success"></div>
+
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="closeSettings()">Tutup</button>
+                <button class="btn btn-primary" onclick="saveSettingsModal()">💾 Simpan URL</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // ============ CONFIGURATION ============
-        // ⚠️ GANTI DENGAN URL APPS SCRIPT ANDA!
-        const APPS_SCRIPT_URL = "YOUR_APPS_SCRIPT_URL";
-        
+        let APPS_SCRIPT_URL = localStorage.getItem('appsScriptUrl');
         let currentUser = null;
         let allData = [];
+
+        // ============ SETUP SCREEN ============
+        window.addEventListener('load', () => {
+            if (!APPS_SCRIPT_URL) {
+                document.getElementById('setupScreen').style.display = 'block';
+            } else {
+                showLoginScreen();
+            }
+        });
+
+        function saveSetup() {
+            const url = document.getElementById('setupUrl').value.trim();
+
+            if (!url) {
+                showError('setupError', 'URL harus diisi');
+                return;
+            }
+
+            if (!url.includes('script.google.com')) {
+                showError('setupError', 'URL harus dari Google Apps Script');
+                return;
+            }
+
+            localStorage.setItem('appsScriptUrl', url);
+            APPS_SCRIPT_URL = url;
+            document.getElementById('setupScreen').style.display = 'none';
+            showLoginScreen();
+        }
+
+        function changeSetup() {
+            document.getElementById('setupScreen').style.display = 'block';
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'none';
+            document.getElementById('setupUrl').value = APPS_SCRIPT_URL;
+        }
+
+        function showLoginScreen() {
+            document.getElementById('setupScreen').style.display = 'none';
+            document.getElementById('loginScreen').style.display = 'block';
+        }
+
+        // ============ SETTINGS MODAL ============
+        function openSettings() {
+            document.getElementById('settingsUrl').value = APPS_SCRIPT_URL;
+            document.getElementById('settingsModal').classList.add('show');
+        }
+
+        function closeSettings() {
+            document.getElementById('settingsModal').classList.remove('show');
+        }
+
+        function saveSettingsModal() {
+            const url = document.getElementById('settingsUrl').value.trim();
+
+            if (!url) {
+                showError('settingsError', 'URL harus diisi');
+                return;
+            }
+
+            if (!url.includes('script.google.com')) {
+                showError('settingsError', 'URL harus dari Google Apps Script');
+                return;
+            }
+
+            localStorage.setItem('appsScriptUrl', url);
+            APPS_SCRIPT_URL = url;
+            
+            document.getElementById('settingsError').style.display = 'none';
+            document.getElementById('settingsSuccess').classList.add('show');
+            document.getElementById('settingsSuccess').textContent = '✅ URL berhasil disimpan!';
+            
+            setTimeout(() => {
+                closeSettings();
+                document.getElementById('settingsSuccess').classList.remove('show');
+            }, 1500);
+        }
+
+        // Close modal when click outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('settingsModal');
+            if (event.target == modal) {
+                closeSettings();
+            }
+        }
 
         // ============ AUTHENTICATION ============
         function switchTab(tab) {
@@ -678,8 +918,8 @@
 
         function logout() {
             currentUser = null;
-            document.getElementById('loginScreen').style.display = 'block';
             document.getElementById('mainApp').style.display = 'none';
+            showLoginScreen();
             document.getElementById('loginUsername').value = '';
             document.getElementById('loginPassword').value = '';
         }
@@ -753,7 +993,7 @@
 
         async function updateDashboard() {
             try {
-                const response = await fetch(https://script.google.com/macros/s/AKfycbzfXmRtCdQ0oevOmd69yKfl3x2bQYE1awRi3SeQZQZp3aCfiihpGyu-sj7lIWOSFX4R0Q/exec, {
+                const response = await fetch(APPS_SCRIPT_URL, {
                     method: 'POST',
                     body: JSON.stringify({
                         action: 'GET_STATS'
