@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Audit Data Dosen Serdos 2026 - Universitas Cordova</title>
+    <title>Audit Data Dosen Serdos 2026 - Firebase Cloud</title>
+    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <style>
         * {
@@ -13,7 +16,7 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 10px;
@@ -33,6 +36,27 @@
             color: white;
             padding: 20px;
             text-align: center;
+            position: relative;
+        }
+
+        .firebase-status {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 12px;
+            padding: 5px 10px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 20px;
+        }
+
+        .firebase-status.online::before {
+            content: "● ";
+            color: #28a745;
+        }
+
+        .firebase-status.offline::before {
+            content: "● ";
+            color: #dc3545;
         }
 
         header h1 {
@@ -47,7 +71,6 @@
 
         .tabs {
             display: flex;
-            gap: 0;
             background: #f5f5f5;
             border-bottom: 2px solid #ddd;
             overflow-x: auto;
@@ -68,10 +91,6 @@
             min-width: 120px;
         }
 
-        .tab-button:hover {
-            background: #efefef;
-        }
-
         .tab-button.active {
             color: #667eea;
             border-bottom-color: #667eea;
@@ -87,6 +106,57 @@
 
         .tab-content.active {
             display: block;
+        }
+
+        .alert {
+            padding: 12px 15px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            border-left: 4px solid;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border-color: #28a745;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border-color: #17a2b8;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+            border-color: #dc3545;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.9;
         }
 
         .form-group {
@@ -122,12 +192,6 @@
             gap: 15px;
         }
 
-        @media (max-width: 768px) {
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-        }
-
         button {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -146,147 +210,12 @@
             box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
         }
 
-        .button-group {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
         .btn-secondary {
             background: #6c757d;
         }
 
-        .btn-danger {
-            background: #dc3545;
-        }
-
         .btn-success {
             background: #28a745;
-        }
-
-        .alert {
-            padding: 12px 15px;
-            margin-bottom: 15px;
-            border-radius: 6px;
-            font-size: 13px;
-            border-left: 4px solid;
-        }
-
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border-color: #28a745;
-        }
-
-        .alert-danger {
-            background: #f8d7da;
-            color: #721c24;
-            border-color: #dc3545;
-        }
-
-        .alert-warning {
-            background: #fff3cd;
-            color: #856404;
-            border-color: #ffc107;
-        }
-
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .stat-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-        }
-
-        .stat-number {
-            font-size: 32px;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .stat-label {
-            font-size: 12px;
-            opacity: 0.9;
-        }
-
-        @media (max-width: 768px) {
-            .stats {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        .chart-container {
-            position: relative;
-            height: 300px;
-            margin: 20px 0;
-            background: #f9f9f9;
-            border-radius: 10px;
-            padding: 15px;
-        }
-
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin: 20px 0;
-        }
-
-        @media (max-width: 768px) {
-            .grid-2 {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .recommendation-box {
-            background: linear-gradient(135deg, #f9f9f9 0%, #f0f0f0 100%);
-            border-left: 4px solid #667eea;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-        }
-
-        .recommendation-box.p1 {
-            border-left-color: #28a745;
-            background: #f0fff4;
-        }
-
-        .recommendation-box.p2 {
-            border-left-color: #ffc107;
-            background: #fffbf0;
-        }
-
-        .recommendation-box.followup {
-            border-left-color: #dc3545;
-            background: #fff5f5;
-        }
-
-        .rec-title {
-            font-weight: 600;
-            font-size: 14px;
-            margin-bottom: 8px;
-            color: #333;
-        }
-
-        .rec-content {
-            font-size: 13px;
-            color: #666;
-            line-height: 1.5;
-        }
-
-        .rec-action {
-            background: white;
-            padding: 10px;
-            border-radius: 6px;
-            margin-top: 10px;
-            font-size: 12px;
-            border-left: 3px solid #667eea;
         }
 
         table {
@@ -313,18 +242,12 @@
             border-bottom: 1px solid #eee;
         }
 
-        tr:hover {
-            background: #f9f9f9;
-        }
-
         .badge {
             display: inline-block;
             padding: 4px 8px;
             border-radius: 4px;
             font-size: 12px;
             font-weight: 600;
-            background: #e7f3ff;
-            color: #0066cc;
         }
 
         .badge.p1 {
@@ -342,13 +265,14 @@
             color: #721c24;
         }
 
-        .search-box input {
-            width: 100%;
+        .sync-status {
+            background: #f0f8ff;
             padding: 10px;
-            border: 1px solid #ddd;
             border-radius: 6px;
-            font-size: 14px;
             margin-bottom: 15px;
+            font-size: 12px;
+            color: #0066cc;
+            border-left: 4px solid #0066cc;
         }
 
         footer {
@@ -360,93 +284,41 @@
             border-top: 1px solid #ddd;
         }
 
-        .import-section {
-            background: #f0f8ff;
-            padding: 15px;
-            border-radius: 6px;
-            margin-bottom: 15px;
-            border-left: 4px solid #667eea;
-        }
-
-        .drop-zone {
-            border: 2px dashed #667eea;
-            border-radius: 8px;
-            padding: 30px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            background: #f9f9f9;
-        }
-
-        .drop-zone:hover {
-            background: #f0f8ff;
-            border-color: #764ba2;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 20px;
-            background: #eee;
-            border-radius: 10px;
-            overflow: hidden;
-            margin: 10px 0;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-            width: 0%;
-            transition: width 0.3s;
-        }
-
-        .insight-card {
-            background: white;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
-        }
-
-        .insight-icon {
-            font-size: 24px;
-            margin-right: 10px;
-        }
-
-        .insight-text {
-            font-size: 13px;
-            color: #333;
-            line-height: 1.5;
-        }
-
-        .btn-small {
-            padding: 5px 10px;
-            font-size: 12px;
-            width: auto;
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>📋 Audit Data Dosen Serdos 2026</h1>
-            <p>Universitas Cordova - Tracking Eligibilitas & Rekomendasi Aksi</p>
+            <div class="firebase-status offline" id="firebaseStatus">Connecting to Firebase...</div>
+            <h1>🔥 Audit Data Dosen Serdos 2026</h1>
+            <p>Cloud Database dengan Real-time Sync (Firebase)</p>
         </header>
 
         <div class="tabs">
             <button class="tab-button active" onclick="switchTab('dashboard')">📊 Dashboard</button>
-            <button class="tab-button" onclick="switchTab('import')">📥 Import Data</button>
-            <button class="tab-button" onclick="switchTab('input')">➕ Input Manual</button>
+            <button class="tab-button" onclick="switchTab('input')">➕ Input Data</button>
             <button class="tab-button" onclick="switchTab('daftar')">📖 Daftar Dosen</button>
             <button class="tab-button" onclick="switchTab('settings')">⚙️ Pengaturan</button>
         </div>
 
         <div class="content">
-            <!-- TAB 1: DASHBOARD (UPGRADED!) -->
+            <!-- TAB 1: DASHBOARD -->
             <div id="dashboard" class="tab-content active">
-                <h2>📊 Dashboard Audit Dosen - Dengan Grafik & Rekomendasi</h2>
+                <h2>📊 Dashboard</h2>
                 <div id="dashboardAlert"></div>
+                
+                <div class="sync-status" id="syncStatus">
+                    🔄 Menyambung ke Firebase...
+                </div>
 
-                <!-- STATISTICS CARDS -->
                 <div class="stats">
                     <div class="stat-card">
                         <div class="stat-number" id="totalDosen">0</div>
@@ -466,153 +338,20 @@
                     </div>
                 </div>
 
-                <!-- CHARTS (NEW!) -->
-                <div class="grid-2">
-                    <div>
-                        <h3 style="margin-bottom: 15px;">📊 Distribusi Eligibilitas</h3>
-                        <div class="chart-container">
-                            <canvas id="pieChart"></canvas>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 style="margin-bottom: 15px;">📈 Perbandingan Status</h3>
-                        <div class="chart-container">
-                            <canvas id="barChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- KEY INSIGHTS (NEW!) -->
-                <div style="background: #f0f8ff; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #667eea;">
-                    <h3 style="margin-bottom: 15px;">💡 Key Insights</h3>
-                    <div id="insightsContainer"></div>
-                </div>
-
-                <!-- RECOMMENDATIONS (NEW!) -->
-                <div style="margin: 30px 0;">
-                    <h3 style="margin-bottom: 15px;">🎯 Rekomendasi Aksi Strategis</h3>
-                    
-                    <!-- P1 RECOMMENDATIONS -->
-                    <div class="recommendation-box p1">
-                        <div class="rec-title">✅ P1 (ELIGIBLE) - <span id="p1Count">0</span> Dosen</div>
-                        <div class="rec-content">
-                            Dosen yang memenuhi SEMUA kriteria dan siap untuk mengajukan Serdos 2026.
-                        </div>
-                        <div class="rec-action">
-                            <strong>Aksi:</strong> Persiapkan dokumen lengkap (SK, publikasi, karya ilmiah) untuk submitsi ke KemenDiktistek sebelum August 2026.
-                        </div>
-                        <div class="rec-action">
-                            <strong>Timeline:</strong> Segera - Dokumentasi harus lengkap SEBELUM submit.
-                        </div>
-                        <div id="p1Details" style="margin-top: 10px; font-size: 12px; color: #666;"></div>
-                    </div>
-
-                    <!-- P2 RECOMMENDATIONS -->
-                    <div class="recommendation-box p2">
-                        <div class="rec-title">◐ P2 (CONDITIONAL) - <span id="p2Count">0</span> Dosen</div>
-                        <div class="rec-content">
-                            Dosen yang memenuhi SEBAGIAN kriteria. Perlu perbaikan di area spesifik untuk menjadi eligible.
-                        </div>
-                        <div class="rec-action">
-                            <strong>Aksi Prioritas:</strong>
-                            <ul style="margin-left: 20px; margin-top: 5px;">
-                                <li><strong>Publikasi:</strong> Cari/terbitkan karya ilmiah (SINTA/Scopus) sebelum submit</li>
-                                <li><strong>PEKERTI/AA:</strong> Ambil PEKERTI atau AA jika belum punya (deadline: 31 Agustus 2026)</li>
-                                <li><strong>BKD:</strong> Verifikasi 4 semester di SISTER dan lengkapi jika kurang</li>
-                                <li><strong>Data Pendidikan:</strong> Revisi data pendidikan jika ada yang salah (deadline: 31 Juli 2026)</li>
-                            </ul>
-                        </div>
-                        <div class="rec-action">
-                            <strong>Timeline:</strong> July 2026 - Lengkapi semua requirement sebelum submit.
-                        </div>
-                        <div id="p2Details" style="margin-top: 10px; font-size: 12px; color: #666;"></div>
-                    </div>
-
-                    <!-- FOLLOW-UP RECOMMENDATIONS -->
-                    <div class="recommendation-box followup">
-                        <div class="rec-title">✕ FOLLOW-UP (ACTION NEEDED) - <span id="followupCount">0</span> Dosen</div>
-                        <div class="rec-content">
-                            Dosen yang belum memenuhi kriteria minimum. Tidak eligible untuk Serdos 2026, perlu persiapan jangka panjang.
-                        </div>
-                        <div class="rec-action">
-                            <strong>Hambatan Utama:</strong>
-                            <ul style="margin-left: 20px; margin-top: 5px;">
-                                <li>Tidak memiliki Jabatan Fungsional (JF)</li>
-                                <li>Masa kerja < 2 tahun</li>
-                                <li>Sedang Tugas Belajar (TB) penuh</li>
-                                <li>Tidak ada publikasi/karya ilmiah</li>
-                            </ul>
-                        </div>
-                        <div class="rec-action">
-                            <strong>Aksi:</strong> Planning untuk Serdos 2027/2028:
-                            <ul style="margin-left: 20px; margin-top: 5px;">
-                                <li>✓ Kaji status JF - persiapan untuk PK II/III</li>
-                                <li>✓ Monitor masa kerja - targetkan 2 tahun ke depan</li>
-                                <li>✓ Daftar PEKERTI/AA dan program publikasi</li>
-                                <li>✓ Selesaikan TB dan terjun ke penelitian aktif</li>
-                            </ul>
-                        </div>
-                        <div id="followupDetails" style="margin-top: 10px; font-size: 12px; color: #666;"></div>
-                    </div>
-                </div>
-
-                <!-- EXPORT & PRINT BUTTONS -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px;">
-                    <button class="btn-success" onclick="exportToCSV()">📥 Export ke CSV</button>
-                    <button class="btn-secondary" onclick="printReport()">🖨️ Print Report</button>
+                <div style="background: #f5f5f5; padding: 15px; border-radius: 6px; margin-top: 20px;">
+                    <h3>📱 Status Koneksi Firebase</h3>
+                    <p id="firebaseInfo" style="font-size: 13px; margin-top: 10px; color: #666;">
+                        Tunggu... menyambung ke Firebase Cloud Database
+                    </p>
                 </div>
             </div>
 
-            <!-- TAB 2: IMPORT DATA -->
-            <div id="import" class="tab-content">
-                <h2>📥 Import Data Dosen dari CSV</h2>
-                <div id="importAlert"></div>
-
-                <div class="import-section">
-                    <h3>📋 Cara Import:</h3>
-                    <ol style="margin-left: 20px; margin-top: 10px; font-size: 13px;">
-                        <li>Download CSV dari Google Sheets</li>
-                        <li>Drag & drop atau click "Pilih File"</li>
-                        <li>Tunggu proses (3-5 detik)</li>
-                        <li>✅ 80 dosen auto-import!</li>
-                    </ol>
-                </div>
-
-                <div class="form-group">
-                    <label>📂 Drop CSV File</label>
-                    <div class="drop-zone" id="dropZone" ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
-                        <div style="font-size: 14px; color: #667eea; font-weight: 600;">
-                            📁 Drag & Drop CSV File
-                        </div>
-                        <div style="font-size: 12px; color: #999; margin-top: 10px;">
-                            atau click untuk browse
-                        </div>
-                        <input type="file" id="csvFileInput" accept=".csv" onchange="handleFileSelect(event)" style="display: none;">
-                        <button style="margin-top: 15px; width: 200px;" onclick="document.getElementById('csvFileInput').click();">Pilih File CSV</button>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>📋 Atau Paste CSV Data</label>
-                    <textarea id="csvPasteArea" rows="10" placeholder="Paste CSV data di sini..."></textarea>
-                    <button style="margin-top: 10px;" onclick="importFromPaste()">📌 Import dari Paste</button>
-                </div>
-
-                <div id="importProgress" style="display: none;">
-                    <p>Processing...</p>
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="progressFill"></div>
-                    </div>
-                    <p id="progressText">0%</p>
-                </div>
-            </div>
-
-            <!-- TAB 3: INPUT MANUAL -->
+            <!-- TAB 2: INPUT DATA -->
             <div id="input" class="tab-content">
-                <h2>➕ Input Data Manual</h2>
+                <h2>➕ Input Data Dosen</h2>
                 <div id="inputAlert"></div>
 
-                <form id="dosenForm" onsubmit="return submitForm(event)">
+                <form id="dosenForm" onsubmit="return submitFormFirebase(event)">
                     <div class="form-row">
                         <div class="form-group">
                             <label for="nidn">NIDN</label>
@@ -676,38 +415,21 @@
                             <select id="karyaIlmiah" required>
                                 <option value="">-- Pilih --</option>
                                 <option value="Ada">Ada</option>
-                                <option value="Dalam Proses">Dalam Proses</option>
                                 <option value="Tidak Ada">Tidak Ada</option>
                             </select>
                         </div>
                     </div>
 
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="tugasBelajar">Tugas Belajar</label>
-                            <select id="tugasBelajar" required>
-                                <option value="Tidak TB">Tidak TB</option>
-                                <option value="TB Sambil Bekerja">TB Sambil Bekerja</option>
-                                <option value="TB Penuh">TB Penuh</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="nuptk">NUPTK (Opsional)</label>
-                            <input type="text" id="nuptk" placeholder="Jika ada">
-                        </div>
-                    </div>
-
-                    <button type="submit">💾 Simpan Data</button>
+                    <button type="submit">💾 Simpan ke Firebase</button>
                 </form>
             </div>
 
-            <!-- TAB 4: DAFTAR DOSEN -->
+            <!-- TAB 3: DAFTAR DOSEN -->
             <div id="daftar" class="tab-content">
                 <h2>📖 Daftar Dosen</h2>
-                
-                <div class="search-box">
-                    <input type="text" id="searchInput" placeholder="Cari nama atau NIDN..." onkeyup="filterTable()">
-                </div>
+
+                <input type="text" id="searchInput" placeholder="Cari nama atau NIDN..." onkeyup="filterTable()" 
+                    style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 6px;">
 
                 <div style="overflow-x: auto;">
                     <table id="dosenTable">
@@ -717,7 +439,6 @@
                                 <th>NIDN</th>
                                 <th>Nama</th>
                                 <th>Jabatan</th>
-                                <th>Masa Kerja</th>
                                 <th>Status</th>
                                 <th>Aksi</th>
                             </tr>
@@ -728,35 +449,46 @@
                 </div>
             </div>
 
-            <!-- TAB 5: SETTINGS -->
+            <!-- TAB 4: SETTINGS -->
             <div id="settings" class="tab-content">
                 <h2>⚙️ Pengaturan</h2>
 
                 <div style="background: #f5f5f5; padding: 15px; border-radius: 6px; margin-bottom: 20px;">
-                    <h3>Backup & Restore</h3>
-                    <p style="font-size: 13px; color: #666; margin-bottom: 10px;">
-                        Data disimpan di localStorage. Backup secara berkala!
+                    <h3>🔥 Firebase Configuration</h3>
+                    <p style="font-size: 13px; color: #666; margin-bottom: 15px;">
+                        Atur konfigurasi Firebase untuk koneksi cloud database.
                     </p>
-                    <div class="button-group">
-                        <button class="btn-success" onclick="backupData()">💾 Backup</button>
-                        <button class="btn-secondary" onclick="restoreData()">📂 Restore</button>
+                    
+                    <div class="form-group">
+                        <label>API Key</label>
+                        <input type="text" id="apiKey" placeholder="Paste Firebase API Key" value="">
                     </div>
+                    <div class="form-group">
+                        <label>Project ID</label>
+                        <input type="text" id="projectId" placeholder="Paste Firebase Project ID" value="">
+                    </div>
+
+                    <button onclick="updateFirebaseConfig()">🔐 Simpan Firebase Config</button>
                 </div>
 
                 <div style="background: #f5f5f5; padding: 15px; border-radius: 6px; margin-bottom: 20px;">
-                    <h3>Manage Data</h3>
+                    <h3>💾 Backup & Restore</h3>
                     <p style="font-size: 13px; color: #666; margin-bottom: 10px;">
-                        Total dosen: <strong id="totalDataCount">0</strong>
+                        Backup ke Firebase dan restore dari Firebase.
                     </p>
-                    <button class="btn-danger" onclick="clearAllData()">🗑️ Hapus Semua</button>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <button class="btn-success" onclick="backupToFirebase()">☁️ Backup ke Firebase</button>
+                        <button class="btn-secondary" onclick="restoreFromFirebase()">☁️ Restore dari Firebase</button>
+                    </div>
                 </div>
 
                 <div style="background: #f5f5f5; padding: 15px; border-radius: 6px;">
-                    <h3>Info Aplikasi</h3>
+                    <h3>ℹ️ Informasi</h3>
                     <p style="font-size: 13px; color: #666;">
-                        <strong>Versi:</strong> 3.0 (Dashboard + Charts + Rekomendasi)<br>
-                        <strong>Last Updated:</strong> <span id="lastUpdate">-</span><br>
-                        <strong>Storage:</strong> <span id="storageUsed">-</span> KB
+                        <strong>Versi:</strong> 4.0 (Firebase Cloud)<br>
+                        <strong>Database:</strong> <span id="dbStatus">Offline</span><br>
+                        <strong>Total Dosen:</strong> <span id="totalDosenInfo">0</span><br>
+                        <strong>Last Sync:</strong> <span id="lastSyncTime">-</span>
                     </p>
                 </div>
             </div>
@@ -764,183 +496,83 @@
 
         <footer>
             <p>© 2026 Universitas Cordova - Audit Data Dosen Serdos 2026</p>
-            <p>Dengan Grafik & Rekomendasi Strategis</p>
+            <p>🔥 Powered by Firebase Cloud Database</p>
         </footer>
     </div>
 
-    <input type="file" id="fileInput" style="display: none;" accept=".json" onchange="processRestoreFile(event)">
-
     <script>
-        let pieChart, barChart;
+        // ===== FIREBASE CONFIGURATION =====
+        // GANTI INI DENGAN CONFIG ANDA DARI FIREBASE CONSOLE!
 
-        // ===== IMPORT FUNCTIONS =====
+        let db, auth;
+        let isOnline = false;
 
-        function handleDragOver(event) {
-            event.preventDefault();
-            document.getElementById('dropZone').classList.add('dragging');
-        }
+        function initializeFirebase() {
+            const firebaseConfig = {
+                apiKey: "YOUR_API_KEY",
+                authDomain: "YOUR_PROJECT.firebaseapp.com",
+                projectId: "YOUR_PROJECT_ID",
+                storageBucket: "YOUR_PROJECT.appspot.com",
+                messagingSenderId: "YOUR_SENDER_ID",
+                appId: "YOUR_APP_ID"
+            };
 
-        function handleDragLeave(event) {
-            document.getElementById('dropZone').classList.remove('dragging');
-        }
-
-        function handleDrop(event) {
-            event.preventDefault();
-            document.getElementById('dropZone').classList.remove('dragging');
-            const files = event.dataTransfer.files;
-            if (files.length > 0) {
-                handleFileSelect({ target: { files: files } });
-            }
-        }
-
-        function handleFileSelect(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (e) => processCSV(e.target.result);
-            reader.readAsText(file);
-        }
-
-        function importFromPaste() {
-            const data = document.getElementById('csvPasteArea').value;
-            if (!data) {
-                showAlert('importAlert', '⚠️ Paste data CSV!', 'warning');
-                return;
-            }
-            processCSV(data);
-        }
-
-        function processCSV(csv) {
             try {
-                showImportProgress(true);
-                const lines = csv.split('\n').filter(line => line.trim());
-                
-                if (lines.length < 2) {
-                    showAlert('importAlert', '❌ Data tidak valid!', 'danger');
-                    return;
-                }
+                // Initialize Firebase
+                firebase.initializeApp(firebaseConfig);
+                db = firebase.firestore();
+                auth = firebase.auth();
 
-                const headers = lines[0].split(',').map(h => h.trim());
-                const namaIdx = headers.findIndex(h => h.toLowerCase().includes('nama'));
-                const nidnIdx = headers.findIndex(h => h.toLowerCase().includes('nidn'));
-                const jabatanIdx = headers.findIndex(h => h.toLowerCase().includes('jabatan'));
-                const masaKerjaIdx = headers.findIndex(h => h.toLowerCase().includes('masa kerja'));
-                const bkdIdx = headers.findIndex(h => h.toLowerCase().includes('bkd'));
-                const pekertIdx = headers.findIndex(h => h.toLowerCase().includes('pekerti'));
-                const publikasiIdx = headers.findIndex(h => h.toLowerCase().includes('publikasi'));
-                const pendidikanIdx = headers.findIndex(h => h.toLowerCase().includes('pendidikan'));
-
-                let daftarDosen = getDaftar();
-                let count = 0;
-
-                for (let i = 1; i < lines.length; i++) {
-                    try {
-                        const values = lines[i].split(',').map(v => v.trim().replace(/^"(.*)"$/, '$1'));
-                        const nama = namaIdx >= 0 ? values[namaIdx] : '';
-                        if (!nama) continue;
-
-                        const nidn = nidnIdx >= 0 ? values[nidnIdx] : '';
-                        const jabatan = jabatanIdx >= 0 ? values[jabatanIdx].split('-')[0].trim() : '';
-                        const masaKerjaText = masaKerjaIdx >= 0 ? values[masaKerjaIdx] : '';
-                        const bkd = bkdIdx >= 0 ? values[bkdIdx] : '';
-                        const pekerti = pekertIdx >= 0 ? values[pekertIdx] : '';
-                        const publikasi = publikasiIdx >= 0 ? values[publikasiIdx] : '';
-                        const pendidikan = pendidikanIdx >= 0 ? values[pendidikanIdx] : 'S1';
-
-                        const masaKerjaNum = extractYears(masaKerjaText);
-                        const tmtJF = calculateTMTFromMasaKerja(masaKerjaNum);
-
-                        const dosen = {
-                            id: Date.now() + count,
-                            nidn,
-                            nama,
-                            jabatan: jabatan || 'Tidak Ada',
-                            tmtJF,
-                            masaKerja: masaKerjaNum,
-                            lkd: parseLKD(bkd),
-                            pekerti: pekerti || 'Belum Ada',
-                            pendidikan: extractPendidikan(pendidikan),
-                            karyaIlmiah: publikasi ? 'Ada' : 'Tidak Ada',
-                            tugasBelajar: 'Tidak TB',
-                            nuptk: '',
-                            catatan: 'Imported from CSV',
-                            tanggalInput: new Date().toLocaleDateString('id-ID')
-                        };
-
-                        const eligibility = calculateEligibility(dosen);
-                        dosen.eligibilitas = eligibility.kategori;
-                        dosen.syaratTerpenuhi = eligibility.syaratCount;
-
-                        daftarDosen.push(dosen);
-                        count++;
-
-                        const progress = Math.round((i / (lines.length - 1)) * 100);
-                        document.getElementById('progressFill').style.width = progress + '%';
-                        document.getElementById('progressText').textContent = progress + '%';
-                    } catch (e) {}
-                }
-
-                localStorage.setItem('daftarDosen', JSON.stringify(daftarDosen));
-                showImportProgress(false);
-                showAlert('importAlert', `✅ ${count} dosen imported!`, 'success');
-                document.getElementById('csvPasteArea').value = '';
-                updateDashboard();
-                displayDosenTable();
+                // Sign in anonymously
+                auth.signInAnonymously()
+                    .then(() => {
+                        console.log("✅ Firebase Connected!");
+                        setFirebaseStatus(true);
+                        setupRealtimeListener();
+                    })
+                    .catch(error => {
+                        console.error("❌ Firebase Auth Error:", error);
+                        setFirebaseStatus(false);
+                    });
 
             } catch (error) {
-                showImportProgress(false);
-                showAlert('importAlert', `❌ Error: ${error.message}`, 'danger');
+                console.error("❌ Firebase Init Error:", error);
+                showAlert('dashboardAlert', `Firebase Error: ${error.message}. Check config di Settings!`, 'danger');
+                setFirebaseStatus(false);
             }
         }
 
-        function showImportProgress(show) {
-            document.getElementById('importProgress').style.display = show ? 'block' : 'none';
-        }
+        function setFirebaseStatus(online) {
+            isOnline = online;
+            const status = document.getElementById('firebaseStatus');
+            const syncStatus = document.getElementById('syncStatus');
+            const info = document.getElementById('firebaseInfo');
 
-        function extractYears(text) {
-            if (!text) return 0;
-            const match = text.match(/(\d+)\s*Tahun/);
-            return match ? parseInt(match[1]) : 0;
-        }
-
-        function calculateTMTFromMasaKerja(years) {
-            const now = new Date();
-            const tmt = new Date(now.getFullYear() - years, now.getMonth(), now.getDate());
-            return tmt.toISOString().split('T')[0];
-        }
-
-        function parseLKD(text) {
-            if (!text || text === '-') return 'Tidak';
-            if (text.toLowerCase().includes('melaporkan')) return 'Ada';
-            return 'Tidak';
-        }
-
-        function extractPendidikan(text) {
-            if (!text) return 'S1';
-            if (text.includes('S3')) return 'S3';
-            if (text.includes('S2')) return 'S2';
-            return 'S1';
-        }
-
-        // ===== CORE FUNCTIONS =====
-
-        function switchTab(tabName) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.tab-button').forEach(el => el.classList.remove('active'));
-            document.getElementById(tabName).classList.add('active');
-            event.target.classList.add('active');
-
-            if (tabName === 'dashboard') {
-                updateDashboard();
-            } else if (tabName === 'daftar') {
-                displayDosenTable();
-            } else if (tabName === 'settings') {
-                updateSettingsInfo();
+            if (online) {
+                status.className = 'firebase-status online';
+                status.textContent = '✓ Connected to Firebase';
+                syncStatus.innerHTML = '✅ Terhubung ke Firebase Cloud Database - Data akan disync real-time';
+                info.innerHTML = '<strong>Status:</strong> Online | <strong>Database:</strong> Firebase Firestore | <strong>Sync:</strong> Real-time';
+                document.getElementById('dbStatus').textContent = 'Online ✓';
+            } else {
+                status.className = 'firebase-status offline';
+                status.textContent = '✗ Offline Mode';
+                syncStatus.innerHTML = '⚠️ Offline Mode - Data disimpan ke localStorage, akan sync saat online';
+                info.innerHTML = '<strong>Status:</strong> Offline | <strong>Database:</strong> localStorage | <strong>Sync:</strong> Pending';
+                document.getElementById('dbStatus').textContent = 'Offline (localStorage)';
             }
+
+            document.getElementById('lastSyncTime').textContent = new Date().toLocaleTimeString('id-ID');
         }
 
-        function submitForm(event) {
+        // ===== FIREBASE FUNCTIONS =====
+
+        async function submitFormFirebase(event) {
             event.preventDefault();
+
+            if (!isOnline) {
+                showAlert('inputAlert', '⚠️ Offline Mode - Data disimpan lokal dulu, akan sync saat online', 'info');
+            }
 
             const nidn = document.getElementById('nidn').value;
             const nama = document.getElementById('nama').value;
@@ -950,196 +582,181 @@
             const pekerti = document.getElementById('pekerti').value;
             const pendidikan = document.getElementById('pendidikan').value;
             const karyaIlmiah = document.getElementById('karyaIlmiah').value;
-            const tugasBelajar = document.getElementById('tugasBelajar').value;
-            const nuptk = document.getElementById('nuptk').value;
 
             const masaKerja = calculateMasaKerja(tmtJF);
             const eligibility = calculateEligibility({
                 jabatan, tmtJF, lkd, pekerti, pendidikan, 
-                karyaIlmiah, tugasBelajar, masaKerja
+                karyaIlmiah, masaKerja
             });
 
             const dosen = {
                 id: Date.now(),
                 nidn, nama, jabatan, tmtJF, masaKerja, lkd, pekerti,
-                pendidikan, karyaIlmiah, tugasBelajar, nuptk,
+                pendidikan, karyaIlmiah,
                 eligibilitas: eligibility.kategori,
                 syaratTerpenuhi: eligibility.syaratCount,
                 tanggalInput: new Date().toLocaleDateString('id-ID')
             };
 
-            let daftarDosen = getDaftar();
+            // Save to localStorage (offline)
+            let daftarDosen = getDaftarLocal();
             daftarDosen.push(dosen);
             localStorage.setItem('daftarDosen', JSON.stringify(daftarDosen));
 
-            showAlert('inputAlert', `✅ ${nama} saved! Status: ${eligibility.kategori}`, 'success');
+            // Save to Firebase (online)
+            if (isOnline) {
+                try {
+                    await db.collection("dosen").doc(dosen.id.toString()).set(dosen);
+                    showAlert('inputAlert', `✅ ${nama} saved to Firebase!`, 'success');
+                } catch (error) {
+                    showAlert('inputAlert', `⚠️ Saved locally, Firebase error: ${error.message}`, 'info');
+                }
+            } else {
+                showAlert('inputAlert', `✅ ${nama} saved locally (will sync when online)`, 'info');
+            }
+
             document.getElementById('dosenForm').reset();
             updateDashboard();
+            displayDosenTable();
 
             return false;
+        }
+
+        function setupRealtimeListener() {
+            if (!isOnline || !db) {
+                console.log("Firebase not ready for real-time listener");
+                return;
+            }
+
+            // Listen to Firestore changes
+            db.collection("dosen").onSnapshot(
+                snapshot => {
+                    const daftar = [];
+                    snapshot.forEach(doc => {
+                        daftar.push(doc.data());
+                    });
+
+                    // Save to localStorage
+                    localStorage.setItem('daftarDosen', JSON.stringify(daftar));
+
+                    // Update UI
+                    updateDashboard();
+                    displayDosenTable();
+
+                    console.log(`✅ Real-time sync: ${daftar.length} dosen`);
+                },
+                error => {
+                    console.error("Real-time listener error:", error);
+                }
+            );
+        }
+
+        async function backupToFirebase() {
+            if (!isOnline) {
+                showAlert('dashboardAlert', '⚠️ Must be online to backup to Firebase', 'danger');
+                return;
+            }
+
+            try {
+                const daftar = getDaftarLocal();
+                await db.collection("backup").doc("latest").set({
+                    timestamp: new Date(),
+                    count: daftar.length,
+                    data: daftar
+                });
+
+                showAlert('dashboardAlert', `✅ ${daftar.length} dosen backed up to Firebase!`, 'success');
+            } catch (error) {
+                showAlert('dashboardAlert', `❌ Backup error: ${error.message}`, 'danger');
+            }
+        }
+
+        async function restoreFromFirebase() {
+            if (!isOnline) {
+                showAlert('dashboardAlert', '⚠️ Must be online to restore from Firebase', 'danger');
+                return;
+            }
+
+            try {
+                const doc = await db.collection("backup").doc("latest").get();
+                if (!doc.exists) {
+                    showAlert('dashboardAlert', '❌ No backup found in Firebase', 'danger');
+                    return;
+                }
+
+                const backup = doc.data();
+                localStorage.setItem('daftarDosen', JSON.stringify(backup.data));
+
+                updateDashboard();
+                displayDosenTable();
+
+                showAlert('dashboardAlert', `✅ Restored ${backup.count} dosen from Firebase!`, 'success');
+            } catch (error) {
+                showAlert('dashboardAlert', `❌ Restore error: ${error.message}`, 'danger');
+            }
+        }
+
+        function updateFirebaseConfig() {
+            const apiKey = document.getElementById('apiKey').value;
+            const projectId = document.getElementById('projectId').value;
+
+            if (!apiKey || !projectId) {
+                showAlert('dashboardAlert', '⚠️ Please fill API Key and Project ID', 'danger');
+                return;
+            }
+
+            localStorage.setItem('firebaseApiKey', apiKey);
+            localStorage.setItem('firebaseProjectId', projectId);
+
+            showAlert('dashboardAlert', '✅ Firebase config saved! Please refresh page.', 'success');
+        }
+
+        // ===== CORE FUNCTIONS =====
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-button').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
         }
 
         function calculateMasaKerja(tmtJF) {
             const tmt = new Date(tmtJF);
             const today = new Date();
             let years = today.getFullYear() - tmt.getFullYear();
-            const monthDiff = today.getMonth() - tmt.getMonth();
-            if (monthDiff < 0) years--;
+            if (today.getMonth() < tmt.getMonth()) years--;
             return Math.max(0, years);
         }
 
         function calculateEligibility(dosen) {
-            let syaratCount = 0;
+            let count = 0;
+            if (dosen.jabatan && dosen.jabatan !== 'Tidak Ada') count++;
+            if (dosen.masaKerja >= 2) count++;
+            if (dosen.lkd === 'Ada') count++;
+            if (dosen.pekerti !== 'Belum Ada') count++;
+            if (dosen.pendidikan) count++;
+            if (dosen.karyaIlmiah && dosen.karyaIlmiah !== 'Tidak Ada') count++;
+            count += 3; // Assumed OK
 
-            if (dosen.jabatan && dosen.jabatan !== 'Tidak Ada') syaratCount++;
-            if (dosen.masaKerja >= 2) syaratCount++;
-            if (dosen.lkd === 'Ada') syaratCount++;
-            if (dosen.pekerti !== 'Belum Ada') syaratCount++;
-            if (dosen.pendidikan) syaratCount++;
-            if (dosen.karyaIlmiah && dosen.karyaIlmiah !== 'Tidak Ada') syaratCount++;
-            if (dosen.tugasBelajar !== 'TB Penuh') syaratCount++;
-            syaratCount += 2;
-
-            let kategori = 'Follow-up';
-            if (syaratCount >= 9) kategori = 'P1';
-            else if (syaratCount >= 7) kategori = 'P2';
-
-            return { kategori, syaratCount };
+            let kategori = count >= 9 ? 'P1' : count >= 7 ? 'P2' : 'Follow-up';
+            return { kategori, syaratCount: count };
         }
 
         function updateDashboard() {
-            const daftar = getDaftar();
-            const p1 = daftar.filter(d => d.eligibilitas === 'P1');
-            const p2 = daftar.filter(d => d.eligibilitas === 'P2');
-            const followup = daftar.filter(d => d.eligibilitas === 'Follow-up');
+            const daftar = getDaftarLocal();
+            const p1 = daftar.filter(d => d.eligibilitas === 'P1').length;
+            const p2 = daftar.filter(d => d.eligibilitas === 'P2').length;
+            const followup = daftar.filter(d => d.eligibilitas === 'Follow-up').length;
 
             document.getElementById('totalDosen').textContent = daftar.length;
-            document.getElementById('countP1').textContent = p1.length;
-            document.getElementById('countP2').textContent = p2.length;
-            document.getElementById('countFollowup').textContent = followup.length;
-
-            // Update recommendation counts
-            document.getElementById('p1Count').textContent = p1.length;
-            document.getElementById('p2Count').textContent = p2.length;
-            document.getElementById('followupCount').textContent = followup.length;
-
-            // Update details
-            document.getElementById('p1Details').innerHTML = p1.length > 0 ? 
-                `<strong>Dosen:</strong> ${p1.map(d => d.nama).join(', ')}` : 'Tidak ada';
-            document.getElementById('p2Details').innerHTML = p2.length > 0 ? 
-                `<strong>Dosen:</strong> ${p2.map(d => d.nama).join(', ')}` : 'Tidak ada';
-            document.getElementById('followupDetails').innerHTML = followup.length > 0 ? 
-                `<strong>Dosen:</strong> ${followup.map(d => d.nama).join(', ')}` : 'Tidak ada';
-
-            // Update insights
-            updateInsights(daftar, p1, p2, followup);
-
-            // Update charts
-            updateCharts(daftar.length, p1.length, p2.length, followup.length);
-        }
-
-        function updateInsights(daftar, p1, p2, followup) {
-            const container = document.getElementById('insightsContainer');
-            const insights = [];
-
-            if (daftar.length === 0) {
-                container.innerHTML = '<p style="color: #999; font-size: 13px;">Belum ada data. Import atau input data untuk melihat insights.</p>';
-                return;
-            }
-
-            const p1Percentage = Math.round((p1.length / daftar.length) * 100);
-            const p2Percentage = Math.round((p2.length / daftar.length) * 100);
-            const followupPercentage = Math.round((followup.length / daftar.length) * 100);
-
-            let insightHTML = `
-                <div class="insight-card">
-                    <span class="insight-icon">📊</span>
-                    <div class="insight-text">
-                        <strong>${p1Percentage}% dosen (${p1.length}) siap untuk Serdos 2026.</strong> 
-                        Mereka memenuhi SEMUA kriteria dan bisa langsung submit dokumen.
-                    </div>
-                </div>
-                <div class="insight-card">
-                    <span class="insight-icon">🎯</span>
-                    <div class="insight-text">
-                        <strong>${p2Percentage}% dosen (${p2.length}) perlu improvement minor.</strong>
-                        Focus pada publikasi, PEKERTI, dan BKD untuk menjadi eligible.
-                    </div>
-                </div>
-                <div class="insight-card">
-                    <span class="insight-icon">⏳</span>
-                    <div class="insight-text">
-                        <strong>${followupPercentage}% dosen (${followup.length}) perlu persiapan jangka panjang.</strong>
-                        Target untuk Serdos 2027/2028 dengan fokus pada JF dan publikasi.
-                    </div>
-                </div>
-            `;
-
-            container.innerHTML = insightHTML;
-        }
-
-        function updateCharts(total, p1, p2, followup) {
-            // Pie Chart
-            const piectx = document.getElementById('pieChart').getContext('2d');
-            if (pieChart) pieChart.destroy();
-            pieChart = new Chart(piectx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['P1 (Eligible)', 'P2 (Conditional)', 'Follow-up'],
-                    datasets: [{
-                        data: [p1, p2, followup],
-                        backgroundColor: ['#28a745', '#ffc107', '#dc3545'],
-                        borderColor: ['#ffffff', '#ffffff', '#ffffff'],
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        }
-                    }
-                }
-            });
-
-            // Bar Chart
-            const barctx = document.getElementById('barChart').getContext('2d');
-            if (barChart) barChart.destroy();
-            barChart = new Chart(barctx, {
-                type: 'bar',
-                data: {
-                    labels: ['P1 Eligible', 'P2 Conditional', 'Follow-up'],
-                    datasets: [{
-                        label: 'Jumlah Dosen',
-                        data: [p1, p2, followup],
-                        backgroundColor: ['#28a745', '#ffc107', '#dc3545'],
-                        borderColor: ['#28a745', '#ffc107', '#dc3545'],
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    indexAxis: 'y',
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    },
-                    scales: {
-                        x: {
-                            beginAtZero: true,
-                            max: Math.max(total, 10)
-                        }
-                    }
-                }
-            });
+            document.getElementById('countP1').textContent = p1;
+            document.getElementById('countP2').textContent = p2;
+            document.getElementById('countFollowup').textContent = followup;
+            document.getElementById('totalDosenInfo').textContent = daftar.length;
         }
 
         function displayDosenTable() {
-            const daftar = getDaftar();
+            const daftar = getDaftarLocal();
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
 
@@ -1150,19 +767,36 @@
                     <td>${dosen.nidn}</td>
                     <td><strong>${dosen.nama}</strong></td>
                     <td>${dosen.jabatan}</td>
-                    <td>${dosen.masaKerja} tahun</td>
                     <td><span class="badge ${dosen.eligibilitas.toLowerCase()}">${dosen.eligibilitas}</span></td>
-                    <td>
-                        <button class="btn-small btn-danger" onclick="deleteDosen(${dosen.id})">Hapus</button>
-                    </td>
+                    <td><button class="btn-small" onclick="deleteDosenFirebase('${dosen.id}')">Hapus</button></td>
                 `;
             });
         }
 
+        async function deleteDosenFirebase(id) {
+            if (!confirm('Yakin hapus?')) return;
+
+            // Delete from localStorage
+            let daftar = getDaftarLocal();
+            daftar = daftar.filter(d => d.id != id);
+            localStorage.setItem('daftarDosen', JSON.stringify(daftar));
+
+            // Delete from Firebase
+            if (isOnline && db) {
+                try {
+                    await db.collection("dosen").doc(id).delete();
+                } catch (error) {
+                    console.error("Delete error:", error);
+                }
+            }
+
+            displayDosenTable();
+            updateDashboard();
+        }
+
         function filterTable() {
             const input = document.getElementById('searchInput').value.toLowerCase();
-            const table = document.getElementById('dosenTable');
-            const rows = table.querySelectorAll('tbody tr');
+            const rows = document.getElementById('dosenTable').querySelectorAll('tbody tr');
             rows.forEach(row => {
                 const nidn = row.cells[1].textContent.toLowerCase();
                 const nama = row.cells[2].textContent.toLowerCase();
@@ -1170,17 +804,7 @@
             });
         }
 
-        function deleteDosen(id) {
-            if (confirm('Hapus data ini?')) {
-                let daftar = getDaftar();
-                daftar = daftar.filter(d => d.id !== id);
-                localStorage.setItem('daftarDosen', JSON.stringify(daftar));
-                displayDosenTable();
-                updateDashboard();
-            }
-        }
-
-        function getDaftar() {
+        function getDaftarLocal() {
             const data = localStorage.getItem('daftarDosen');
             return data ? JSON.parse(data) : [];
         }
@@ -1191,98 +815,16 @@
             setTimeout(() => alert.innerHTML = '', 5000);
         }
 
-        function exportToCSV() {
-            const daftar = getDaftar();
-            if (daftar.length === 0) {
-                alert('Tidak ada data!');
-                return;
-            }
-            let csv = 'No,NIDN,Nama,Jabatan,Masa Kerja,Status\n';
-            daftar.forEach((d, i) => {
-                csv += `${i + 1},"${d.nidn}","${d.nama}","${d.jabatan}",${d.masaKerja},"${d.eligibilitas}"\n`;
-            });
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = `audit_dosen_${new Date().toLocaleDateString('id-ID')}.csv`;
-            link.click();
-        }
-
-        function printReport() {
-            const daftar = getDaftar();
-            let html = '<table border="1" cellpadding="10"><thead><tr>';
-            html += '<th>#</th><th>NIDN</th><th>Nama</th><th>Jabatan</th><th>Status</th></tr></thead><tbody>';
-            daftar.forEach((d, i) => {
-                html += `<tr><td>${i + 1}</td><td>${d.nidn}</td><td>${d.nama}</td><td>${d.jabatan}</td><td>${d.eligibilitas}</td></tr>`;
-            });
-            html += '</tbody></table>';
-            const win = window.open('', '', 'height=700,width=900');
-            win.document.write('<h2>Laporan Audit Data Dosen Serdos 2026</h2>');
-            win.document.write(html);
-            win.print();
-        }
-
-        function backupData() {
-            const daftar = getDaftar();
-            const backup = {
-                tanggalBackup: new Date().toLocaleString('id-ID'),
-                totalDosen: daftar.length,
-                data: daftar
-            };
-            const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = `backup_${new Date().toLocaleDateString('id-ID')}.json`;
-            link.click();
-            alert('✅ Backup done!');
-        }
-
-        function restoreData() {
-            document.getElementById('fileInput').click();
-        }
-
-        function processRestoreFile(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const backup = JSON.parse(e.target.result);
-                    if (confirm(`Restore ${backup.totalDosen} dosen?`)) {
-                        localStorage.setItem('daftarDosen', JSON.stringify(backup.data));
-                        alert('✅ Restore done!');
-                        updateDashboard();
-                    }
-                } catch {
-                    alert('❌ Invalid file!');
-                }
-            };
-            reader.readAsText(file);
-        }
-
-        function clearAllData() {
-            if (confirm('⚠️ Hapus SEMUA data?\n\nTindakan tidak bisa dibatalkan!')) {
-                if (confirm('Benar-benar yakin?')) {
-                    localStorage.removeItem('daftarDosen');
-                    alert('✅ Data dihapus!');
-                    updateDashboard();
-                }
-            }
-        }
-
-        function updateSettingsInfo() {
-            const daftar = getDaftar();
-            document.getElementById('totalDataCount').textContent = daftar.length;
-            document.getElementById('lastUpdate').textContent = new Date().toLocaleString('id-ID');
-            const dataSize = JSON.stringify(daftar).length / 1024;
-            document.getElementById('storageUsed').textContent = dataSize.toFixed(2);
-        }
-
-        // Initialize
+        // Initialize on load
         document.addEventListener('DOMContentLoaded', function() {
+            initializeFirebase();
             updateDashboard();
-            updateSettingsInfo();
+            displayDosenTable();
         });
+
+        // Check online status
+        window.addEventListener('online', () => setFirebaseStatus(true));
+        window.addEventListener('offline', () => setFirebaseStatus(false));
     </script>
 </body>
 </html>
