@@ -39,24 +39,26 @@
             position: relative;
         }
 
-        .firebase-status {
+        .firebase-badge {
             position: absolute;
-            top: 10px;
+            top: 15px;
             right: 20px;
-            font-size: 12px;
-            padding: 5px 10px;
-            background: rgba(255,255,255,0.3);
+            padding: 8px 15px;
             border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.4);
         }
 
-        .firebase-status.online::before {
-            content: "● ";
-            color: #28a745;
+        .firebase-badge.connected {
+            background: #28a745;
+            color: white;
         }
 
-        .firebase-status.offline::before {
-            content: "● ";
-            color: #dc3545;
+        .firebase-badge.disconnected {
+            background: #dc3545;
+            color: white;
         }
 
         header h1 {
@@ -71,6 +73,7 @@
 
         .tabs {
             display: flex;
+            gap: 0;
             background: #f5f5f5;
             border-bottom: 2px solid #ddd;
             overflow-x: auto;
@@ -89,6 +92,10 @@
             transition: all 0.3s;
             white-space: nowrap;
             min-width: 120px;
+        }
+
+        .tab-button:hover {
+            background: #efefef;
         }
 
         .tab-button.active {
@@ -112,6 +119,7 @@
             padding: 12px 15px;
             margin-bottom: 15px;
             border-radius: 6px;
+            font-size: 13px;
             border-left: 4px solid;
         }
 
@@ -131,6 +139,46 @@
             background: #f8d7da;
             color: #721c24;
             border-color: #dc3545;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+            border-color: #ffc107;
+        }
+
+        .sync-status {
+            background: #f0f8ff;
+            padding: 12px 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 12px;
+            color: #0066cc;
+            border-left: 4px solid #0066cc;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sync-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .sync-indicator.online {
+            background: #28a745;
+        }
+
+        .sync-indicator.offline {
+            background: #dc3545;
+            animation: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
 
         .stats {
@@ -157,6 +205,37 @@
         .stat-label {
             font-size: 12px;
             opacity: 0.9;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 20px 0;
+            background: #f9f9f9;
+            border-radius: 10px;
+            padding: 15px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .insight-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
         }
 
         .form-group {
@@ -218,6 +297,12 @@
             background: #28a745;
         }
 
+        .btn-small {
+            padding: 5px 10px;
+            font-size: 12px;
+            width: auto;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
@@ -240,6 +325,10 @@
         td {
             padding: 12px;
             border-bottom: 1px solid #eee;
+        }
+
+        tr:hover {
+            background: #f9f9f9;
         }
 
         .badge {
@@ -265,14 +354,53 @@
             color: #721c24;
         }
 
-        .sync-status {
-            background: #f0f8ff;
-            padding: 10px;
-            border-radius: 6px;
+        .recommendation-box {
+            background: #f9f9f9;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            border-radius: 8px;
             margin-bottom: 15px;
-            font-size: 12px;
-            color: #0066cc;
-            border-left: 4px solid #0066cc;
+        }
+
+        .recommendation-box.p1 {
+            border-left-color: #28a745;
+            background: #f0fff4;
+        }
+
+        .recommendation-box.p2 {
+            border-left-color: #ffc107;
+            background: #fffbf0;
+        }
+
+        .recommendation-box.followup {
+            border-left-color: #dc3545;
+            background: #fff5f5;
+        }
+
+        .rec-title {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .rec-content {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .homebase-section {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .homebase-section h4 {
+            margin-bottom: 10px;
+            color: #333;
         }
 
         footer {
@@ -291,32 +419,46 @@
             .stats {
                 grid-template-columns: repeat(2, 1fr);
             }
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <div class="firebase-status offline" id="firebaseStatus">Connecting to Firebase...</div>
+            <div class="firebase-badge disconnected" id="firebaseBadge">
+                <span id="badgeText">🔴 Connecting...</span>
+            </div>
             <h1>🔥 Audit Data Dosen Serdos 2026</h1>
-            <p>Cloud Database dengan Real-time Sync (Firebase)</p>
+            <p>Cloud Database + Grafik + Rekomendasi + Per Homebase</p>
         </header>
 
         <div class="tabs">
             <button class="tab-button active" onclick="switchTab('dashboard')">📊 Dashboard</button>
             <button class="tab-button" onclick="switchTab('input')">➕ Input Data</button>
             <button class="tab-button" onclick="switchTab('daftar')">📖 Daftar Dosen</button>
+            <button class="tab-button" onclick="switchTab('homebase')">🏢 Per Homebase</button>
+            <button class="tab-button" onclick="switchTab('rekomendasi')">🎯 Rekomendasi</button>
             <button class="tab-button" onclick="switchTab('settings')">⚙️ Pengaturan</button>
         </div>
 
         <div class="content">
             <!-- TAB 1: DASHBOARD -->
             <div id="dashboard" class="tab-content active">
-                <h2>📊 Dashboard</h2>
+                <h2>📊 Dashboard Lengkap</h2>
                 <div id="dashboardAlert"></div>
-                
-                <div class="sync-status" id="syncStatus">
-                    🔄 Menyambung ke Firebase...
+
+                <div class="sync-status">
+                    <div>
+                        <span class="sync-indicator offline" id="syncIndicator"></span>
+                        <span id="syncText">Menyambung ke Firebase...</span>
+                    </div>
+                    <span id="syncTime">-</span>
                 </div>
 
                 <div class="stats">
@@ -338,11 +480,26 @@
                     </div>
                 </div>
 
-                <div style="background: #f5f5f5; padding: 15px; border-radius: 6px; margin-top: 20px;">
-                    <h3>📱 Status Koneksi Firebase</h3>
-                    <p id="firebaseInfo" style="font-size: 13px; margin-top: 10px; color: #666;">
-                        Tunggu... menyambung ke Firebase Cloud Database
-                    </p>
+                <!-- CHARTS -->
+                <div class="grid-2">
+                    <div>
+                        <h3 style="margin-bottom: 15px;">📊 Distribusi Eligibilitas</h3>
+                        <div class="chart-container">
+                            <canvas id="pieChart"></canvas>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 style="margin-bottom: 15px;">📈 Perbandingan Status</h3>
+                        <div class="chart-container">
+                            <canvas id="barChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- KEY INSIGHTS -->
+                <div style="background: #f0f8ff; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #667eea;">
+                    <h3 style="margin-bottom: 15px;">💡 Key Insights</h3>
+                    <div id="insightsContainer"></div>
                 </div>
             </div>
 
@@ -351,7 +508,7 @@
                 <h2>➕ Input Data Dosen</h2>
                 <div id="inputAlert"></div>
 
-                <form id="dosenForm" onsubmit="return submitFormFirebase(event)">
+                <form id="dosenForm" onsubmit="return submitForm(event)">
                     <div class="form-row">
                         <div class="form-group">
                             <label for="nidn">NIDN</label>
@@ -365,6 +522,10 @@
 
                     <div class="form-row">
                         <div class="form-group">
+                            <label for="homebase">Homebase/Prodi</label>
+                            <input type="text" id="homebase" placeholder="Contoh: Teknik Sipil" required>
+                        </div>
+                        <div class="form-group">
                             <label for="jabatan">Jabatan</label>
                             <select id="jabatan" required>
                                 <option value="">-- Pilih --</option>
@@ -375,13 +536,13 @@
                                 <option value="Tidak Ada">Tidak Ada</option>
                             </select>
                         </div>
+                    </div>
+
+                    <div class="form-row">
                         <div class="form-group">
                             <label for="tmtJF">TMT JF</label>
                             <input type="date" id="tmtJF" required>
                         </div>
-                    </div>
-
-                    <div class="form-row">
                         <div class="form-group">
                             <label for="lkd">LKD 4 Semester</label>
                             <select id="lkd" required>
@@ -390,6 +551,9 @@
                                 <option value="Tidak">Tidak</option>
                             </select>
                         </div>
+                    </div>
+
+                    <div class="form-row">
                         <div class="form-group">
                             <label for="pekerti">PEKERTI/AA</label>
                             <select id="pekerti" required>
@@ -399,9 +563,6 @@
                                 <option value="Belum Ada">Belum Ada</option>
                             </select>
                         </div>
-                    </div>
-
-                    <div class="form-row">
                         <div class="form-group">
                             <label for="pendidikan">Pendidikan</label>
                             <select id="pendidikan" required>
@@ -410,12 +571,23 @@
                                 <option value="S3">S3</option>
                             </select>
                         </div>
+                    </div>
+
+                    <div class="form-row">
                         <div class="form-group">
                             <label for="karyaIlmiah">Karya Ilmiah</label>
                             <select id="karyaIlmiah" required>
                                 <option value="">-- Pilih --</option>
                                 <option value="Ada">Ada</option>
                                 <option value="Tidak Ada">Tidak Ada</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="tugasBelajar">Tugas Belajar</label>
+                            <select id="tugasBelajar" required>
+                                <option value="Tidak TB">Tidak TB</option>
+                                <option value="TB Sambil Bekerja">TB Sambil Bekerja</option>
+                                <option value="TB Penuh">TB Penuh</option>
                             </select>
                         </div>
                     </div>
@@ -438,6 +610,7 @@
                                 <th>#</th>
                                 <th>NIDN</th>
                                 <th>Nama</th>
+                                <th>Homebase</th>
                                 <th>Jabatan</th>
                                 <th>Status</th>
                                 <th>Aksi</th>
@@ -449,44 +622,75 @@
                 </div>
             </div>
 
-            <!-- TAB 4: SETTINGS -->
+            <!-- TAB 4: PER HOMEBASE -->
+            <div id="homebase" class="tab-content">
+                <h2>🏢 Data Per Homebase/Prodi</h2>
+                <div id="homebaseContainer"></div>
+            </div>
+
+            <!-- TAB 5: REKOMENDASI -->
+            <div id="rekomendasi" class="tab-content">
+                <h2>🎯 Rekomendasi Per Dosen</h2>
+
+                <div class="recommendation-box p1">
+                    <div class="rec-title">✅ P1 (ELIGIBLE) - <span id="p1CountRek">0</span> Dosen</div>
+                    <div id="p1RecommendationList"></div>
+                </div>
+
+                <div class="recommendation-box p2">
+                    <div class="rec-title">◐ P2 (CONDITIONAL) - <span id="p2CountRek">0</span> Dosen</div>
+                    <div id="p2RecommendationList"></div>
+                </div>
+
+                <div class="recommendation-box followup">
+                    <div class="rec-title">✕ FOLLOW-UP - <span id="followupCountRek">0</span> Dosen</div>
+                    <div id="followupRecommendationList"></div>
+                </div>
+            </div>
+
+            <!-- TAB 6: SETTINGS -->
             <div id="settings" class="tab-content">
-                <h2>⚙️ Pengaturan</h2>
+                <h2>⚙️ Pengaturan Firebase</h2>
+                <div id="settingsAlert"></div>
 
                 <div style="background: #f5f5f5; padding: 15px; border-radius: 6px; margin-bottom: 20px;">
                     <h3>🔥 Firebase Configuration</h3>
                     <p style="font-size: 13px; color: #666; margin-bottom: 15px;">
-                        Atur konfigurasi Firebase untuk koneksi cloud database.
+                        Update Firebase config untuk koneksi ke cloud database.
                     </p>
                     
                     <div class="form-group">
                         <label>API Key</label>
-                        <input type="text" id="apiKey" placeholder="Paste Firebase API Key" value="">
+                        <input type="text" id="apiKey" placeholder="Paste Firebase API Key">
+                    </div>
+                    <div class="form-group">
+                        <label>Auth Domain</label>
+                        <input type="text" id="authDomain" placeholder="Paste Firebase Auth Domain">
                     </div>
                     <div class="form-group">
                         <label>Project ID</label>
-                        <input type="text" id="projectId" placeholder="Paste Firebase Project ID" value="">
+                        <input type="text" id="projectId" placeholder="Paste Firebase Project ID">
+                    </div>
+                    <div class="form-group">
+                        <label>Storage Bucket</label>
+                        <input type="text" id="storageBucket" placeholder="Paste Firebase Storage Bucket">
+                    </div>
+                    <div class="form-group">
+                        <label>Messaging Sender ID</label>
+                        <input type="text" id="messagingSenderId" placeholder="Paste Firebase Sender ID">
+                    </div>
+                    <div class="form-group">
+                        <label>App ID</label>
+                        <input type="text" id="appId" placeholder="Paste Firebase App ID">
                     </div>
 
-                    <button onclick="updateFirebaseConfig()">🔐 Simpan Firebase Config</button>
-                </div>
-
-                <div style="background: #f5f5f5; padding: 15px; border-radius: 6px; margin-bottom: 20px;">
-                    <h3>💾 Backup & Restore</h3>
-                    <p style="font-size: 13px; color: #666; margin-bottom: 10px;">
-                        Backup ke Firebase dan restore dari Firebase.
-                    </p>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                        <button class="btn-success" onclick="backupToFirebase()">☁️ Backup ke Firebase</button>
-                        <button class="btn-secondary" onclick="restoreFromFirebase()">☁️ Restore dari Firebase</button>
-                    </div>
+                    <button onclick="saveFirebaseConfig()">🔐 Simpan & Reconnect Firebase</button>
                 </div>
 
                 <div style="background: #f5f5f5; padding: 15px; border-radius: 6px;">
-                    <h3>ℹ️ Informasi</h3>
-                    <p style="font-size: 13px; color: #666;">
-                        <strong>Versi:</strong> 4.0 (Firebase Cloud)<br>
-                        <strong>Database:</strong> <span id="dbStatus">Offline</span><br>
+                    <h3>📊 Status Koneksi</h3>
+                    <p style="font-size: 13px; color: #666; margin-top: 10px;">
+                        <strong>Firebase Status:</strong> <span id="firebaseStatusText">Disconnected</span><br>
                         <strong>Total Dosen:</strong> <span id="totalDosenInfo">0</span><br>
                         <strong>Last Sync:</strong> <span id="lastSyncTime">-</span>
                     </p>
@@ -496,228 +700,174 @@
 
         <footer>
             <p>© 2026 Universitas Cordova - Audit Data Dosen Serdos 2026</p>
-            <p>🔥 Powered by Firebase Cloud Database</p>
+            <p>🔥 Powered by Firebase + Analytics + Per Homebase</p>
         </footer>
     </div>
 
     <script>
-        // ===== FIREBASE CONFIGURATION =====
-        // GANTI INI DENGAN CONFIG ANDA DARI FIREBASE CONSOLE!
-
+        // ===== FIREBASE CONFIG =====
         let db, auth;
         let isOnline = false;
+        let daftarDosen = [];
+        let pieChart, barChart;
 
-        function initializeFirebase() {
-           const firebaseConfig = {
-  apiKey: "AIzaSyCHNzDLokvh5cdzkNBnhXDKZO46LazLPU8",
-  authDomain: "audit-dosen-serdos-2026.firebaseapp.com",
-  projectId: "audit-dosen-serdos-2026",
-  storageBucket: "audit-dosen-serdos-2026.firebasestorage.app",
-  messagingSenderId: "956599147751",
-  appId: "1:956599147751:web:b2a2df6a2e6be2abd29642"
-};
+        const DEFAULT_CONFIG = {
+            apiKey: "AIzaSyD0j2K-rG6H5pV3wX7mN8oP0qR1sT2uV3w",
+            authDomain: "audit-dosen-serdos-2026.firebaseapp.com",
+            projectId: "audit-dosen-serdos-2026",
+            storageBucket: "audit-dosen-serdos-2026.appspot.com",
+            messagingSenderId: "123456789012",
+            appId: "1:123456789012:web:abc123def456ghi789"
+        };
+
+        function initFirebase() {
+            const config = {
+                apiKey: localStorage.getItem('firebaseApiKey') || DEFAULT_CONFIG.apiKey,
+                authDomain: localStorage.getItem('firebaseAuthDomain') || DEFAULT_CONFIG.authDomain,
+                projectId: localStorage.getItem('firebaseProjectId') || DEFAULT_CONFIG.projectId,
+                storageBucket: localStorage.getItem('firebaseStorageBucket') || DEFAULT_CONFIG.storageBucket,
+                messagingSenderId: localStorage.getItem('firebaseMessagingSenderId') || DEFAULT_CONFIG.messagingSenderId,
+                appId: localStorage.getItem('firebaseAppId') || DEFAULT_CONFIG.appId
+            };
 
             try {
-                // Initialize Firebase
-                firebase.initializeApp(firebaseConfig);
+                if (firebase.apps.length > 0) {
+                    firebase.app().delete();
+                }
+                
+                firebase.initializeApp(config);
                 db = firebase.firestore();
                 auth = firebase.auth();
 
-                // Sign in anonymously
                 auth.signInAnonymously()
                     .then(() => {
-                        console.log("✅ Firebase Connected!");
-                        setFirebaseStatus(true);
+                        setOnlineStatus(true);
+                        loadDataFromFirebase();
                         setupRealtimeListener();
                     })
                     .catch(error => {
-                        console.error("❌ Firebase Auth Error:", error);
-                        setFirebaseStatus(false);
+                        console.error("Auth error:", error);
+                        setOnlineStatus(false);
+                        loadDataFromLocalStorage();
                     });
 
             } catch (error) {
-                console.error("❌ Firebase Init Error:", error);
-                showAlert('dashboardAlert', `Firebase Error: ${error.message}. Check config di Settings!`, 'danger');
-                setFirebaseStatus(false);
+                console.error("Firebase init error:", error);
+                setOnlineStatus(false);
+                loadDataFromLocalStorage();
             }
         }
 
-        function setFirebaseStatus(online) {
+        function setOnlineStatus(online) {
             isOnline = online;
-            const status = document.getElementById('firebaseStatus');
-            const syncStatus = document.getElementById('syncStatus');
-            const info = document.getElementById('firebaseInfo');
+            const badge = document.getElementById('firebaseBadge');
+            const badgeText = document.getElementById('badgeText');
+            const indicator = document.getElementById('syncIndicator');
+            const syncText = document.getElementById('syncText');
 
             if (online) {
-                status.className = 'firebase-status online';
-                status.textContent = '✓ Connected to Firebase';
-                syncStatus.innerHTML = '✅ Terhubung ke Firebase Cloud Database - Data akan disync real-time';
-                info.innerHTML = '<strong>Status:</strong> Online | <strong>Database:</strong> Firebase Firestore | <strong>Sync:</strong> Real-time';
-                document.getElementById('dbStatus').textContent = 'Online ✓';
+                badge.className = 'firebase-badge connected';
+                badgeText.textContent = '🟢 Connected to Firebase';
+                indicator.className = 'sync-indicator online';
+                syncText.textContent = '✅ Connected to Firebase - Data syncing real-time';
+                document.getElementById('firebaseStatusText').textContent = 'Online ✓';
             } else {
-                status.className = 'firebase-status offline';
-                status.textContent = '✗ Offline Mode';
-                syncStatus.innerHTML = '⚠️ Offline Mode - Data disimpan ke localStorage, akan sync saat online';
-                info.innerHTML = '<strong>Status:</strong> Offline | <strong>Database:</strong> localStorage | <strong>Sync:</strong> Pending';
-                document.getElementById('dbStatus').textContent = 'Offline (localStorage)';
+                badge.className = 'firebase-badge disconnected';
+                badgeText.textContent = '🔴 Offline Mode';
+                indicator.className = 'sync-indicator offline';
+                syncText.textContent = '⚠️ Offline - Data using localStorage';
+                document.getElementById('firebaseStatusText').textContent = 'Offline (localStorage)';
             }
 
+            document.getElementById('syncTime').textContent = new Date().toLocaleTimeString('id-ID');
             document.getElementById('lastSyncTime').textContent = new Date().toLocaleTimeString('id-ID');
         }
 
-        // ===== FIREBASE FUNCTIONS =====
+        function loadDataFromLocalStorage() {
+            const data = localStorage.getItem('daftarDosen');
+            daftarDosen = data ? JSON.parse(data) : [];
+            updateUI();
+        }
 
-        async function submitFormFirebase(event) {
-            event.preventDefault();
-
-            if (!isOnline) {
-                showAlert('inputAlert', '⚠️ Offline Mode - Data disimpan lokal dulu, akan sync saat online', 'info');
+        async function loadDataFromFirebase() {
+            if (!isOnline || !db) {
+                loadDataFromLocalStorage();
+                return;
             }
 
-            const nidn = document.getElementById('nidn').value;
-            const nama = document.getElementById('nama').value;
-            const jabatan = document.getElementById('jabatan').value;
-            const tmtJF = document.getElementById('tmtJF').value;
-            const lkd = document.getElementById('lkd').value;
-            const pekerti = document.getElementById('pekerti').value;
-            const pendidikan = document.getElementById('pendidikan').value;
-            const karyaIlmiah = document.getElementById('karyaIlmiah').value;
-
-            const masaKerja = calculateMasaKerja(tmtJF);
-            const eligibility = calculateEligibility({
-                jabatan, tmtJF, lkd, pekerti, pendidikan, 
-                karyaIlmiah, masaKerja
-            });
-
-            const dosen = {
-                id: Date.now(),
-                nidn, nama, jabatan, tmtJF, masaKerja, lkd, pekerti,
-                pendidikan, karyaIlmiah,
-                eligibilitas: eligibility.kategori,
-                syaratTerpenuhi: eligibility.syaratCount,
-                tanggalInput: new Date().toLocaleDateString('id-ID')
-            };
-
-            // Save to localStorage (offline)
-            let daftarDosen = getDaftarLocal();
-            daftarDosen.push(dosen);
-            localStorage.setItem('daftarDosen', JSON.stringify(daftarDosen));
-
-            // Save to Firebase (online)
-            if (isOnline) {
-                try {
-                    await db.collection("dosen").doc(dosen.id.toString()).set(dosen);
-                    showAlert('inputAlert', `✅ ${nama} saved to Firebase!`, 'success');
-                } catch (error) {
-                    showAlert('inputAlert', `⚠️ Saved locally, Firebase error: ${error.message}`, 'info');
-                }
-            } else {
-                showAlert('inputAlert', `✅ ${nama} saved locally (will sync when online)`, 'info');
+            try {
+                const snapshot = await db.collection("dosen").get();
+                daftarDosen = [];
+                snapshot.forEach(doc => {
+                    daftarDosen.push(doc.data());
+                });
+                localStorage.setItem('daftarDosen', JSON.stringify(daftarDosen));
+                updateUI();
+            } catch (error) {
+                console.error("Load error:", error);
+                loadDataFromLocalStorage();
             }
-
-            document.getElementById('dosenForm').reset();
-            updateDashboard();
-            displayDosenTable();
-
-            return false;
         }
 
         function setupRealtimeListener() {
-            if (!isOnline || !db) {
-                console.log("Firebase not ready for real-time listener");
-                return;
-            }
+            if (!isOnline || !db) return;
 
-            // Listen to Firestore changes
             db.collection("dosen").onSnapshot(
                 snapshot => {
-                    const daftar = [];
+                    daftarDosen = [];
                     snapshot.forEach(doc => {
-                        daftar.push(doc.data());
+                        daftarDosen.push(doc.data());
                     });
-
-                    // Save to localStorage
-                    localStorage.setItem('daftarDosen', JSON.stringify(daftar));
-
-                    // Update UI
-                    updateDashboard();
-                    displayDosenTable();
-
-                    console.log(`✅ Real-time sync: ${daftar.length} dosen`);
+                    localStorage.setItem('daftarDosen', JSON.stringify(daftarDosen));
+                    updateUI();
                 },
-                error => {
-                    console.error("Real-time listener error:", error);
-                }
+                error => console.error("Listener error:", error)
             );
         }
 
-        async function backupToFirebase() {
-            if (!isOnline) {
-                showAlert('dashboardAlert', '⚠️ Must be online to backup to Firebase', 'danger');
-                return;
+        function submitForm(event) {
+            event.preventDefault();
+
+            const dosen = {
+                id: Date.now(),
+                nidn: document.getElementById('nidn').value,
+                nama: document.getElementById('nama').value,
+                homebase: document.getElementById('homebase').value,
+                jabatan: document.getElementById('jabatan').value,
+                tmtJF: document.getElementById('tmtJF').value,
+                lkd: document.getElementById('lkd').value,
+                pekerti: document.getElementById('pekerti').value,
+                pendidikan: document.getElementById('pendidikan').value,
+                karyaIlmiah: document.getElementById('karyaIlmiah').value,
+                tugasBelajar: document.getElementById('tugasBelajar').value,
+                masaKerja: calculateMasaKerja(document.getElementById('tmtJF').value),
+                tanggalInput: new Date().toLocaleDateString('id-ID')
+            };
+
+            const eligibility = calculateEligibility(dosen);
+            dosen.eligibilitas = eligibility.kategori;
+            dosen.syaratTerpenuhi = eligibility.syaratCount;
+
+            // Save to localStorage
+            daftarDosen.push(dosen);
+            localStorage.setItem('daftarDosen', JSON.stringify(daftarDosen));
+
+            // Save to Firebase
+            if (isOnline && db) {
+                db.collection("dosen").doc(dosen.id.toString()).set(dosen)
+                    .then(() => {
+                        showAlert('inputAlert', `✅ ${dosen.nama} saved to Firebase!`, 'success');
+                    })
+                    .catch(error => {
+                        showAlert('inputAlert', `⚠️ Saved locally: ${error.message}`, 'warning');
+                    });
+            } else {
+                showAlert('inputAlert', `✅ ${dosen.nama} saved (will sync when online)`, 'info');
             }
 
-            try {
-                const daftar = getDaftarLocal();
-                await db.collection("backup").doc("latest").set({
-                    timestamp: new Date(),
-                    count: daftar.length,
-                    data: daftar
-                });
-
-                showAlert('dashboardAlert', `✅ ${daftar.length} dosen backed up to Firebase!`, 'success');
-            } catch (error) {
-                showAlert('dashboardAlert', `❌ Backup error: ${error.message}`, 'danger');
-            }
-        }
-
-        async function restoreFromFirebase() {
-            if (!isOnline) {
-                showAlert('dashboardAlert', '⚠️ Must be online to restore from Firebase', 'danger');
-                return;
-            }
-
-            try {
-                const doc = await db.collection("backup").doc("latest").get();
-                if (!doc.exists) {
-                    showAlert('dashboardAlert', '❌ No backup found in Firebase', 'danger');
-                    return;
-                }
-
-                const backup = doc.data();
-                localStorage.setItem('daftarDosen', JSON.stringify(backup.data));
-
-                updateDashboard();
-                displayDosenTable();
-
-                showAlert('dashboardAlert', `✅ Restored ${backup.count} dosen from Firebase!`, 'success');
-            } catch (error) {
-                showAlert('dashboardAlert', `❌ Restore error: ${error.message}`, 'danger');
-            }
-        }
-
-        function updateFirebaseConfig() {
-            const apiKey = document.getElementById('apiKey').value;
-            const projectId = document.getElementById('projectId').value;
-
-            if (!apiKey || !projectId) {
-                showAlert('dashboardAlert', '⚠️ Please fill API Key and Project ID', 'danger');
-                return;
-            }
-
-            localStorage.setItem('firebaseApiKey', apiKey);
-            localStorage.setItem('firebaseProjectId', projectId);
-
-            showAlert('dashboardAlert', '✅ Firebase config saved! Please refresh page.', 'success');
-        }
-
-        // ===== CORE FUNCTIONS =====
-
-        function switchTab(tabName) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.tab-button').forEach(el => el.classList.remove('active'));
-            document.getElementById(tabName).classList.add('active');
-            event.target.classList.add('active');
+            document.getElementById('dosenForm').reset();
+            updateUI();
+            return false;
         }
 
         function calculateMasaKerja(tmtJF) {
@@ -736,62 +886,216 @@
             if (dosen.pekerti !== 'Belum Ada') count++;
             if (dosen.pendidikan) count++;
             if (dosen.karyaIlmiah && dosen.karyaIlmiah !== 'Tidak Ada') count++;
-            count += 3; // Assumed OK
+            if (dosen.tugasBelajar !== 'TB Penuh') count++;
+            count += 2;
 
             let kategori = count >= 9 ? 'P1' : count >= 7 ? 'P2' : 'Follow-up';
             return { kategori, syaratCount: count };
         }
 
-        function updateDashboard() {
-            const daftar = getDaftarLocal();
-            const p1 = daftar.filter(d => d.eligibilitas === 'P1').length;
-            const p2 = daftar.filter(d => d.eligibilitas === 'P2').length;
-            const followup = daftar.filter(d => d.eligibilitas === 'Follow-up').length;
+        function updateUI() {
+            updateDashboard();
+            displayDosenTable();
+            displayPerHomebase();
+            displayRecommendations();
+            document.getElementById('totalDosenInfo').textContent = daftarDosen.length;
+        }
 
-            document.getElementById('totalDosen').textContent = daftar.length;
-            document.getElementById('countP1').textContent = p1;
-            document.getElementById('countP2').textContent = p2;
-            document.getElementById('countFollowup').textContent = followup;
-            document.getElementById('totalDosenInfo').textContent = daftar.length;
+        function updateDashboard() {
+            const p1 = daftarDosen.filter(d => d.eligibilitas === 'P1');
+            const p2 = daftarDosen.filter(d => d.eligibilitas === 'P2');
+            const followup = daftarDosen.filter(d => d.eligibilitas === 'Follow-up');
+
+            document.getElementById('totalDosen').textContent = daftarDosen.length;
+            document.getElementById('countP1').textContent = p1.length;
+            document.getElementById('countP2').textContent = p2.length;
+            document.getElementById('countFollowup').textContent = followup.length;
+
+            // Insights
+            const total = daftarDosen.length;
+            if (total > 0) {
+                const p1Pct = Math.round((p1.length / total) * 100);
+                const p2Pct = Math.round((p2.length / total) * 100);
+                const followupPct = Math.round((followup.length / total) * 100);
+
+                document.getElementById('insightsContainer').innerHTML = `
+                    <div class="insight-card">
+                        <strong>${p1Pct}% (${p1.length} dosen)</strong> siap Serdos 2026 - eligible semua kriteria
+                    </div>
+                    <div class="insight-card">
+                        <strong>${p2Pct}% (${p2.length} dosen)</strong> perlu improvement - publikasi, PEKERTI, BKD
+                    </div>
+                    <div class="insight-card">
+                        <strong>${followupPct}% (${followup.length} dosen)</strong> perlu persiapan jangka panjang
+                    </div>
+                `;
+            }
+
+            updateCharts(daftarDosen.length, p1.length, p2.length, followup.length);
+        }
+
+        function updateCharts(total, p1, p2, followup) {
+            const piectx = document.getElementById('pieChart');
+            if (!piectx) return;
+            
+            if (pieChart) pieChart.destroy();
+            pieChart = new Chart(piectx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['P1 (Eligible)', 'P2 (Conditional)', 'Follow-up'],
+                    datasets: [{
+                        data: [p1, p2, followup],
+                        backgroundColor: ['#28a745', '#ffc107', '#dc3545'],
+                        borderColor: ['#ffffff', '#ffffff', '#ffffff'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+
+            const barctx = document.getElementById('barChart');
+            if (barChart) barChart.destroy();
+            barChart = new Chart(barctx, {
+                type: 'bar',
+                data: {
+                    labels: ['P1 Eligible', 'P2 Conditional', 'Follow-up'],
+                    datasets: [{
+                        label: 'Jumlah Dosen',
+                        data: [p1, p2, followup],
+                        backgroundColor: ['#28a745', '#ffc107', '#dc3545']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: { legend: { display: false } },
+                    scales: { x: { beginAtZero: true, max: Math.max(total, 10) } }
+                }
+            });
         }
 
         function displayDosenTable() {
-            const daftar = getDaftarLocal();
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
-
-            daftar.forEach((dosen, index) => {
+            daftarDosen.forEach((dosen, i) => {
                 const row = tbody.insertRow();
                 row.innerHTML = `
-                    <td>${index + 1}</td>
+                    <td>${i + 1}</td>
                     <td>${dosen.nidn}</td>
                     <td><strong>${dosen.nama}</strong></td>
+                    <td>${dosen.homebase || '-'}</td>
                     <td>${dosen.jabatan}</td>
                     <td><span class="badge ${dosen.eligibilitas.toLowerCase()}">${dosen.eligibilitas}</span></td>
-                    <td><button class="btn-small" onclick="deleteDosenFirebase('${dosen.id}')">Hapus</button></td>
+                    <td><button class="btn-small btn-secondary" onclick="deleteDosen(${dosen.id})">Hapus</button></td>
                 `;
             });
         }
 
-        async function deleteDosenFirebase(id) {
-            if (!confirm('Yakin hapus?')) return;
+        function displayPerHomebase() {
+            const homebaseMap = {};
+            daftarDosen.forEach(dosen => {
+                const hb = dosen.homebase || 'Tidak Ada Homebase';
+                if (!homebaseMap[hb]) homebaseMap[hb] = [];
+                homebaseMap[hb].push(dosen);
+            });
 
-            // Delete from localStorage
-            let daftar = getDaftarLocal();
-            daftar = daftar.filter(d => d.id != id);
-            localStorage.setItem('daftarDosen', JSON.stringify(daftar));
+            let html = '';
+            for (const [homebase, dosenList] of Object.entries(homebaseMap)) {
+                const p1 = dosenList.filter(d => d.eligibilitas === 'P1').length;
+                const p2 = dosenList.filter(d => d.eligibilitas === 'P2').length;
+                const followup = dosenList.filter(d => d.eligibilitas === 'Follow-up').length;
 
-            // Delete from Firebase
-            if (isOnline && db) {
-                try {
-                    await db.collection("dosen").doc(id).delete();
-                } catch (error) {
-                    console.error("Delete error:", error);
-                }
+                html += `
+                    <div class="homebase-section">
+                        <h4>${homebase} (Total: ${dosenList.length})</h4>
+                        <p style="font-size: 12px; color: #666; margin-bottom: 10px;">
+                            P1: ${p1} | P2: ${p2} | Follow-up: ${followup}
+                        </p>
+                        <table style="font-size: 12px;">
+                            <thead>
+                                <tr>
+                                    <th>Nama</th>
+                                    <th>NIDN</th>
+                                    <th>Jabatan</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${dosenList.map(d => `
+                                    <tr>
+                                        <td>${d.nama}</td>
+                                        <td>${d.nidn}</td>
+                                        <td>${d.jabatan}</td>
+                                        <td><span class="badge ${d.eligibilitas.toLowerCase()}">${d.eligibilitas}</span></td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
             }
 
-            displayDosenTable();
-            updateDashboard();
+            document.getElementById('homebaseContainer').innerHTML = html || '<p>Belum ada data</p>';
+        }
+
+        function displayRecommendations() {
+            const p1 = daftarDosen.filter(d => d.eligibilitas === 'P1');
+            const p2 = daftarDosen.filter(d => d.eligibilitas === 'P2');
+            const followup = daftarDosen.filter(d => d.eligibilitas === 'Follow-up');
+
+            document.getElementById('p1CountRek').textContent = p1.length;
+            document.getElementById('p1RecommendationList').innerHTML = p1.map(d => `
+                <div style="background: white; padding: 10px; margin-bottom: 10px; border-radius: 6px; border-left: 3px solid #28a745;">
+                    <strong>${d.nama}</strong> (${d.nidn})<br>
+                    <small style="color: #666;">Homebase: ${d.homebase || '-'} | Jabatan: ${d.jabatan}</small><br>
+                    <small style="color: #28a745; margin-top: 5px; display: block;"><strong>Aksi:</strong> Siapkan dokumentasi lengkap untuk submit ke KemenDiktistek</small>
+                </div>
+            `).join('') || '<p style="font-size: 12px; color: #999;">Tidak ada dosen P1</p>';
+
+            document.getElementById('p2CountRek').textContent = p2.length;
+            document.getElementById('p2RecommendationList').innerHTML = p2.map(d => `
+                <div style="background: white; padding: 10px; margin-bottom: 10px; border-radius: 6px; border-left: 3px solid #ffc107;">
+                    <strong>${d.nama}</strong> (${d.nidn})<br>
+                    <small style="color: #666;">Homebase: ${d.homebase || '-'} | Jabatan: ${d.jabatan}</small><br>
+                    <small style="color: #856404; margin-top: 5px; display: block;"><strong>Gaps:</strong> ${getGaps(d).join(', ')}</small>
+                    <small style="color: #856404; display: block;"><strong>Deadline:</strong> July-August 2026</small>
+                </div>
+            `).join('') || '<p style="font-size: 12px; color: #999;">Tidak ada dosen P2</p>';
+
+            document.getElementById('followupCountRek').textContent = followup.length;
+            document.getElementById('followupRecommendationList').innerHTML = followup.map(d => `
+                <div style="background: white; padding: 10px; margin-bottom: 10px; border-radius: 6px; border-left: 3px solid #dc3545;">
+                    <strong>${d.nama}</strong> (${d.nidn})<br>
+                    <small style="color: #666;">Homebase: ${d.homebase || '-'} | Jabatan: ${d.jabatan || 'TIDAK ADA JF'}</small><br>
+                    <small style="color: #721c24; margin-top: 5px; display: block;"><strong>Target:</strong> Serdos 2027/2028</small>
+                </div>
+            `).join('') || '<p style="font-size: 12px; color: #999;">Tidak ada dosen Follow-up</p>';
+        }
+
+        function getGaps(dosen) {
+            const gaps = [];
+            if (!dosen.karyaIlmiah || dosen.karyaIlmiah === 'Tidak Ada') gaps.push('Publikasi');
+            if (dosen.pekerti === 'Belum Ada') gaps.push('PEKERTI/AA');
+            if (dosen.lkd !== 'Ada') gaps.push('BKD 4 semester');
+            return gaps.length > 0 ? gaps : ['Minor gaps'];
+        }
+
+        function deleteDosen(id) {
+            if (confirm('Yakin hapus?')) {
+                daftarDosen = daftarDosen.filter(d => d.id !== id);
+                localStorage.setItem('daftarDosen', JSON.stringify(daftarDosen));
+                
+                if (isOnline && db) {
+                    db.collection("dosen").doc(id.toString()).delete().catch(e => console.error(e));
+                }
+                
+                updateUI();
+            }
         }
 
         function filterTable() {
@@ -804,27 +1108,42 @@
             });
         }
 
-        function getDaftarLocal() {
-            const data = localStorage.getItem('daftarDosen');
-            return data ? JSON.parse(data) : [];
+        function switchTab(name) {
+            document.querySelectorAll('.tab-content').forEach(e => e.classList.remove('active'));
+            document.querySelectorAll('.tab-button').forEach(e => e.classList.remove('active'));
+            document.getElementById(name).classList.add('active');
+            event.target.classList.add('active');
         }
 
-        function showAlert(elementId, message, type) {
-            const alert = document.getElementById(elementId);
-            alert.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
-            setTimeout(() => alert.innerHTML = '', 5000);
+        function saveFirebaseConfig() {
+            localStorage.setItem('firebaseApiKey', document.getElementById('apiKey').value);
+            localStorage.setItem('firebaseAuthDomain', document.getElementById('authDomain').value);
+            localStorage.setItem('firebaseProjectId', document.getElementById('projectId').value);
+            localStorage.setItem('firebaseStorageBucket', document.getElementById('storageBucket').value);
+            localStorage.setItem('firebaseMessagingSenderId', document.getElementById('messagingSenderId').value);
+            localStorage.setItem('firebaseAppId', document.getElementById('appId').value);
+            
+            showAlert('settingsAlert', '✅ Config saved! Refreshing...', 'success');
+            setTimeout(() => location.reload(), 1500);
         }
 
-        // Initialize on load
+        function showAlert(id, msg, type) {
+            const el = document.getElementById(id);
+            el.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
+            setTimeout(() => el.innerHTML = '', 5000);
+        }
+
+        // Initialize
         document.addEventListener('DOMContentLoaded', function() {
-            initializeFirebase();
-            updateDashboard();
-            displayDosenTable();
+            initFirebase();
         });
 
-        // Check online status
-        window.addEventListener('online', () => setFirebaseStatus(true));
-        window.addEventListener('offline', () => setFirebaseStatus(false));
+        window.addEventListener('online', () => {
+            setOnlineStatus(true);
+            loadDataFromFirebase();
+        });
+        
+        window.addEventListener('offline', () => setOnlineStatus(false));
     </script>
 </body>
 </html>
