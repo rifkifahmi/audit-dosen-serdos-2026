@@ -528,6 +528,9 @@
         <header>
             <h1>📋 Evaluasi Sertifikasi Dosen (Serdos) 2026</h1>
             <p>Sistem Evaluasi Kelayakan Dosen - Universitas Cordova</p>
+            <div style="background: #d6eaf8; border-left: 4px solid #3498db; padding: 12px; margin-top: 15px; border-radius: 4px; font-size: 13px;">
+                <strong>💾 Data Anda Aman!</strong> Semua data dosen dan evaluasi tersimpan secara lokal di browser Anda dan <strong>tidak akan hilang</strong> meskipun aplikasi diperbarui atau browser ditutup.
+            </div>
         </header>
 
         <!-- TABS -->
@@ -650,10 +653,11 @@
                                     <th>No</th>
                                     <th>Nama Dosen</th>
                                     <th>NIDN</th>
-                                    <th>Masa Kerja</th>
                                     <th>Jabatan</th>
+                                    <th>Masa Kerja</th>
+                                    <th>Program Studi</th>
                                     <th>Status</th>
-                                    <th>Kriteria</th>
+                                    <th>Rekomendasi Naik Level</th>
                                     <th>Aksi</th>
                                 </tr>
                             </thead>
@@ -1030,27 +1034,31 @@
 
             dosenData.forEach((dosen, index) => {
                 const evaluation = evaluateDosen(dosen);
-                const row = document.createElement('tr');
+                const nextLevel = extractJabatan(dosen.jabatan).includes('Asisten Ahli') ? 'Lektor' : 
+                                  (extractJabatan(dosen.jabatan).includes('Lektor') && !extractJabatan(dosen.jabatan).includes('Kepala') ? 'Lektor Kepala' : 'Sudah Tingkat Tertinggi');
                 
-                let criteriaHtml = '';
-                for (let i = 1; i <= 7; i++) {
-                    const crit = evaluation.criteria[i];
-                    let className = crit.pass ? 'pass' : (crit.pending ? 'pending' : 'fail');
-                    let symbol = crit.pass ? '✓' : (crit.pending ? '?' : '✗');
-                    criteriaHtml += `<span class="criteria-badge ${className}" title="${crit.label}">${symbol}</span>`;
+                let recommendationText = '';
+                if (nextLevel === 'Lektor') {
+                    recommendationText = evaluation.status === 'eligible' ? '✓ Siap naik ke Lektor' : '⚠️ Perlu lengkapi kriteria';
+                } else if (nextLevel === 'Lektor Kepala') {
+                    recommendationText = '⚠️ Perluas publikasi & pengabdian';
+                } else {
+                    recommendationText = '🎓 Pertahankan posisi';
                 }
 
+                const row = document.createElement('tr');
+                
                 row.innerHTML = `
                     <td>${index + 1}</td>
                     <td><strong>${dosen.nama}</strong></td>
                     <td>${dosen.nidn || '-'}</td>
+                    <td>${extractJabatan(dosen.jabatan)}</td>
                     <td>${dosen.masaKerja}</td>
-                    <td>${dosen.jabatan}</td>
+                    <td style="font-size: 12px;">${extractProdi(dosen.homebase)}</td>
                     <td><span class="status-badge status-${evaluation.status}">${getStatusLabel(evaluation.status)}</span></td>
-                    <td style="text-align: center;">${criteriaHtml}</td>
+                    <td style="font-size: 12px; max-width: 150px;">${recommendationText}</td>
                     <td class="action-buttons">
                         <button class="btn-primary" onclick="showDetail('${dosen.nidn}')">Detail</button>
-                        <button class="btn-secondary" onclick="editData('${dosen.nidn}')">Edit</button>
                     </td>
                 `;
                 tbody.appendChild(row);
@@ -1093,6 +1101,7 @@
         function showDetail(nidn) {
             const dosen = dosenData.find(d => d.nidn === nidn);
             const evaluation = evaluateDosen(dosen);
+            const recommendation = generateRecommendation(dosen, evaluation);
 
             let criteriaHtml = '';
             for (let i = 1; i <= 7; i++) {
@@ -1122,22 +1131,25 @@
                 </div>
 
                 <div style="background: #f9f9f9; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
-                    <strong>Jabatan:</strong> ${dosen.jabatan}<br>
+                    <strong>Jabatan:</strong> ${extractJabatan(dosen.jabatan)}<br>
                     <strong>Masa Kerja:</strong> ${dosen.masaKerja}<br>
+                    <strong>Program Studi:</strong> ${extractProdi(dosen.homebase)}<br>
                     <strong>Pendidikan:</strong> ${dosen.pendidikan}
                 </div>
 
-                <h4 style="color: #2c3e50; margin-bottom: 15px;">Hasil Evaluasi 7 Kriteria:</h4>
+                <h4 style="color: #2c3e50; margin-bottom: 15px;">Hasil Evaluasi 7 Kriteria Sertifikasi Dosen:</h4>
                 <div class="criteria-list">
                     ${criteriaHtml}
                 </div>
 
-                <div style="background: ${getStatusColor(evaluation.status)}20; border-left: 4px solid ${getStatusColor(evaluation.status)}; padding: 15px; border-radius: 4px; margin-top: 20px;">
-                    <strong style="color: ${getStatusColor(evaluation.status)};">Status: ${getStatusLabel(evaluation.status)}</strong>
+                <div style="background: ${getStatusColor(evaluation.status)}20; border-left: 4px solid ${getStatusColor(evaluation.status)}; padding: 15px; border-radius: 4px; margin-top: 20px; margin-bottom: 20px;">
+                    <strong style="color: ${getStatusColor(evaluation.status)};">Status Serdos 2026: ${getStatusLabel(evaluation.status)}</strong>
                     <p style="font-size: 13px; color: #7f8c8d; margin-top: 5px;">
                         Memenuhi ${evaluation.passCount}/7 kriteria ${evaluation.pendingCount > 0 ? `(${evaluation.pendingCount} perlu data)` : ''}
                     </p>
                 </div>
+
+                ${recommendation}
             `;
 
             document.getElementById('modalTitle').textContent = `Detail Evaluasi - ${dosen.nama}`;
@@ -1164,6 +1176,94 @@
                 'pending': '#f39c12'
             };
             return colors[status] || '#95a5a6';
+        }
+
+        // Generate Rekomendasi Naik Level
+        function generateRecommendation(dosen, evaluation) {
+            const jabatan = extractJabatan(dosen.jabatan);
+            let recommendation = '';
+            let nextLevel = '';
+            let requirements = [];
+
+            if (jabatan.includes('Asisten Ahli') || jabatan === 'Asisten Ahli') {
+                nextLevel = 'Lektor';
+                
+                // Cek kriteria naik ke Lektor
+                if (evaluation.status !== 'eligible') {
+                    requirements.push('✗ Belum eligible untuk Serdos 2026');
+                }
+                
+                const masaKerja = parseMasaKerja(dosen.masaKerja);
+                if (masaKerja < 5) {
+                    requirements.push(`✗ Masa kerja ${masaKerja} tahun (butuh minimal 5 tahun)`);
+                } else {
+                    requirements.push(`✓ Masa kerja ${masaKerja} tahun (memenuhi)`);
+                }
+
+                const publikasiCount = publikasiData[dosen.nidn] && publikasiData[dosen.nidn].publikasi === 'ya' ? 1 : 0;
+                if (publikasiCount < 2) {
+                    requirements.push(`✗ Publikasi hanya ${publikasiCount} (butuh minimal 2-3 publikasi)`);
+                } else {
+                    requirements.push(`✓ Sudah memiliki publikasi`);
+                }
+
+                if (evaluation.criteria[5].pass) {
+                    requirements.push('✓ BKD 4 semester lengkap');
+                } else {
+                    requirements.push('✗ BKD 4 semester belum lengkap');
+                }
+
+                recommendation = `
+                    <div style="background: #e8f8f5; border-left: 4px solid #27ae60; padding: 15px; border-radius: 4px; margin-top: 15px;">
+                        <h4 style="color: #27ae60; margin-bottom: 10px;">📈 Rencana Naik Level: ${jabatan} → ${nextLevel}</h4>
+                        <p style="font-size: 13px; color: #2c3e50; margin-bottom: 10px;">Persyaratan yang harus dipenuhi:</p>
+                        <div style="font-size: 13px; color: #2c3e50;">
+                            ${requirements.map(req => `<p style="margin: 5px 0;">${req}</p>`).join('')}
+                        </div>
+                    </div>
+                `;
+            } else if (jabatan.includes('Lektor') && !jabatan.includes('Kepala')) {
+                nextLevel = 'Lektor Kepala';
+                
+                requirements.push('✓ Sudah memiliki jabatan Lektor');
+                
+                const masaKerja = parseMasaKerja(dosen.masaKerja);
+                if (masaKerja < 7) {
+                    requirements.push(`✗ Masa kerja ${masaKerja} tahun (butuh minimal 7 tahun)`);
+                } else {
+                    requirements.push(`✓ Masa kerja ${masaKerja} tahun (memenuhi)`);
+                }
+
+                requirements.push('⚠️ Publikasi minimal 5+ artikel (periksa akumulasi Anda)');
+                requirements.push('⚠️ Pengabdian masyarakat/penelitian aktif');
+                requirements.push('⚠️ Kepemimpinan atau tugas administrasi');
+
+                recommendation = `
+                    <div style="background: #fef5e7; border-left: 4px solid #f39c12; padding: 15px; border-radius: 4px; margin-top: 15px;">
+                        <h4 style="color: #d68910; margin-bottom: 10px;">📈 Rencana Naik Level: ${jabatan} → ${nextLevel}</h4>
+                        <p style="font-size: 13px; color: #2c3e50; margin-bottom: 10px;">Persyaratan yang harus dipenuhi:</p>
+                        <div style="font-size: 13px; color: #2c3e50;">
+                            ${requirements.map(req => `<p style="margin: 5px 0;">${req}</p>`).join('')}
+                        </div>
+                    </div>
+                `;
+            } else if (jabatan.includes('Lektor Kepala')) {
+                recommendation = `
+                    <div style="background: #f4ecf7; border-left: 4px solid #8e44ad; padding: 15px; border-radius: 4px; margin-top: 15px;">
+                        <h4 style="color: #8e44ad; margin-bottom: 10px;">🎓 Status: Lektor Kepala</h4>
+                        <p style="font-size: 13px; color: #2c3e50;">Anda sudah mencapai posisi Lektor Kepala. Pertahankan dan tingkatkan kontribusi akademik, penelitian, dan pengabdian masyarakat untuk aspirasi lebih lanjut.</p>
+                    </div>
+                `;
+            } else if (jabatan === 'Belum ada Jabatan' || jabatan === '') {
+                recommendation = `
+                    <div style="background: #fadbd8; border-left: 4px solid #e74c3c; padding: 15px; border-radius: 4px; margin-top: 15px;">
+                        <h4 style="color: #e74c3c; margin-bottom: 10px;">⚠️ Belum Memiliki Jabatan Fungsional</h4>
+                        <p style="font-size: 13px; color: #2c3e50;">Segera ajukan untuk mendapatkan jabatan fungsional (minimal Asisten Ahli) sesuai dengan persyaratan dan kualifikasi akademik Anda.</p>
+                    </div>
+                `;
+            }
+
+            return recommendation;
         }
 
         function closeModal() {
@@ -1518,15 +1618,29 @@
             const workbook = XLSX.utils.book_new();
             const data = [];
 
-            data.push(['EVALUASI SERTIFIKASI DOSEN (SERDOS) 2026', '', '', '', '', '', '', '']);
-            data.push(['Universitas Cordova', '', '', '', '', '', '', '']);
+            data.push(['EVALUASI SERTIFIKASI DOSEN (SERDOS) 2026', '', '', '', '', '', '', '', '']);
+            data.push(['Universitas Cordova', '', '', '', '', '', '', '', '']);
             data.push(['']);
-            data.push(['No', 'Nama Dosen', 'NIDN', 'Jabatan', 'Masa Kerja', 'Status', 'Kriteria Terpenuhi', 'Alasan']);
+            data.push(['No', 'Nama Dosen', 'NIDN', 'Jabatan', 'Masa Kerja', 'Program Studi', 'Status Serdos', 'Kriteria Terpenuhi', 'Rekomendasi Naik Level', 'Action Plan']);
 
             dosenData.forEach((dosen, index) => {
                 const evaluation = evaluateDosen(dosen);
-                const alasan = [];
+                const jabatan = extractJabatan(dosen.jabatan);
+                const recommendation = generateRecommendation(dosen, evaluation);
                 
+                // Extract rekomendasi text
+                let rekomendasiText = '';
+                if (jabatan.includes('Asisten Ahli')) {
+                    rekomendasiText = evaluation.status === 'eligible' ? 'Siap naik ke Lektor' : 'Perlu lengkapi kriteria Serdos';
+                } else if (jabatan.includes('Lektor') && !jabatan.includes('Kepala')) {
+                    rekomendasiText = 'Perluas publikasi dan pengabdian masyarakat untuk naik ke Lektor Kepala';
+                } else if (jabatan.includes('Lektor Kepala')) {
+                    rekomendasiText = 'Pertahankan dan tingkatkan kontribusi akademik';
+                } else {
+                    rekomendasiText = 'Segera ajukan jabatan fungsional';
+                }
+
+                const alasan = [];
                 for (let i = 1; i <= 7; i++) {
                     const crit = evaluation.criteria[i];
                     if (!crit.pass) {
@@ -1534,15 +1648,25 @@
                     }
                 }
 
+                const actionPlan = [];
+                if (evaluation.status !== 'eligible') {
+                    if (!evaluation.criteria[4].pass) actionPlan.push('Ikuti program PEKERTI/AA');
+                    if (!evaluation.criteria[5].pass) actionPlan.push('Lengkapi laporan BKD');
+                    if (!evaluation.criteria[6].pass) actionPlan.push('Tingkatkan publikasi ilmiah');
+                }
+                if (evaluation.pendingCount > 0) actionPlan.push('Lengkapi data publikasi dan status tugas belajar');
+
                 data.push([
                     index + 1,
                     dosen.nama,
                     dosen.nidn,
-                    dosen.jabatan,
+                    jabatan,
                     dosen.masaKerja,
+                    extractProdi(dosen.homebase),
                     getStatusLabel(evaluation.status),
                     `${evaluation.passCount}/7`,
-                    alasan.join('\n')
+                    rekomendasiText,
+                    actionPlan.length > 0 ? actionPlan.join(', ') : 'Tetap pertahankan pencapaian'
                 ]);
             });
 
@@ -1553,9 +1677,11 @@
                 { wch: 12 },
                 { wch: 18 },
                 { wch: 15 },
+                { wch: 25 },
                 { wch: 15 },
                 { wch: 15 },
-                { wch: 35 }
+                { wch: 30 },
+                { wch: 40 }
             ];
 
             XLSX.utils.book_append_sheet(workbook, worksheet, 'Evaluasi Serdos');
