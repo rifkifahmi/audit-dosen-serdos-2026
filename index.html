@@ -808,56 +808,121 @@
                     </div>
 
                     <div style="background: #fff3cd; padding: 15px; border-radius: 4px; margin-bottom: 15px; border-left: 4px solid #ffc107;">
-                        <p style="font-weight: 600; margin-bottom: 10px; color: #856404;">⚙️ Kode Google Apps Script:</p>
-                        <textarea id="scriptCode" style="width: 100%; height: 300px; padding: 10px; border: 1px solid #bdc3c7; border-radius: 4px; font-family: monospace; font-size: 11px; background: white;" readonly>function doPost(e) {
-  const sheet = SpreadsheetApp.getActiveSheet();
-  const data = JSON.parse(e.postData.contents);
-  
-  // Clear existing data
-  sheet.clearContents();
-  
-  // Add headers
-  const headers = ['No', 'Nama Dosen', 'NIDN', 'Jabatan', 'Masa Kerja', 'Program Studi', 'Status Evaluasi', 'Rekomendasi', 'Publikasi', 'Tugas Belajar'];
-  sheet.appendRow(headers);
-  
-  // Add data
-  data.forEach((row, index) => {
-    sheet.appendRow([
-      index + 1,
-      row.nama,
-      row.nidn,
-      row.jabatan,
-      row.masaKerja,
-      row.prodi,
-      row.status,
-      row.rekomendasi,
-      row.publikasi,
-      row.tugas
-    ]);
-  });
-  
-  return ContentService.createTextOutput(JSON.stringify({success: true, count: data.length}))
-    .setMimeType(ContentService.MimeType.JSON);
+                        <p style="font-weight: 600; margin-bottom: 10px; color: #856404;">📋 CARA COPY KODE (PENTING!):</p>
+                        <ol style="font-size: 12px; color: #2c3e50; line-height: 2;">
+                            <li>Klik tombol <strong>"📋 Copy Kode"</strong> di bawah</li>
+                            <li>Klik di dalam textarea kode (area putih)</li>
+                            <li>Tekan <strong>Ctrl+A</strong> untuk select semua</li>
+                            <li>Tekan <strong>Ctrl+C</strong> untuk copy</li>
+                            <li>Buka Google Apps Script editor di tab lain</li>
+                            <li>Delete semua kode yang ada (Ctrl+A → Delete)</li>
+                            <li>Paste kode baru (Ctrl+V)</li>
+                            <li>Tekan <strong>Ctrl+S</strong> untuk save</li>
+                        </ol>
+                    </div>
+
+                        <p style="font-weight: 600; margin-bottom: 10px; color: #856404;">⚙️ Kode Google Apps Script (LENGKAP - COPY SEMUA):</p>
+                        <textarea id="scriptCode" style="width: 100%; height: 500px; padding: 10px; border: 1px solid #bdc3c7; border-radius: 4px; font-family: monospace; font-size: 10px; background: #f5f5f5; line-height: 1.4;" readonly>function doPost(e) {
+  try {
+    const sheet = SpreadsheetApp.getActiveSheet();
+    const rawData = e.postData.contents;
+    
+    let data = JSON.parse(rawData);
+    
+    if (!Array.isArray(data)) {
+      return ContentService.createTextOutput(JSON.stringify({
+        success: false,
+        error: 'Data harus berupa array'
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    sheet.clearContents();
+    
+    const headers = ['No', 'Nama Dosen', 'NIDN', 'Jabatan', 'Masa Kerja', 'Program Studi', 'Status Evaluasi', 'Rekomendasi', 'Publikasi', 'Tugas Belajar'];
+    sheet.appendRow(headers);
+    
+    const headerRange = sheet.getRange(1, 1, 1, headers.length);
+    headerRange.setBackground('#3498db');
+    headerRange.setFontColor('#ffffff');
+    headerRange.setFontWeight('bold');
+    
+    let rowCount = 0;
+    data.forEach((row, index) => {
+      sheet.appendRow([
+        index + 1,
+        row.nama || '',
+        row.nidn || '',
+        row.jabatan || '',
+        row.masaKerja || '',
+        row.prodi || '',
+        row.status || '',
+        row.rekomendasi || '',
+        row.publikasi || '',
+        row.tugas || ''
+      ]);
+      rowCount++;
+    });
+    
+    try {
+      sheet.autoResizeColumns(1, headers.length);
+    } catch(e) {}
+    
+    return ContentService.createTextOutput(JSON.stringify({
+      success: true,
+      count: rowCount,
+      total: data.length,
+      message: rowCount + ' data berhasil disimpan',
+      timestamp: new Date().toLocaleString('id-ID')
+    })).setMimeType(ContentService.MimeType.JSON);
+    
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({
+      success: false,
+      error: error.toString(),
+      message: 'Error: ' + error.message
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
 }
 
 function doGet(e) {
-  return ContentService.createTextOutput(JSON.stringify({status: 'Apps Script ready'}))
-    .setMimeType(ContentService.MimeType.JSON);
+  return ContentService.createTextOutput(JSON.stringify({
+    status: 'ready',
+    message: 'Google Apps Script siap menerima data',
+    timestamp: new Date().toLocaleString('id-ID')
+  })).setMimeType(ContentService.MimeType.JSON);
 }</textarea>
-                        <button class="btn-secondary" onclick="copyScriptCode()" style="margin-top: 10px;">📋 Copy Kode</button>
-                    </div>
+                        <button class="btn-secondary" onclick="copyScriptCode()" style="margin-top: 10px; width: 100%;">📋 COPY SEMUA KODE (Click ini!)</button>
 
-                    <div style="background: white; padding: 15px; border-radius: 4px;">
-                        <p style="font-weight: 600; margin-bottom: 10px;">STEP 3: Input URL ke Aplikasi</p>
-                        <ol style="font-size: 13px; color: #2c3e50; line-height: 1.8;">
-                            <li>Copy URL dari Google Apps Script deployment</li>
-                            <li>Paste ke field "URL Google Apps Script" di atas</li>
-                            <li>Klik "Test Koneksi" untuk verifikasi</li>
-                            <li>Klik "Sinkronisasi Data" untuk mulai</li>
-                        </ol>
+                    <div style="background: #fff3cd; padding: 15px; border-radius: 4px; margin-top: 30px; border-left: 4px solid #ffc107;">
+                        <p style="font-weight: 600; margin-bottom: 10px; color: #856404;">❓ Troubleshooting Jika Ada Error</p>
+                        <div style="font-size: 12px; color: #2c3e50; line-height: 1.8;">
+                            <p><strong>Error: "Authorization required"</strong></p>
+                            <ul style="margin-left: 20px;">
+                                <li>→ Di Apps Script editor, klik tombol "Run" untuk authorize</li>
+                                <li>→ Pilih akun Google Anda</li>
+                                <li>→ Klik "Allow"</li>
+                            </ul>
+                            
+                            <p style="margin-top: 10px;"><strong>Error: "Exceeds size limit"</strong></p>
+                            <ul style="margin-left: 20px;">
+                                <li>→ Data terlalu besar untuk satu kali upload</li>
+                                <li>→ Bagi data menjadi beberapa batch (max ~500 dosen per upload)</li>
+                            </ul>
+                            
+                            <p style="margin-top: 10px;"><strong>Error: "Cannot find method clearContents"</strong></p>
+                            <ul style="margin-left: 20px;">
+                                <li>→ Ini adalah error versi Apps Script</li>
+                                <li>→ Ganti "clearContents()" dengan "clear()"</li>
+                            </ul>
+                            
+                            <p style="margin-top: 10px;"><strong>Koneksi timeout / blank response</strong></p>
+                            <ul style="margin-left: 20px;">
+                                <li>→ Refresh page dan coba lagi</li>
+                                <li>→ Cek apakah Apps Script masih aktif (jangan dihapus)</li>
+                                <li>→ Deploy hanya sekali (jangan multiple deploy)</li>
+                            </ul>
+                        </div>
                     </div>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -1648,7 +1713,7 @@ function doGet(e) {
                 // Generate rekomendasi text
                 let rekomendasi = '';
                 if (jabatan.includes('Asisten Ahli')) {
-                    rekomendasi = evaluation.status === 'eligible' ? 'Siap naik ke Lektor' : 'Lengkapi kriteria Serdos';
+                    rekomendasi = evaluation.status === 'eligible' ? 'Siap naik ke Lektor' : 'Lengkapi kriteria evaluasi';
                 } else if (jabatan.includes('Lektor') && !jabatan.includes('Kepala')) {
                     rekomendasi = 'Perluas publikasi untuk naik Lektor Kepala';
                 } else {
@@ -1673,20 +1738,35 @@ function doGet(e) {
                 method: 'POST',
                 body: JSON.stringify(dataToSync)
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.success) {
-                    statusDiv.innerHTML = `<div class="alert alert-success">✅ Sinkronisasi berhasil!<br>${data.count} data dosen berhasil disimpan ke Google Sheets.<br><br>Silakan buka Google Sheet Anda untuk verifikasi.</div>`;
+                    statusDiv.innerHTML = `<div class="alert alert-success">✅ Sinkronisasi berhasil!<br>${data.message}<br>Jumlah data: ${data.count}/${data.total}<br>Waktu: ${data.timestamp}<br><br>Silakan buka Google Sheet Anda untuk verifikasi.</div>`;
                     // Save last sync time
-                    const now = new Date().toLocaleString('id-ID');
-                    localStorage.setItem('lastSyncTime', now);
+                    localStorage.setItem('lastSyncTime', data.timestamp);
                     alert('✓ ' + data.count + ' dosen berhasil disinkronisasi ke Google Sheets!');
                 } else {
-                    throw new Error('Response tidak valid');
+                    throw new Error(data.message || 'Response tidak valid');
                 }
             })
             .catch(error => {
-                statusDiv.innerHTML = `<div class="alert" style="background: #fadbd8; border-left: 4px solid #e74c3c; color: #a93226; padding: 12px; border-radius: 4px;">❌ Sinkronisasi gagal: ${error.message}<br><br>Coba:<br>1. Verifikasi URL Apps Script<br>2. Pastikan Google Sheet ter-share dengan Apps Script<br>3. Coba test koneksi dulu sebelum sinkronisasi</div>`;
+                console.error('Sync error:', error);
+                statusDiv.innerHTML = `<div class="alert" style="background: #fadbd8; border-left: 4px solid #e74c3c; color: #a93226; padding: 12px; border-radius: 4px;">
+                    ❌ Sinkronisasi gagal!<br><br>
+                    <strong>Error:</strong> ${error.message}<br><br>
+                    <strong>Solusi:</strong><br>
+                    1. Verifikasi URL Apps Script benar (copy-paste exact)<br>
+                    2. Pastikan "Who has access" diset ke "Anyone"<br>
+                    3. Coba "Test Koneksi" dulu sebelum sinkronisasi<br>
+                    4. Refresh halaman dan coba lagi<br>
+                    5. Buka browser Console (F12) untuk detail error<br><br>
+                    <strong>Catatan:</strong> Data tetap aman di localStorage aplikasi ini
+                </div>`;
             });
         }
 
