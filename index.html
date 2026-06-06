@@ -582,12 +582,48 @@
             <div class="input-section">
                 <h3>📥 Impor Data Dosen</h3>
                 <p style="color: #7f8c8d; margin-bottom: 15px; font-size: 13px;">
-                    Copy-paste seluruh tabel dari Google Sheets (termasuk header) ke box di bawah:
+                    Pilih salah satu cara import:
                 </p>
-                <textarea id="dataInput" placeholder="Paste data dari spreadsheet di sini..." style="width: 100%; height: 200px; padding: 15px; border: 2px dashed #3498db; border-radius: 4px; font-family: monospace; font-size: 12px;"></textarea>
-                <div class="button-group">
-                    <button class="btn-primary" onclick="importData()">📤 Impor Data</button>
-                    <button class="btn-secondary" onclick="clearAllData()">🗑️ Hapus Semua Data</button>
+
+                <!-- TAB UPLOAD FILE vs PASTE -->
+                <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #ecf0f1; padding-bottom: 10px;">
+                    <button id="tabUpload" class="tab-btn" style="border-bottom: 3px solid #3498db; color: #3498db;" onclick="switchImportTab('upload')">📁 Upload File</button>
+                    <button id="tabPaste" class="tab-btn" onclick="switchImportTab('paste')">📋 Copy-Paste</button>
+                </div>
+
+                <!-- UPLOAD FILE TAB -->
+                <div id="uploadTab" style="display: block;">
+                    <div style="background: #f0fdf4; border: 2px dashed #27ae60; border-radius: 8px; padding: 40px; text-align: center; margin-bottom: 20px;">
+                        <div style="font-size: 36px; margin-bottom: 10px;">📊</div>
+                        <p style="color: #2c3e50; font-weight: 500; margin-bottom: 10px;">Upload File Excel atau CSV</p>
+                        <p style="color: #7f8c8d; font-size: 13px; margin-bottom: 20px;">Support format: .xlsx, .xls, .csv</p>
+                        <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display: none;">
+                        <button class="btn-success" style="padding: 15px 30px; font-size: 15px;" onclick="document.getElementById('fileInput').click()">
+                            🖱️ Pilih File atau Drag & Drop
+                        </button>
+                        <p style="color: #7f8c8d; font-size: 12px; margin-top: 15px;">
+                            Tips: Export spreadsheet Google Sheets Anda sebagai Excel (.xlsx) terlebih dahulu
+                        </p>
+                    </div>
+                    <div id="fileNameDisplay" style="color: #27ae60; font-weight: 500; margin-bottom: 15px; display: none;">
+                        ✓ File dipilih: <span id="fileName"></span>
+                    </div>
+                    <div class="button-group">
+                        <button class="btn-primary" id="importFileBtn" onclick="importDataFromFile()" style="display: none;">📤 Impor Data dari File</button>
+                        <button class="btn-secondary" onclick="clearAllData()">🗑️ Hapus Semua Data</button>
+                    </div>
+                </div>
+
+                <!-- PASTE TAB -->
+                <div id="pasteTab" style="display: none;">
+                    <p style="color: #7f8c8d; margin-bottom: 15px; font-size: 13px;">
+                        Copy seluruh tabel dari Google Sheets (termasuk header) dan paste di bawah:
+                    </p>
+                    <textarea id="dataInput" placeholder="Paste data dari spreadsheet di sini..." style="width: 100%; height: 200px; padding: 15px; border: 2px dashed #3498db; border-radius: 4px; font-family: monospace; font-size: 12px;"></textarea>
+                    <div class="button-group">
+                        <button class="btn-primary" onclick="importData()">📤 Impor Data</button>
+                        <button class="btn-secondary" onclick="clearAllData()">🗑️ Hapus Semua Data</button>
+                    </div>
                 </div>
             </div>
 
@@ -739,7 +775,177 @@
             event.target.classList.add('active');
         }
 
-        // Import Data
+        // Import Tab Switch
+        function switchImportTab(tab) {
+            if (tab === 'upload') {
+                document.getElementById('uploadTab').style.display = 'block';
+                document.getElementById('pasteTab').style.display = 'none';
+                document.getElementById('tabUpload').style.borderBottomColor = '#3498db';
+                document.getElementById('tabUpload').style.color = '#3498db';
+                document.getElementById('tabPaste').style.borderBottomColor = 'transparent';
+                document.getElementById('tabPaste').style.color = '#7f8c8d';
+            } else {
+                document.getElementById('uploadTab').style.display = 'none';
+                document.getElementById('pasteTab').style.display = 'block';
+                document.getElementById('tabUpload').style.borderBottomColor = 'transparent';
+                document.getElementById('tabUpload').style.color = '#7f8c8d';
+                document.getElementById('tabPaste').style.borderBottomColor = '#3498db';
+                document.getElementById('tabPaste').style.color = '#3498db';
+            }
+        }
+
+        // File Input Handler
+        document.addEventListener('DOMContentLoaded', function() {
+            const fileInput = document.getElementById('fileInput');
+            
+            // Handle file selection
+            fileInput.addEventListener('change', function(e) {
+                if (e.target.files.length > 0) {
+                    const fileName = e.target.files[0].name;
+                    document.getElementById('fileName').textContent = fileName;
+                    document.getElementById('fileNameDisplay').style.display = 'block';
+                    document.getElementById('importFileBtn').style.display = 'inline-block';
+                }
+            });
+
+            // Handle drag & drop
+            const uploadArea = document.querySelector('#uploadTab > div:first-child');
+            
+            uploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                uploadArea.style.background = '#c8e6c9';
+                uploadArea.style.borderColor = '#1b5e20';
+            });
+
+            uploadArea.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                uploadArea.style.background = '#f0fdf4';
+                uploadArea.style.borderColor = '#27ae60';
+            });
+
+            uploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                uploadArea.style.background = '#f0fdf4';
+                uploadArea.style.borderColor = '#27ae60';
+                
+                if (e.dataTransfer.files.length > 0) {
+                    fileInput.files = e.dataTransfer.files;
+                    const event = new Event('change', { bubbles: true });
+                    fileInput.dispatchEvent(event);
+                }
+            });
+        });
+
+        // Import Data from File
+        function importDataFromFile() {
+            const fileInput = document.getElementById('fileInput');
+            
+            if (!fileInput.files || fileInput.files.length === 0) {
+                alert('Silakan pilih file terlebih dahulu!');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                try {
+                    const data = e.target.result;
+                    let workbook;
+
+                    // Handle Excel files
+                    if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+                        workbook = XLSX.read(data, { type: 'binary' });
+                        const sheetName = workbook.SheetNames[0];
+                        const worksheet = workbook.Sheets[sheetName];
+                        const rows = XLSX.utils.sheet_to_json(worksheet);
+                        
+                        parseImportedData(rows);
+                    } 
+                    // Handle CSV files
+                    else if (file.name.endsWith('.csv')) {
+                        const text = new TextDecoder().decode(new Uint8Array(data));
+                        const lines = text.split('\n').map(line => line.trim()).filter(line => line);
+                        const headers = lines[0].split(',').map(h => h.trim());
+                        
+                        const rows = [];
+                        for (let i = 1; i < lines.length; i++) {
+                            const values = lines[i].split(',').map(v => v.trim());
+                            if (values[0]) {
+                                const obj = {};
+                                headers.forEach((header, idx) => {
+                                    obj[header] = values[idx] || '';
+                                });
+                                rows.push(obj);
+                            }
+                        }
+                        
+                        parseImportedData(rows);
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('❌ Gagal membaca file. Pastikan format file benar.\n\nPastikan:\n1. File adalah Excel (.xlsx/.xls) atau CSV\n2. Baris pertama adalah header (Nama, NIDN, Jabatan, dll)\n3. File tidak kosong\n\nError: ' + error.message);
+                }
+            };
+
+            reader.onerror = function() {
+                alert('❌ Gagal membaca file. Coba lagi.');
+            };
+
+            // Read file based on type
+            if (file.name.endsWith('.csv')) {
+                reader.readAsArrayBuffer(file);
+            } else {
+                reader.readAsBinaryString(file);
+            }
+        }
+
+        // Parse Imported Data
+        function parseImportedData(rows) {
+            dosenData = [];
+
+            rows.forEach(row => {
+                // Map CSV/Excel columns to data structure
+                // Column headers might be: Nama, NIDN, Jabatan Fungsional, Masa Kerja, BKD 4 Semester, PEKERTI/AA, Publikasi, Homebase, Pendidikan, Status
+                
+                const nama = row['Nama'] || row['nama'] || '';
+                if (nama.trim()) {
+                    dosenData.push({
+                        nama: nama.trim(),
+                        nidn: (row['NIDN'] || row['nidn'] || '').trim(),
+                        jabatan: (row['Jabatan Fungsional'] || row['jabatan'] || row['Jabatan'] || '').trim(),
+                        masaKerja: (row['Masa Kerja'] || row['masa_kerja'] || '').trim(),
+                        bkd: (row['BKD 4 Semester'] || row['BKD'] || row['bkd'] || '').trim(),
+                        pekerti: (row['PEKERTI/AA'] || row['PEKERTI'] || row['pekerti'] || '').trim(),
+                        publikasi: (row['Publikasi'] || row['publikasi'] || '').trim(),
+                        homebase: (row['Homebase'] || row['homebase'] || '').trim(),
+                        pendidikan: (row['Pendidikan'] || row['pendidikan'] || '').trim(),
+                        status: (row['Status'] || row['status'] || '').trim()
+                    });
+                }
+            });
+
+            if (dosenData.length === 0) {
+                alert('❌ Tidak ada data yang ditemukan. Periksa kembali format file.');
+                return;
+            }
+
+            localStorage.setItem('dosenData', JSON.stringify(dosenData));
+            document.getElementById('fileInput').value = '';
+            document.getElementById('fileNameDisplay').style.display = 'none';
+            document.getElementById('importFileBtn').style.display = 'none';
+            
+            displayResults();
+            updateDashboard();
+            updateSelectDosen();
+            
+            alert(`✅ ${dosenData.length} dosen berhasil diimpor dari file!`);
+            
+            // Switch to data tab
+            switchTab('data');
+        }
+
+        // Import Data (Paste Mode)
         function importData() {
             const input = document.getElementById('dataInput').value.trim();
             if (!input) {
@@ -748,25 +954,36 @@
             }
 
             const lines = input.split('\n').map(line => line.trim()).filter(line => line);
-            const headers = lines[0].split('\t');
+            
+            if (lines.length < 2) {
+                alert('❌ Data tidak valid. Pastikan Anda copy termasuk header dan minimal 1 baris data.');
+                return;
+            }
+
+            const headers = lines[0].split('\t').map(h => h.trim());
             
             dosenData = [];
             for (let i = 1; i < lines.length; i++) {
-                const values = lines[i].split('\t');
-                if (values[0].trim()) { // Check if name is not empty
+                const values = lines[i].split('\t').map(v => v.trim());
+                if (values[0]) { // Check if name is not empty
                     dosenData.push({
-                        nama: values[0].trim(),
-                        nidn: values[1].trim(),
-                        jabatan: values[2].trim(),
-                        masaKerja: values[3].trim(),
-                        bkd: values[4].trim(),
-                        pekerti: values[5].trim(),
-                        publikasi: values[6].trim(),
-                        homebase: values[7].trim(),
-                        pendidikan: values[8].trim(),
-                        status: values[9].trim()
+                        nama: values[0] || '',
+                        nidn: values[1] || '',
+                        jabatan: values[2] || '',
+                        masaKerja: values[3] || '',
+                        bkd: values[4] || '',
+                        pekerti: values[5] || '',
+                        publikasi: values[6] || '',
+                        homebase: values[7] || '',
+                        pendidikan: values[8] || '',
+                        status: values[9] || ''
                     });
                 }
+            }
+
+            if (dosenData.length === 0) {
+                alert('❌ Tidak ada data yang ditemukan. Pastikan Anda copy termasuk baris data (bukan hanya header).');
+                return;
             }
 
             localStorage.setItem('dosenData', JSON.stringify(dosenData));
@@ -775,7 +992,8 @@
             updateDashboard();
             updateSelectDosen();
             
-            alert(`✓ ${dosenData.length} dosen berhasil diimpor!`);
+            alert(`✅ ${dosenData.length} dosen berhasil diimpor!`);
+            switchTab('data');
         }
 
         // Evaluation Logic
