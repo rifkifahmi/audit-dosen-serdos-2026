@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Evaluasi Sertifikasi Dosen (Serdos) 2026</title>
+    <title>Audit & Evaluasi Dosen - Universitas Cordova</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <style>
@@ -526,8 +526,8 @@
     <div class="container">
         <!-- HEADER -->
         <header>
-            <h1>📋 Evaluasi Sertifikasi Dosen (Serdos) 2026</h1>
-            <p>Sistem Evaluasi Kelayakan Dosen - Universitas Cordova</p>
+            <h1>🎓 Audit & Evaluasi Dosen</h1>
+            <p>Sistem Penilaian Komprehensif Dosen - Universitas Cordova</p>
             <div style="background: #d6eaf8; border-left: 4px solid #3498db; padding: 12px; margin-top: 15px; border-radius: 4px; font-size: 13px;">
                 <strong>💾 Data Anda Aman!</strong> Semua data dosen dan evaluasi tersimpan secara lokal di browser Anda dan <strong>tidak akan hilang</strong> meskipun aplikasi diperbarui atau browser ditutup.
             </div>
@@ -746,7 +746,7 @@
             <div class="input-section">
                 <h3>☁️ Sinkronisasi Data ke Google Sheets</h3>
                 <p style="color: #7f8c8d; margin-bottom: 15px; font-size: 13px;">
-                    Simpan dan sinkronisasi data evaluasi dosen Anda ke Google Sheets secara otomatis.
+                    Simpan dan sinkronisasi data audit & evaluasi dosen Anda ke Google Sheets secara otomatis.
                 </p>
 
                 <div class="alert alert-info">
@@ -788,7 +788,7 @@
                         <ol style="font-size: 13px; color: #2c3e50; line-height: 1.8;">
                             <li>Buka <a href="https://sheets.google.com" target="_blank" style="color: #3498db;">Google Sheets</a></li>
                             <li>Klik "Buat spreadsheet baru"</li>
-                            <li>Beri nama: "Serdos 2026 - Data Evaluasi"</li>
+                            <li>Beri nama: "Audit & Evaluasi Dosen"</li>
                             <li>Copy ID dari URL (bagian setelah /d/)</li>
                         </ol>
                     </div>
@@ -817,7 +817,7 @@
   sheet.clearContents();
   
   // Add headers
-  const headers = ['No', 'Nama Dosen', 'NIDN', 'Jabatan', 'Masa Kerja', 'Program Studi', 'Status Serdos', 'Rekomendasi', 'Publikasi', 'Tugas Belajar'];
+  const headers = ['No', 'Nama Dosen', 'NIDN', 'Jabatan', 'Masa Kerja', 'Program Studi', 'Status Evaluasi', 'Rekomendasi', 'Publikasi', 'Tugas Belajar'];
   sheet.appendRow(headers);
   
   // Add data
@@ -1881,10 +1881,10 @@ function doGet(e) {
             const workbook = XLSX.utils.book_new();
             const data = [];
 
-            data.push(['EVALUASI SERTIFIKASI DOSEN (SERDOS) 2026', '', '', '', '', '', '', '', '']);
+            data.push(['AUDIT & EVALUASI DOSEN', '', '', '', '', '', '', '', '']);
             data.push(['Universitas Cordova', '', '', '', '', '', '', '', '']);
             data.push(['']);
-            data.push(['No', 'Nama Dosen', 'NIDN', 'Jabatan', 'Masa Kerja', 'Program Studi', 'Status Serdos', 'Kriteria Terpenuhi', 'Rekomendasi Naik Level', 'Action Plan']);
+            data.push(['No', 'Nama Dosen', 'NIDN', 'Jabatan', 'Masa Kerja', 'Program Studi', 'Status Evaluasi', 'Kriteria Terpenuhi', 'Rekomendasi Naik Level', 'Action Plan']);
 
             dosenData.forEach((dosen, index) => {
                 const evaluation = evaluateDosen(dosen);
@@ -1947,8 +1947,8 @@ function doGet(e) {
                 { wch: 40 }
             ];
 
-            XLSX.utils.book_append_sheet(workbook, worksheet, 'Evaluasi Serdos');
-            XLSX.writeFile(workbook, 'Evaluasi_Serdos_2026.xlsx');
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Audit & Evaluasi');
+            XLSX.writeFile(workbook, 'Audit_Evaluasi_Dosen.xlsx');
         }
 
         // Print
@@ -1957,7 +1957,7 @@ function doGet(e) {
             let htmlContent = `
                 <html>
                 <head>
-                    <title>Evaluasi Sertifikasi Dosen 2026</title>
+                    <title>Audit & Evaluasi Dosen</title>
                     <style>
                         body { font-family: Arial, sans-serif; margin: 20px; }
                         h1 { text-align: center; }
@@ -1970,7 +1970,7 @@ function doGet(e) {
                     </style>
                 </head>
                 <body>
-                    <h1>Evaluasi Sertifikasi Dosen (Serdos) 2026</h1>
+                    <h1>Audit & Evaluasi Dosen</h1>
                     <p><strong>Universitas Cordova</strong></p>
                     <table>
                         <thead>
@@ -1980,6 +1980,7 @@ function doGet(e) {
                                 <th>NIDN</th>
                                 <th>Jabatan</th>
                                 <th>Masa Kerja</th>
+                                <th>Program Studi</th>
                                 <th>Status</th>
                                 <th>Kriteria</th>
                             </tr>
