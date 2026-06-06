@@ -3,10 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Audit Data Dosen V8 - Firebase Connection Manager</title>
-    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-database.js"></script>
+    <title>Evaluasi Sertifikasi Dosen (Serdos) 2026</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -15,282 +13,242 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f5f5f5;
-            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
+            padding: 20px;
         }
 
         header {
             background: white;
             padding: 30px;
             border-radius: 8px;
-            margin-bottom: 30px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-
-        h1 {
-            font-size: 28px;
-            color: #202124;
-            margin-bottom: 5px;
-        }
-
-        .subtitle {
-            color: #5f6368;
-            font-size: 14px;
-        }
-
-        /* CONNECTION SECTION */
-        .connection-section {
-            background: white;
-            border-radius: 8px;
-            padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-
-        .connection-section h2 {
-            font-size: 16px;
-            color: #202124;
             margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #e8e8e8;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        .connection-cards {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 30px;
+        header h1 {
+            color: #2c3e50;
+            margin-bottom: 5px;
+            font-size: 28px;
         }
 
-        .connection-card {
-            border: 1px solid #e8e8e8;
-            border-radius: 8px;
-            padding: 20px;
-            background: #fafafa;
-        }
-
-        .connection-card.firebase {
-            border-left: 4px solid #fbbf24;
-        }
-
-        .connection-card.sheets {
-            border-left: 4px solid #bbf7d0;
-        }
-
-        .card-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .status-indicator {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            margin-right: 10px;
-            animation: pulse 2s infinite;
-        }
-
-        .status-indicator.connecting {
-            background: #fbbf24;
-        }
-
-        .status-indicator.connected {
-            background: #10b981;
-            animation: none;
-        }
-
-        .status-indicator.disconnected {
-            background: #ef4444;
-            animation: none;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .card-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: #202124;
-        }
-
-        .card-description {
-            color: #5f6368;
-            font-size: 13px;
-            line-height: 1.6;
-        }
-
-        .card-description strong {
-            color: #202124;
-        }
-
-        .connection-buttons {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #e8e8e8;
-        }
-
-        .btn {
-            padding: 8px 16px;
-            border: 1px solid #dadce0;
-            border-radius: 4px;
-            background: white;
-            color: #202124;
-            font-size: 13px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn:hover {
-            background: #f8f9fa;
-            border-color: #d2d3d4;
-        }
-
-        .btn.primary {
-            background: #1f2937;
-            color: white;
-            border-color: #1f2937;
-        }
-
-        .btn.primary:hover {
-            background: #374151;
-        }
-
-        .btn.success {
-            background: #10b981;
-            color: white;
-            border-color: #10b981;
-        }
-
-        .btn.success:hover {
-            background: #059669;
-        }
-
-        /* ACTION BUTTONS */
-        .action-buttons {
-            display: flex;
-            gap: 15px;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #e8e8e8;
-        }
-
-        .btn-large {
-            flex: 1;
-            padding: 12px 24px;
+        header p {
+            color: #7f8c8d;
             font-size: 14px;
-            border-radius: 4px;
-            border: 1px solid #dadce0;
-            background: white;
-            color: #1f2937;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .btn-large:hover {
-            background: #f8f9fa;
-            border-color: #d2d3d4;
-        }
-
-        .btn-large.primary {
-            background: #1f2937;
-            color: white;
-            border-color: #1f2937;
-        }
-
-        .btn-large.primary:hover {
-            background: #374151;
-        }
-
-        /* TABS */
-        .tabs-section {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            overflow: hidden;
         }
 
         .tabs {
             display: flex;
-            border-bottom: 1px solid #e8e8e8;
-            background: #f5f5f5;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ecf0f1;
+            background: white;
+            padding: 0 20px;
+            border-radius: 8px 8px 0 0;
         }
 
-        .tab-button {
-            padding: 16px 20px;
-            border: none;
+        .tab-btn {
+            padding: 15px 25px;
             background: none;
-            color: #5f6368;
-            font-size: 14px;
-            font-weight: 500;
+            border: none;
             cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+            color: #7f8c8d;
             border-bottom: 3px solid transparent;
-            transition: all 0.2s;
+            transition: all 0.3s;
         }
 
-        .tab-button.active {
-            color: #1f2937;
-            border-bottom-color: #1f2937;
+        .tab-btn.active {
+            color: #3498db;
+            border-bottom-color: #3498db;
+        }
+
+        .tab-btn:hover {
+            color: #2c3e50;
         }
 
         .tab-content {
             display: none;
+            background: white;
             padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         .tab-content.active {
             display: block;
         }
 
-        /* FORM */
-        .form-group {
-            margin-bottom: 20px;
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
         }
 
-        label {
+        .stat-card {
+            padding: 25px;
+            border-radius: 8px;
+            color: white;
+            text-align: center;
+        }
+
+        .stat-card.eligible {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+        }
+
+        .stat-card.not-eligible {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+
+        .stat-card.pending {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+        }
+
+        .stat-card.total {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+        }
+
+        .stat-number {
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .input-section {
+            margin-bottom: 25px;
+        }
+
+        .input-section h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
             display: block;
             margin-bottom: 8px;
             font-weight: 500;
-            color: #202124;
-            font-size: 13px;
+            color: #2c3e50;
+            font-size: 14px;
         }
 
-        input, select, textarea {
+        .form-group input[type="text"],
+        .form-group input[type="number"],
+        .form-group textarea,
+        .form-group select {
             width: 100%;
             padding: 10px;
-            border: 1px solid #dadce0;
+            border: 1px solid #bdc3c7;
             border-radius: 4px;
-            font-size: 13px;
             font-family: inherit;
+            font-size: 14px;
         }
 
-        input:focus, select:focus {
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
             outline: none;
-            border-color: #1f2937;
-            box-shadow: 0 0 0 2px rgba(31, 41, 55, 0.1);
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1);
         }
 
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-success {
+            background-color: #27ae60;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #229954;
+        }
+
+        .btn-secondary {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #7f8c8d;
+        }
+
+        .btn-danger {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+
+        .search-filter {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .search-filter input,
+        .search-filter select {
+            padding: 10px;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .search-filter input {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
         }
 
         table {
@@ -300,133 +258,265 @@
         }
 
         thead {
-            background: #f5f5f5;
-            border-bottom: 1px solid #e8e8e8;
+            background-color: #ecf0f1;
         }
 
         th {
-            padding: 12px;
+            padding: 15px;
             text-align: left;
             font-weight: 600;
-            color: #202124;
+            color: #2c3e50;
+            border-bottom: 2px solid #bdc3c7;
             font-size: 13px;
         }
 
         td {
-            padding: 12px;
-            border-bottom: 1px solid #e8e8e8;
+            padding: 12px 15px;
+            border-bottom: 1px solid #ecf0f1;
             font-size: 13px;
         }
 
         tr:hover {
-            background: #f9f9f9;
+            background-color: #f9f9f9;
         }
 
-        .badge {
+        .status-badge {
             display: inline-block;
-            padding: 4px 8px;
-            border-radius: 4px;
+            padding: 6px 12px;
+            border-radius: 20px;
             font-size: 12px;
             font-weight: 600;
         }
 
-        .badge.p1 {
-            background: #d1fae5;
-            color: #065f46;
+        .status-eligible {
+            background-color: #d5f4e6;
+            color: #27ae60;
         }
 
-        .badge.p2 {
-            background: #fef3c7;
-            color: #78350f;
+        .status-not-eligible {
+            background-color: #fadbd8;
+            color: #e74c3c;
         }
 
-        .badge.followup {
-            background: #fee2e2;
-            color: #7f1d1d;
+        .status-pending {
+            background-color: #fdebd0;
+            color: #f39c12;
+        }
+
+        .criteria-badge {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 20px;
+            font-size: 11px;
+            font-weight: bold;
+            margin: 2px;
+        }
+
+        .criteria-badge.pass {
+            background-color: #27ae60;
+            color: white;
+        }
+
+        .criteria-badge.fail {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .criteria-badge.pending {
+            background-color: #f39c12;
+            color: white;
+        }
+
+        .detail-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .detail-modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 8px;
+            max-width: 700px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 30px;
+            width: 100%;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 15px;
+        }
+
+        .modal-header h2 {
+            color: #2c3e50;
+            font-size: 20px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #7f8c8d;
+        }
+
+        .criteria-list {
+            margin-top: 20px;
+        }
+
+        .criteria-item {
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid #ecf0f1;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+        }
+
+        .criteria-item.pass {
+            border-left-color: #27ae60;
+            background-color: #f0fdf4;
+        }
+
+        .criteria-item.fail {
+            border-left-color: #e74c3c;
+            background-color: #fef2f2;
+        }
+
+        .criteria-item.pending {
+            border-left-color: #f39c12;
+            background-color: #fffbf0;
+        }
+
+        .criteria-title {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .criteria-description {
+            font-size: 13px;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .action-buttons button {
+            padding: 8px 12px;
+            font-size: 12px;
+        }
+
+        .icon {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            text-align: center;
+            line-height: 20px;
+            font-weight: bold;
+        }
+
+        .icon.pass {
+            color: #27ae60;
+        }
+
+        .icon.fail {
+            color: #e74c3c;
+        }
+
+        .icon.pending {
+            color: #f39c12;
         }
 
         .alert {
-            padding: 12px 16px;
+            padding: 15px;
             border-radius: 4px;
             margin-bottom: 20px;
-            border-left: 4px solid;
-            font-size: 13px;
         }
 
-        .alert.success {
-            background: #ecfdf5;
-            color: #065f46;
-            border-color: #10b981;
+        .alert-info {
+            background-color: #d6eaf8;
+            color: #1a5490;
+            border-left: 4px solid #3498db;
         }
 
-        .alert.error {
-            background: #fef2f2;
-            color: #7f1d1d;
-            border-color: #ef4444;
+        .alert-success {
+            background-color: #d5f4e6;
+            color: #0b5345;
+            border-left: 4px solid #27ae60;
         }
 
-        .alert.warning {
-            background: #fffbeb;
-            color: #78350f;
-            border-color: #fbbf24;
+        .alert-warning {
+            background-color: #fdebd0;
+            color: #7d6608;
+            border-left: 4px solid #f39c12;
         }
 
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .stat-card {
-            background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 8px;
+        .empty-state {
             text-align: center;
+            padding: 40px 20px;
+            color: #7f8c8d;
         }
 
-        .stat-number {
-            font-size: 28px;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .stat-label {
-            font-size: 12px;
-            opacity: 0.9;
-        }
-
-        .search-box {
-            margin-bottom: 20px;
-        }
-
-        .search-box input {
-            max-width: 300px;
-        }
-
-        .connection-info {
-            background: #f0f9ff;
-            border: 1px solid #bfdbfe;
-            border-radius: 4px;
-            padding: 12px;
-            margin-top: 10px;
-            font-size: 12px;
-            color: #1e40af;
+        .empty-state h3 {
+            margin-bottom: 10px;
+            color: #2c3e50;
         }
 
         @media (max-width: 768px) {
-            .connection-cards {
+            .container {
+                padding: 10px;
+            }
+
+            .dashboard {
                 grid-template-columns: 1fr;
             }
-            .form-row {
-                grid-template-columns: 1fr;
+
+            .tabs {
+                overflow-x: auto;
             }
-            .stats {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            .action-buttons {
+
+            .search-filter {
                 flex-direction: column;
+            }
+
+            .search-filter input,
+            .search-filter select {
+                width: 100%;
+            }
+
+            table {
+                font-size: 12px;
+            }
+
+            th, td {
+                padding: 10px;
             }
         }
     </style>
@@ -435,665 +525,700 @@
     <div class="container">
         <!-- HEADER -->
         <header>
-            <h1>🔥 Audit Data Dosen Serdos 2026</h1>
-            <p class="subtitle">Universitas Cordova - Connection Manager</p>
+            <h1>📋 Evaluasi Sertifikasi Dosen (Serdos) 2026</h1>
+            <p>Sistem Evaluasi Kelayakan Dosen - Universitas Cordova</p>
         </header>
 
-        <!-- CONNECTION STATUS SECTION -->
-        <div class="connection-section">
-            <h2>🔌 Koneksi Database</h2>
+        <!-- TABS -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('dashboard')">📊 Dashboard</button>
+            <button class="tab-btn" onclick="switchTab('data')">📥 Data & Evaluasi</button>
+            <button class="tab-btn" onclick="switchTab('detail')">🔍 Detail Dosen</button>
+        </div>
 
-            <div class="connection-cards">
-                <!-- FIREBASE REALTIME DB CARD -->
-                <div class="connection-card firebase">
-                    <div class="card-header">
-                        <div class="status-indicator connecting" id="firebaseStatusIndicator"></div>
-                        <div>
-                            <div class="card-title">🔥 Firebase Realtime DB</div>
-                            <div class="card-description" id="firebaseStatus">Menghubungkan...</div>
-                        </div>
-                    </div>
-                    <div class="card-description">
-                        <strong>Real-time</strong> • <strong>Multi-device</strong> • <strong>Otomatis</strong>
-                    </div>
-                    <div class="connection-buttons">
-                        <button class="btn" onclick="testFirebaseConnection()">🧪 Test Koneksi</button>
-                        <button class="btn primary" onclick="syncAllData()">🔄 Sync Semuanya</button>
-                        <button class="btn" onclick="switchTab('settings')">⚙️ Settings</button>
-                    </div>
-                    <div class="connection-info" id="firebaseInfo" style="display: none;">
-                        Status: <span id="firebaseDetailStatus">-</span> | URL: <span id="firebaseUrl">-</span>
-                    </div>
+        <!-- TAB 1: DASHBOARD -->
+        <div id="dashboard" class="tab-content active">
+            <div class="dashboard">
+                <div class="stat-card eligible">
+                    <div class="stat-number" id="countEligible">0</div>
+                    <div class="stat-label">Eligible (Memenuhi)</div>
                 </div>
-
-                <!-- GOOGLE SHEETS CARD -->
-                <div class="connection-card sheets">
-                    <div class="card-header">
-                        <div class="status-indicator disconnected"></div>
-                        <div>
-                            <div class="card-title">📊 Google Sheets</div>
-                            <div class="card-description">Belum diatur</div>
-                        </div>
-                    </div>
-                    <div class="card-description">
-                        <strong>Backup ke Sheets</strong> • <strong>Laporan Excel</strong>
-                    </div>
-                    <div class="connection-buttons">
-                        <button class="btn" onclick="switchTab('settings')">📋 Setup Sheets</button>
-                        <button class="btn" onclick="exportToCSV()">💾 Export CSV</button>
-                    </div>
+                <div class="stat-card not-eligible">
+                    <div class="stat-number" id="countNotEligible">0</div>
+                    <div class="stat-label">Tidak Eligible (Tidak Memenuhi)</div>
+                </div>
+                <div class="stat-card pending">
+                    <div class="stat-number" id="countPending">0</div>
+                    <div class="stat-label">Pending (Perlu Data)</div>
+                </div>
+                <div class="stat-card total">
+                    <div class="stat-number" id="countTotal">0</div>
+                    <div class="stat-label">Total Dosen</div>
                 </div>
             </div>
 
-            <!-- ACTION BUTTONS -->
-            <div class="action-buttons">
-                <button class="btn-large primary" onclick="switchTab('daftar')">📖 Lihat Daftar Dosen</button>
-                <button class="btn-large primary" onclick="switchTab('import')">📥 Import Data</button>
-                <button class="btn-large primary" onclick="switchTab('input')">➕ Input Dosen Baru</button>
+            <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <h3 style="color: #2c3e50; margin-bottom: 20px;">Ringkasan Hasil Evaluasi</h3>
+                
+                <div id="summaryChart" style="min-height: 300px; display: flex; align-items: flex-end; justify-content: space-around; padding: 40px 20px; background: #f9f9f9; border-radius: 4px;">
+                    <div style="text-align: center;">
+                        <div style="width: 60px; height: 0px; background: #27ae60; margin-bottom: 10px; border-radius: 4px;" id="chartEligible"></div>
+                        <div style="font-size: 12px; color: #7f8c8d;">Eligible</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="width: 60px; height: 0px; background: #f39c12; margin-bottom: 10px; border-radius: 4px;" id="chartPending"></div>
+                        <div style="font-size: 12px; color: #7f8c8d;">Pending</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="width: 60px; height: 0px; background: #e74c3c; margin-bottom: 10px; border-radius: 4px;" id="chartNotEligible"></div>
+                        <div style="font-size: 12px; color: #7f8c8d;">Tidak Eligible</div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- TABS SECTION -->
-        <div class="tabs-section">
-            <div class="tabs">
-                <button class="tab-button active" onclick="switchTab('dashboard')">📊 Dashboard</button>
-                <button class="tab-button" onclick="switchTab('input')">➕ Input Data</button>
-                <button class="tab-button" onclick="switchTab('import')">📥 Import CSV</button>
-                <button class="tab-button" onclick="switchTab('daftar')">📖 Daftar Dosen</button>
-                <button class="tab-button" onclick="switchTab('settings')">⚙️ Settings</button>
-            </div>
-
-            <!-- TAB: DASHBOARD -->
-            <div id="dashboard" class="tab-content active">
-                <h2>📊 Dashboard Ringkasan</h2>
-                <div id="dashboardAlert"></div>
-
-                <div class="stats">
-                    <div class="stat-card">
-                        <div class="stat-number" id="totalDosen">0</div>
-                        <div class="stat-label">Total Dosen</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="countP1">0</div>
-                        <div class="stat-label">P1 (Eligible)</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="countP2">0</div>
-                        <div class="stat-label">P2 (Conditional)</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="countFollowup">0</div>
-                        <div class="stat-label">Follow-up</div>
-                    </div>
+        <!-- TAB 2: DATA & EVALUASI -->
+        <div id="data" class="tab-content">
+            <div class="input-section">
+                <h3>📥 Impor Data Dosen</h3>
+                <p style="color: #7f8c8d; margin-bottom: 15px; font-size: 13px;">
+                    Copy-paste seluruh tabel dari Google Sheets (termasuk header) ke box di bawah:
+                </p>
+                <textarea id="dataInput" placeholder="Paste data dari spreadsheet di sini..." style="width: 100%; height: 200px; padding: 15px; border: 2px dashed #3498db; border-radius: 4px; font-family: monospace; font-size: 12px;"></textarea>
+                <div class="button-group">
+                    <button class="btn-primary" onclick="importData()">📤 Impor Data</button>
+                    <button class="btn-secondary" onclick="clearAllData()">🗑️ Hapus Semua Data</button>
                 </div>
             </div>
 
-            <!-- TAB: INPUT DATA -->
-            <div id="input" class="tab-content">
-                <h2>➕ Input Data Dosen Baru</h2>
-                <div id="inputAlert"></div>
-
-                <form onsubmit="return submitForm(event)">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>NIDN</label>
-                            <input type="text" id="nidn" placeholder="123456789" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Nama Dosen</label>
-                            <input type="text" id="nama" placeholder="Nama Lengkap" required>
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Homebase</label>
-                            <input type="text" id="homebase" placeholder="Engineering" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Jabatan</label>
-                            <select id="jabatan" required>
-                                <option value="">-- Pilih --</option>
-                                <option value="Guru Besar/Profesor">Guru Besar/Profesor</option>
-                                <option value="Lektor Kepala">Lektor Kepala</option>
-                                <option value="Lektor">Lektor</option>
-                                <option value="Asisten Ahli">Asisten Ahli</option>
-                                <option value="Tidak Ada">Tidak Ada</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>TMT JF</label>
-                            <input type="date" id="tmtJF" required>
-                        </div>
-                        <div class="form-group">
-                            <label>LKD 4 Semester</label>
-                            <select id="lkd" required>
-                                <option value="Ada">Ada</option>
-                                <option value="Tidak">Tidak</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>PEKERTI/AA</label>
-                            <select id="pekerti" required>
-                                <option value="Ada PEKERTI">Ada PEKERTI</option>
-                                <option value="Ada AA">Ada AA</option>
-                                <option value="Belum Ada">Belum Ada</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Pendidikan</label>
-                            <select id="pendidikan" required>
-                                <option value="S1">S1</option>
-                                <option value="S2">S2</option>
-                                <option value="S3">S3</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <button type="submit" class="btn-large primary">💾 Simpan ke Firebase</button>
-                </form>
-            </div>
-
-            <!-- TAB: IMPORT CSV -->
-            <div id="import" class="tab-content">
-                <h2>📥 Import Data dari CSV</h2>
-                <div id="importAlert"></div>
-
-                <div style="background: #f0f9ff; border: 1px solid #bfdbfe; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
-                    <strong style="color: #1e40af;">📋 Cara Menggunakan:</strong>
-                    <ol style="margin-left: 20px; color: #1e40af; font-size: 13px;">
-                        <li>Download CSV dari Google Sheets (File → Download → CSV)</li>
-                        <li>Drag file atau click untuk pilih</li>
-                        <li>Aplikasi akan ADD dosen baru + UPDATE dosen existing</li>
-                        <li>Data otomatis sync ke Firebase</li>
-                    </ol>
+            <div id="evaluationResults" style="display: none;">
+                <div class="alert alert-success">
+                    ✓ Data berhasil diimpor. Scroll ke bawah untuk melihat hasil evaluasi.
                 </div>
 
+                <div class="input-section">
+                    <h3>🔍 Cari & Filter</h3>
+                    <div class="search-filter">
+                        <input type="text" id="searchInput" placeholder="Cari nama atau NIDN..." onkeyup="filterTable()">
+                        <select id="statusFilter" onchange="filterTable()">
+                            <option value="">Semua Status</option>
+                            <option value="eligible">Eligible</option>
+                            <option value="not-eligible">Tidak Eligible</option>
+                            <option value="pending">Pending</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="input-section">
+                    <h3>📊 Tabel Evaluasi Dosen</h3>
+                    <div class="table-wrapper">
+                        <table id="dosenTable">
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Nama Dosen</th>
+                                    <th>NIDN</th>
+                                    <th>Masa Kerja</th>
+                                    <th>Jabatan</th>
+                                    <th>Status</th>
+                                    <th>Kriteria</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-success" onclick="exportToExcel()">📥 Export ke Excel</button>
+                    <button class="btn-secondary" onclick="printResults()">🖨️ Print</button>
+                </div>
+            </div>
+
+            <div id="emptyState" class="empty-state">
+                <h3>📭 Belum Ada Data</h3>
+                <p>Impor data dosen terlebih dahulu untuk mulai evaluasi.</p>
+            </div>
+        </div>
+
+        <!-- TAB 3: DETAIL DOSEN -->
+        <div id="detail" class="tab-content">
+            <div class="input-section">
+                <h3>👤 Tambah/Edit Data Publikasi & Status Tugas Belajar</h3>
+                <p style="color: #7f8c8d; margin-bottom: 15px; font-size: 13px;">
+                    Gunakan form di bawah untuk menambahkan informasi publikasi dan status tugas belajar dosen:
+                </p>
+                
                 <div class="form-group">
-                    <label>📂 Upload File CSV</label>
-                    <div style="border: 2px dashed #1f2937; padding: 40px; text-align: center; border-radius: 8px; background: #f9fafb; cursor: pointer;"
-                        ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
-                        <p style="color: #1f2937; font-weight: 600; margin-bottom: 10px;">📁 Drag File CSV Di Sini</p>
-                        <p style="color: #5f6368; font-size: 13px;">atau</p>
-                        <input type="file" id="csvFile" accept=".csv" onchange="handleFileSelect(event)" style="display: none;">
-                        <button type="button" style="margin-top: 15px; background: #1f2937; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;" onclick="document.getElementById('csvFile').click()">Pilih File CSV</button>
-                    </div>
+                    <label>Pilih Dosen</label>
+                    <select id="selectDosen" style="width: 100%; padding: 10px; border: 1px solid #bdc3c7; border-radius: 4px; font-size: 14px;">
+                        <option value="">-- Pilih Dosen --</option>
+                    </select>
                 </div>
 
-                <div id="importProgress" style="display: none; margin-top: 20px;">
-                    <p style="font-size: 13px; margin-bottom: 10px;">Processing...</p>
-                    <div style="background: #e5e7eb; height: 20px; border-radius: 4px; overflow: hidden;">
-                        <div style="background: linear-gradient(90deg, #1f2937, #374151); height: 100%; width: 0%;" id="progressBar"></div>
-                    </div>
-                    <p id="progressText" style="font-size: 12px; color: #5f6368; margin-top: 10px;">0%</p>
-                </div>
-            </div>
-
-            <!-- TAB: DAFTAR DOSEN -->
-            <div id="daftar" class="tab-content">
-                <h2>📖 Daftar Semua Dosen</h2>
-
-                <div class="search-box">
-                    <input type="text" id="searchInput" placeholder="Cari nama atau NIDN..." onkeyup="filterTable()">
-                </div>
-
-                <div style="overflow-x: auto;">
-                    <table id="dosenTable">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>NIDN</th>
-                                <th>Nama</th>
-                                <th>Homebase</th>
-                                <th>Jabatan</th>
-                                <th>Status</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tableBody">
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- TAB: SETTINGS -->
-            <div id="settings" class="tab-content">
-                <h2>⚙️ Firebase Configuration</h2>
-                <div id="settingsAlert"></div>
-
-                <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
-                    <h3 style="margin-bottom: 15px; color: #202124;">🔥 Firebase Config</h3>
-                    <p style="font-size: 13px; color: #5f6368; margin-bottom: 20px;">Copy dari Firebase Console → Project Settings → Your apps</p>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>API Key</label>
-                            <input type="text" id="apiKey">
-                        </div>
-                        <div class="form-group">
-                            <label>Auth Domain</label>
-                            <input type="text" id="authDomain">
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Project ID</label>
-                            <input type="text" id="projectId">
-                        </div>
-                        <div class="form-group">
-                            <label>Storage Bucket</label>
-                            <input type="text" id="storageBucket">
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Messaging Sender ID</label>
-                            <input type="text" id="messagingSenderId">
-                        </div>
-                        <div class="form-group">
-                            <label>App ID</label>
-                            <input type="text" id="appId">
-                        </div>
+                <div style="background: #f9f9f9; padding: 20px; border-radius: 4px; margin-top: 20px; display: none;" id="dosenFormSection">
+                    <div class="form-group">
+                        <label>Nama Dosen</label>
+                        <input type="text" id="dosenNama" readonly style="background: #ecf0f1;">
                     </div>
 
                     <div class="form-group">
-                        <label>🔴 DATABASE URL (PENTING!)</label>
-                        <input type="text" id="databaseUrl" placeholder="https://xxxxx.firebaseio.com">
-                        <div class="connection-info" style="display: block; margin-top: 8px;">
-                            Format: <strong>https://xxxxx.firebaseio.com</strong> (dari Firebase Console → Realtime Database)
+                        <label>NIDN</label>
+                        <input type="text" id="dosenNIDN" readonly style="background: #ecf0f1;">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Memiliki Publikasi di Jurnal Terakreditasi/Internasional?</label>
+                        <select id="publikasi">
+                            <option value="">-- Pilih --</option>
+                            <option value="ya">Ya, memiliki publikasi</option>
+                            <option value="tidak">Tidak memiliki publikasi</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Detail Publikasi (Judul, Jurnal, Tahun)</label>
+                        <textarea id="detailPublikasi" placeholder="Contoh: Judul: 'Model Digital Marketing', Jurnal: 'Jurnal Manajemen Nasional', Tahun: 2025, Penulis: Pertama/Anggota"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Status Tugas Belajar</label>
+                        <div style="margin-top: 10px;">
+                            <input type="radio" id="tugasAda" name="tugas_belajar" value="ada" onchange="updateTugasStatus()"> 
+                            <label for="tugasAda" style="display: inline; margin-right: 20px;">⚠️ Sedang Tugas Belajar (Tidak Eligible)</label>
+                            <input type="radio" id="tugasTidak" name="tugas_belajar" value="tidak" onchange="updateTugasStatus()" checked> 
+                            <label for="tugasTidak" style="display: inline;">✓ Tidak Sedang Tugas Belajar (Eligible)</label>
                         </div>
                     </div>
 
-                    <button onclick="saveConfig()" class="btn-large success">🔐 Save & Connect to Firebase</button>
+                    <div class="button-group">
+                        <button class="btn-success" onclick="saveDosen()">💾 Simpan Data</button>
+                        <button class="btn-secondary" onclick="cancelEdit()">❌ Batal</button>
+                    </div>
+                </div>
+
+                <div id="selectPrompt" class="empty-state" style="padding: 40px 20px;">
+                    <p>Pilih dosen dari list di atas untuk tambah/edit data publikasi dan status tugas belajar.</p>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- DETAIL MODAL -->
+    <div class="detail-modal" id="detailModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Detail Dosen</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
     <script>
-        let db, auth;
-        let isOnline = false;
-        let daftarDosen = [];
+        // Data Management
+        let dosenData = JSON.parse(localStorage.getItem('dosenData')) || [];
+        let publikasiData = JSON.parse(localStorage.getItem('publikasiData')) || {};
+        let tugasData = JSON.parse(localStorage.getItem('tugasData')) || {};
 
-        function loadConfig() {
-            return {
-                apiKey: localStorage.getItem('firebaseApiKey') || '',
-                authDomain: localStorage.getItem('firebaseAuthDomain') || '',
-                projectId: localStorage.getItem('firebaseProjectId') || '',
-                storageBucket: localStorage.getItem('firebaseStorageBucket') || '',
-                messagingSenderId: localStorage.getItem('firebaseMessagingSenderId') || '',
-                appId: localStorage.getItem('firebaseAppId') || '',
-                databaseURL: localStorage.getItem('firebaseDatabaseUrl') || ''
-            };
-        }
-
-        function saveConfig() {
-            const config = {
-                firebaseApiKey: document.getElementById('apiKey').value,
-                firebaseAuthDomain: document.getElementById('authDomain').value,
-                firebaseProjectId: document.getElementById('projectId').value,
-                firebaseStorageBucket: document.getElementById('storageBucket').value,
-                firebaseMessagingSenderId: document.getElementById('messagingSenderId').value,
-                firebaseAppId: document.getElementById('appId').value,
-                firebaseDatabaseUrl: document.getElementById('databaseUrl').value
-            };
-
-            for (const [key, value] of Object.entries(config)) {
-                localStorage.setItem(key, value);
+        // Initialize
+        window.addEventListener('load', function() {
+            updateDashboard();
+            updateSelectDosen();
+            if (dosenData.length > 0) {
+                displayResults();
             }
+        });
 
-            showAlert('settingsAlert', '✅ Config saved! Reconnecting...', 'success');
-            setTimeout(() => location.reload(), 1500);
-        }
-
-        function initFirebase() {
-            const config = loadConfig();
-
-            if (!config.projectId || !config.databaseURL) {
-                updateFirebaseStatus('Belum diatur', 'disconnected');
-                loadFromLocalStorage();
-                return;
-            }
-
-            const firebaseConfig = {
-                apiKey: config.apiKey,
-                authDomain: config.authDomain,
-                projectId: config.projectId,
-                storageBucket: config.storageBucket,
-                messagingSenderId: config.messagingSenderId,
-                appId: config.appId,
-                databaseURL: config.databaseURL
-            };
-
-            try {
-                if (firebase.apps.length > 0) firebase.app().delete();
-
-                firebase.initializeApp(firebaseConfig);
-                db = firebase.database();
-                auth = firebase.auth();
-
-                auth.signInAnonymously()
-                    .then(() => {
-                        console.log('✅ Firebase Connected!');
-                        updateFirebaseStatus('Terhubung', 'connected');
-                        loadFromDatabase();
-                        setupListener();
-                    })
-                    .catch(error => {
-                        console.error('Auth error:', error);
-                        updateFirebaseStatus('Error: ' + error.message, 'disconnected');
-                        loadFromLocalStorage();
-                    });
-
-            } catch (error) {
-                console.error('Firebase error:', error);
-                updateFirebaseStatus('Error: ' + error.message, 'disconnected');
-                loadFromLocalStorage();
-            }
-        }
-
-        function updateFirebaseStatus(status, indicator) {
-            isOnline = indicator === 'connected';
-            document.getElementById('firebaseStatus').textContent = status;
-            
-            const statusEl = document.getElementById('firebaseStatusIndicator');
-            statusEl.className = 'status-indicator ' + indicator;
-
-            const config = loadConfig();
-            if (config.databaseURL) {
-                document.getElementById('firebaseInfo').style.display = 'block';
-                document.getElementById('firebaseDetailStatus').textContent = status;
-                document.getElementById('firebaseUrl').textContent = config.databaseURL;
-            }
-        }
-
-        function loadFromLocalStorage() {
-            const data = localStorage.getItem('daftarDosen');
-            daftarDosen = data ? JSON.parse(data) : [];
-            updateUI();
-        }
-
-        function loadFromDatabase() {
-            if (!isOnline || !db) {
-                loadFromLocalStorage();
-                return;
-            }
-
-            db.ref('dosen').once('value', (snapshot) => {
-                daftarDosen = [];
-                const data = snapshot.val();
-                if (data) {
-                    for (const key in data) {
-                        daftarDosen.push(data[key]);
-                    }
-                }
-                localStorage.setItem('daftarDosen', JSON.stringify(daftarDosen));
-                updateUI();
-            }).catch(e => {
-                console.error('Load error:', e);
-                loadFromLocalStorage();
-            });
-        }
-
-        function setupListener() {
-            if (!isOnline || !db) return;
-
-            db.ref('dosen').on('value', (snapshot) => {
-                daftarDosen = [];
-                const data = snapshot.val();
-                if (data) {
-                    for (const key in data) {
-                        daftarDosen.push(data[key]);
-                    }
-                }
-                localStorage.setItem('daftarDosen', JSON.stringify(daftarDosen));
-                updateUI();
-            });
-        }
-
-        function submitForm(event) {
-            event.preventDefault();
-
-            const dosen = {
-                id: Date.now(),
-                nidn: document.getElementById('nidn').value,
-                nama: document.getElementById('nama').value,
-                homebase: document.getElementById('homebase').value,
-                jabatan: document.getElementById('jabatan').value,
-                tmtJF: document.getElementById('tmtJF').value,
-                lkd: document.getElementById('lkd').value,
-                pekerti: document.getElementById('pekerti').value,
-                pendidikan: document.getElementById('pendidikan').value,
-                masaKerja: calculateMasaKerja(document.getElementById('tmtJF').value),
-                tanggalInput: new Date().toLocaleDateString('id-ID'),
-                eligibilitas: 'P1'
-            };
-
-            daftarDosen.push(dosen);
-            localStorage.setItem('daftarDosen', JSON.stringify(daftarDosen));
-
-            if (isOnline && db) {
-                db.ref(`dosen/${dosen.id}`).set(dosen)
-                    .then(() => showAlert('inputAlert', `✅ ${dosen.nama} saved to Firebase!`, 'success'))
-                    .catch(e => showAlert('inputAlert', `⚠️ Saved locally: ${e.message}`, 'warning'));
-            } else {
-                showAlert('inputAlert', `✅ ${dosen.nama} saved (offline)`, 'success');
-            }
-
-            document.getElementById('nidn').value = '';
-            document.getElementById('nama').value = '';
-            updateUI();
-            return false;
-        }
-
-        function calculateMasaKerja(tmtJF) {
-            const tmt = new Date(tmtJF);
-            const today = new Date();
-            let years = today.getFullYear() - tmt.getFullYear();
-            if (today.getMonth() < tmt.getMonth()) years--;
-            return Math.max(0, years);
-        }
-
-        function updateUI() {
-            const p1 = daftarDosen.filter(d => d.eligibilitas === 'P1').length;
-            const p2 = daftarDosen.filter(d => d.eligibilitas === 'P2').length;
-            const followup = daftarDosen.filter(d => d.eligibilitas === 'Follow-up').length;
-
-            document.getElementById('totalDosen').textContent = daftarDosen.length;
-            document.getElementById('countP1').textContent = p1;
-            document.getElementById('countP2').textContent = p2;
-            document.getElementById('countFollowup').textContent = followup;
-
-            displayDosenTable();
-        }
-
-        function displayDosenTable() {
-            const tbody = document.getElementById('tableBody');
-            tbody.innerHTML = '';
-
-            daftarDosen.forEach((dosen, i) => {
-                const row = tbody.insertRow();
-                row.innerHTML = `
-                    <td>${i + 1}</td>
-                    <td>${dosen.nidn}</td>
-                    <td>${dosen.nama}</td>
-                    <td>${dosen.homebase}</td>
-                    <td>${dosen.jabatan}</td>
-                    <td><span class="badge ${dosen.eligibilitas.toLowerCase()}">${dosen.eligibilitas}</span></td>
-                    <td><button class="btn" onclick="deleteDosen(${dosen.id})">Delete</button></td>
-                `;
-            });
-        }
-
-        function deleteDosen(id) {
-            if (!confirm('Delete?')) return;
-            daftarDosen = daftarDosen.filter(d => d.id !== id);
-            localStorage.setItem('daftarDosen', JSON.stringify(daftarDosen));
-            if (isOnline && db) db.ref(`dosen/${id}`).remove();
-            updateUI();
-        }
-
-        function filterTable() {
-            const input = document.getElementById('searchInput').value.toLowerCase();
-            const rows = document.getElementById('dosenTable').querySelectorAll('tbody tr');
-            rows.forEach(row => {
-                const nidn = row.cells[1].textContent.toLowerCase();
-                const nama = row.cells[2].textContent.toLowerCase();
-                row.style.display = nidn.includes(input) || nama.includes(input) ? '' : 'none';
-            });
-        }
-
-        function handleDrop(e) {
-            e.preventDefault();
-            if (e.dataTransfer.files.length) {
-                handleFileSelect({ target: { files: e.dataTransfer.files } });
-            }
-        }
-
-        function handleDragOver(e) {
-            e.preventDefault();
-        }
-
-        function handleDragLeave(e) {
-            e.preventDefault();
-        }
-
-        function handleFileSelect(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = (event) => processCSV(event.target.result);
-            reader.readAsText(file);
-        }
-
-        function processCSV(csv) {
-            document.getElementById('importProgress').style.display = 'block';
-
-            try {
-                const lines = csv.split('\n').filter(l => l.trim());
-                const headers = lines[0].split(',').map(h => h.trim());
-                const nidnIdx = headers.findIndex(h => h.toLowerCase().includes('nidn'));
-                const namaIdx = headers.findIndex(h => h.toLowerCase().includes('nama'));
-
-                let count = 0;
-                for (let i = 1; i < lines.length; i++) {
-                    const values = lines[i].split(',').map(v => v.trim());
-                    const nidn = nidnIdx >= 0 ? values[nidnIdx] : '';
-                    const nama = namaIdx >= 0 ? values[namaIdx] : '';
-                    if (!nama || !nidn) continue;
-
-                    const dosen = {
-                        id: Date.now() + i,
-                        nidn, nama,
-                        homebase: 'Unknown',
-                        jabatan: 'Asisten Ahli',
-                        tmtJF: new Date().toISOString().split('T')[0],
-                        lkd: 'Ada',
-                        pekerti: 'Ada PEKERTI',
-                        pendidikan: 'S2',
-                        masaKerja: 3,
-                        tanggalInput: new Date().toLocaleDateString('id-ID'),
-                        eligibilitas: 'P1'
-                    };
-
-                    daftarDosen.push(dosen);
-                    count++;
-
-                    const progress = Math.round((i / (lines.length - 1)) * 100);
-                    document.getElementById('progressBar').style.width = progress + '%';
-                    document.getElementById('progressText').textContent = progress + '%';
-                }
-
-                localStorage.setItem('daftarDosen', JSON.stringify(daftarDosen));
-                if (isOnline && db) {
-                    daftarDosen.forEach(dosen => db.ref(`dosen/${dosen.id}`).set(dosen));
-                }
-
-                document.getElementById('importProgress').style.display = 'none';
-                showAlert('importAlert', `✅ Imported ${count} dosen!`, 'success');
-                updateUI();
-            } catch (error) {
-                document.getElementById('importProgress').style.display = 'none';
-                showAlert('importAlert', `❌ Error: ${error.message}`, 'error');
-            }
-        }
-
-        function testFirebaseConnection() {
-            if (!isOnline || !db) {
-                showAlert('dashboardAlert', '❌ Firebase not connected', 'error');
-                return;
-            }
-
-            db.ref('test').set({ test: true })
-                .then(() => {
-                    showAlert('dashboardAlert', '✅ Firebase connection OK!', 'success');
-                    db.ref('test').remove();
-                })
-                .catch(e => showAlert('dashboardAlert', `❌ Error: ${e.message}`, 'error'));
-        }
-
-        function syncAllData() {
-            if (!isOnline || !db) {
-                showAlert('dashboardAlert', '❌ Firebase not connected', 'error');
-                return;
-            }
-
-            daftarDosen.forEach(dosen => {
-                db.ref(`dosen/${dosen.id}`).set(dosen);
-            });
-
-            showAlert('dashboardAlert', `✅ Sync ${daftarDosen.length} dosen to Firebase!`, 'success');
-        }
-
-        function exportToCSV() {
-            let csv = 'NIDN,Nama,Homebase,Jabatan,TMT JF,LKD,PEKERTI,Pendidikan,Status\n';
-            daftarDosen.forEach(d => {
-                csv += `${d.nidn},${d.nama},${d.homebase},${d.jabatan},${d.tmtJF},${d.lkd},${d.pekerti},${d.pendidikan},${d.eligibilitas}\n`;
-            });
-
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'audit_dosen_' + new Date().getTime() + '.csv';
-            a.click();
-        }
-
-        function switchTab(name) {
-            document.querySelectorAll('.tab-content').forEach(e => e.classList.remove('active'));
-            document.querySelectorAll('.tab-button').forEach(e => e.classList.remove('active'));
-            document.getElementById(name).classList.add('active');
+        // Switch Tabs
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tab).classList.add('active');
             event.target.classList.add('active');
         }
 
-        function showAlert(id, msg, type) {
-            const el = document.getElementById(id);
-            if (!el) return;
-            el.innerHTML = `<div class="alert ${type}">${msg}</div>`;
-            setTimeout(() => el.innerHTML = '', 5000);
+        // Import Data
+        function importData() {
+            const input = document.getElementById('dataInput').value.trim();
+            if (!input) {
+                alert('Silakan paste data terlebih dahulu!');
+                return;
+            }
+
+            const lines = input.split('\n').map(line => line.trim()).filter(line => line);
+            const headers = lines[0].split('\t');
+            
+            dosenData = [];
+            for (let i = 1; i < lines.length; i++) {
+                const values = lines[i].split('\t');
+                if (values[0].trim()) { // Check if name is not empty
+                    dosenData.push({
+                        nama: values[0].trim(),
+                        nidn: values[1].trim(),
+                        jabatan: values[2].trim(),
+                        masaKerja: values[3].trim(),
+                        bkd: values[4].trim(),
+                        pekerti: values[5].trim(),
+                        publikasi: values[6].trim(),
+                        homebase: values[7].trim(),
+                        pendidikan: values[8].trim(),
+                        status: values[9].trim()
+                    });
+                }
+            }
+
+            localStorage.setItem('dosenData', JSON.stringify(dosenData));
+            document.getElementById('dataInput').value = '';
+            displayResults();
+            updateDashboard();
+            updateSelectDosen();
+            
+            alert(`✓ ${dosenData.length} dosen berhasil diimpor!`);
         }
 
-        // Init
-        document.addEventListener('DOMContentLoaded', function() {
-            const config = loadConfig();
-            document.getElementById('apiKey').value = config.apiKey;
-            document.getElementById('authDomain').value = config.authDomain;
-            document.getElementById('projectId').value = config.projectId;
-            document.getElementById('storageBucket').value = config.storageBucket;
-            document.getElementById('messagingSenderId').value = config.messagingSenderId;
-            document.getElementById('appId').value = config.appId;
-            document.getElementById('databaseUrl').value = config.databaseURL;
+        // Evaluation Logic
+        function evaluateDosen(dosen) {
+            const criteria = {
+                1: { pass: dosen.nidn !== '' && dosen.nidn !== '-', label: 'Status Dosen Tetap & NUPTK' },
+                2: { pass: dosen.jabatan.includes('Asisten Ahli') || dosen.jabatan.includes('Lektor'), label: 'Jabatan Akademik (min. Asisten Ahli)' },
+                3: { pass: parseMasaKerja(dosen.masaKerja) >= 2, label: 'Masa Kerja (min. 2 tahun)' },
+                4: { pass: dosen.pekerti === 'Ada', label: 'Sertifikat PEKERTI/AA' },
+                5: { pass: dosen.bkd === 'Melaporkan BKD 4 semester', label: 'BKD 4 Semester Berturut-turut' },
+                6: { pass: publikasiData[dosen.nidn] && publikasiData[dosen.nidn].publikasi === 'ya', label: 'Karya Ilmiah/Publikasi', pending: !publikasiData[dosen.nidn] },
+                7: { pass: tugasData[dosen.nidn] ? tugasData[dosen.nidn].tugas !== 'ada' : true, label: 'Tidak Sedang Tugas Belajar', pending: !publikasiData[dosen.nidn] }
+            };
 
-            initFirebase();
+            const passCount = Object.values(criteria).filter(c => c.pass).length;
+            const pendingCount = Object.values(criteria).filter(c => c.pending).length;
+            const totalRequired = 7;
+
+            let status = 'eligible';
+            if (pendingCount > 0) {
+                status = 'pending';
+            } else if (passCount < totalRequired) {
+                status = 'not-eligible';
+            }
+
+            return { criteria, status, passCount, pendingCount };
+        }
+
+        function parseMasaKerja(masaKerjaStr) {
+            const match = masaKerjaStr.match(/(\d+)\s*Tahun/);
+            return match ? parseInt(match[1]) : 0;
+        }
+
+        // Display Results
+        function displayResults() {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            dosenData.forEach((dosen, index) => {
+                const evaluation = evaluateDosen(dosen);
+                const row = document.createElement('tr');
+                
+                let criteriaHtml = '';
+                for (let i = 1; i <= 7; i++) {
+                    const crit = evaluation.criteria[i];
+                    let className = crit.pass ? 'pass' : (crit.pending ? 'pending' : 'fail');
+                    let symbol = crit.pass ? '✓' : (crit.pending ? '?' : '✗');
+                    criteriaHtml += `<span class="criteria-badge ${className}" title="${crit.label}">${symbol}</span>`;
+                }
+
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td><strong>${dosen.nama}</strong></td>
+                    <td>${dosen.nidn || '-'}</td>
+                    <td>${dosen.masaKerja}</td>
+                    <td>${dosen.jabatan}</td>
+                    <td><span class="status-badge status-${evaluation.status}">${getStatusLabel(evaluation.status)}</span></td>
+                    <td style="text-align: center;">${criteriaHtml}</td>
+                    <td class="action-buttons">
+                        <button class="btn-primary" onclick="showDetail('${dosen.nidn}')">Detail</button>
+                        <button class="btn-secondary" onclick="editData('${dosen.nidn}')">Edit</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            document.getElementById('evaluationResults').style.display = 'block';
+            document.getElementById('emptyState').style.display = 'none';
+        }
+
+        function getStatusLabel(status) {
+            const labels = {
+                'eligible': '✓ Eligible',
+                'not-eligible': '✗ Tidak Eligible',
+                'pending': '⚠️ Pending'
+            };
+            return labels[status] || status;
+        }
+
+        // Filter Table
+        function filterTable() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+            const rows = document.querySelectorAll('#tableBody tr');
+
+            rows.forEach(row => {
+                const nama = row.cells[1].textContent.toLowerCase();
+                const nidn = row.cells[2].textContent.toLowerCase();
+                const rowStatus = row.cells[5].textContent.toLowerCase();
+
+                let showRow = (nama.includes(searchTerm) || nidn.includes(searchTerm));
+                if (statusFilter) {
+                    showRow = showRow && rowStatus.includes(statusFilter);
+                }
+
+                row.style.display = showRow ? '' : 'none';
+            });
+        }
+
+        // Modal Functions
+        function showDetail(nidn) {
+            const dosen = dosenData.find(d => d.nidn === nidn);
+            const evaluation = evaluateDosen(dosen);
+
+            let criteriaHtml = '';
+            for (let i = 1; i <= 7; i++) {
+                const crit = evaluation.criteria[i];
+                let className = crit.pass ? 'pass' : (crit.pending ? 'pending' : 'fail');
+                let icon = crit.pass ? '✓' : (crit.pending ? '?' : '✗');
+                let color = crit.pass ? '#27ae60' : (crit.pending ? '#f39c12' : '#e74c3c');
+                
+                criteriaHtml += `
+                    <div class="criteria-item ${className}">
+                        <div class="criteria-title">
+                            <span class="icon ${className}" style="font-size: 16px;">${icon}</span>
+                            ${crit.label}
+                        </div>
+                        <div class="criteria-description">
+                            ${getDetailCriteria(i, dosen, crit.pass)}
+                        </div>
+                    </div>
+                `;
+            }
+
+            const modalBody = document.getElementById('modalBody');
+            modalBody.innerHTML = `
+                <div style="margin-bottom: 20px;">
+                    <h3 style="color: #2c3e50;">${dosen.nama}</h3>
+                    <p style="color: #7f8c8d; font-size: 13px;">NIDN: ${dosen.nidn}</p>
+                </div>
+
+                <div style="background: #f9f9f9; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+                    <strong>Jabatan:</strong> ${dosen.jabatan}<br>
+                    <strong>Masa Kerja:</strong> ${dosen.masaKerja}<br>
+                    <strong>Pendidikan:</strong> ${dosen.pendidikan}
+                </div>
+
+                <h4 style="color: #2c3e50; margin-bottom: 15px;">Hasil Evaluasi 7 Kriteria:</h4>
+                <div class="criteria-list">
+                    ${criteriaHtml}
+                </div>
+
+                <div style="background: ${getStatusColor(evaluation.status)}20; border-left: 4px solid ${getStatusColor(evaluation.status)}; padding: 15px; border-radius: 4px; margin-top: 20px;">
+                    <strong style="color: ${getStatusColor(evaluation.status)};">Status: ${getStatusLabel(evaluation.status)}</strong>
+                    <p style="font-size: 13px; color: #7f8c8d; margin-top: 5px;">
+                        Memenuhi ${evaluation.passCount}/7 kriteria ${evaluation.pendingCount > 0 ? `(${evaluation.pendingCount} perlu data)` : ''}
+                    </p>
+                </div>
+            `;
+
+            document.getElementById('modalTitle').textContent = `Detail Evaluasi - ${dosen.nama}`;
+            document.getElementById('detailModal').classList.add('show');
+        }
+
+        function getDetailCriteria(criteriaNum, dosen, pass) {
+            const details = {
+                1: `NIDN: ${dosen.nidn || '-'} ${dosen.nidn ? '✓' : '✗'}`,
+                2: `Jabatan: ${dosen.jabatan} ${(dosen.jabatan.includes('Asisten Ahli') || dosen.jabatan.includes('Lektor')) ? '✓' : '✗'}`,
+                3: `Masa Kerja: ${dosen.masaKerja} ${parseMasaKerja(dosen.masaKerja) >= 2 ? '✓' : '✗'}`,
+                4: `Status PEKERTI/AA: ${dosen.pekerti || '-'} ${dosen.pekerti === 'Ada' ? '✓' : '✗'}`,
+                5: `Status BKD: ${dosen.bkd || '-'} ${dosen.bkd === 'Melaporkan BKD 4 semester' ? '✓' : '✗'}`,
+                6: publikasiData[dosen.nidn] ? `Publikasi: ${publikasiData[dosen.nidn].publikasi === 'ya' ? 'Ada ✓' : 'Tidak ada ✗'} - ${publikasiData[dosen.nidn].detail || ''}` : '⚠️ Belum ada data publikasi',
+                7: tugasData[dosen.nidn] ? `Status: ${tugasData[dosen.nidn].tugas === 'ada' ? 'Sedang tugas belajar ✗' : 'Tidak sedang tugas belajar ✓'}` : '⚠️ Belum ada data status tugas belajar'
+            };
+            return details[criteriaNum] || '';
+        }
+
+        function getStatusColor(status) {
+            const colors = {
+                'eligible': '#27ae60',
+                'not-eligible': '#e74c3c',
+                'pending': '#f39c12'
+            };
+            return colors[status] || '#95a5a6';
+        }
+
+        function closeModal() {
+            document.getElementById('detailModal').classList.remove('show');
+        }
+
+        // Edit Dosen
+        function editData(nidn) {
+            document.getElementById('selectDosen').value = nidn;
+            const dosen = dosenData.find(d => d.nidn === nidn);
+            
+            document.getElementById('dosenNama').value = dosen.nama;
+            document.getElementById('dosenNIDN').value = dosen.nidn;
+            
+            if (publikasiData[nidn]) {
+                document.getElementById('publikasi').value = publikasiData[nidn].publikasi;
+                document.getElementById('detailPublikasi').value = publikasiData[nidn].detail;
+            } else {
+                document.getElementById('publikasi').value = '';
+                document.getElementById('detailPublikasi').value = '';
+            }
+
+            if (tugasData[nidn]) {
+                document.getElementById(`tugas${tugasData[nidn].tugas === 'ada' ? 'Ada' : 'Tidak'}`).checked = true;
+            } else {
+                document.getElementById('tugasTidak').checked = true;
+            }
+
+            document.getElementById('dosenFormSection').style.display = 'block';
+            document.getElementById('selectPrompt').style.display = 'none';
+            switchTab('detail');
+        }
+
+        // Select Dosen Change
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('selectDosen').addEventListener('change', function() {
+                if (this.value) {
+                    const dosen = dosenData.find(d => d.nidn === this.value);
+                    document.getElementById('dosenNama').value = dosen.nama;
+                    document.getElementById('dosenNIDN').value = dosen.nidn;
+                    
+                    if (publikasiData[this.value]) {
+                        document.getElementById('publikasi').value = publikasiData[this.value].publikasi;
+                        document.getElementById('detailPublikasi').value = publikasiData[this.value].detail;
+                    } else {
+                        document.getElementById('publikasi').value = '';
+                        document.getElementById('detailPublikasi').value = '';
+                    }
+
+                    if (tugasData[this.value]) {
+                        document.getElementById(`tugas${tugasData[this.value].tugas === 'ada' ? 'Ada' : 'Tidak'}`).checked = true;
+                    } else {
+                        document.getElementById('tugasTidak').checked = true;
+                    }
+
+                    document.getElementById('dosenFormSection').style.display = 'block';
+                    document.getElementById('selectPrompt').style.display = 'none';
+                } else {
+                    document.getElementById('dosenFormSection').style.display = 'none';
+                    document.getElementById('selectPrompt').style.display = 'block';
+                }
+            });
+        });
+
+        function updateTugasStatus() {
+            // Just a placeholder for future use
+        }
+
+        function saveDosen() {
+            const nidn = document.getElementById('dosenNIDN').value;
+            const publikasi = document.getElementById('publikasi').value;
+            const detailPublikasi = document.getElementById('detailPublikasi').value;
+            const tugasBelajar = document.querySelector('input[name="tugas_belajar"]:checked').value;
+
+            if (!publikasi) {
+                alert('Pilih status publikasi terlebih dahulu!');
+                return;
+            }
+
+            publikasiData[nidn] = {
+                publikasi: publikasi,
+                detail: detailPublikasi
+            };
+
+            tugasData[nidn] = {
+                tugas: tugasBelajar
+            };
+
+            localStorage.setItem('publikasiData', JSON.stringify(publikasiData));
+            localStorage.setItem('tugasData', JSON.stringify(tugasData));
+
+            alert('✓ Data berhasil disimpan!');
+            displayResults();
+            updateDashboard();
+            cancelEdit();
+        }
+
+        function cancelEdit() {
+            document.getElementById('selectDosen').value = '';
+            document.getElementById('dosenFormSection').style.display = 'none';
+            document.getElementById('selectPrompt').style.display = 'block';
+            document.getElementById('publikasi').value = '';
+            document.getElementById('detailPublikasi').value = '';
+        }
+
+        function updateSelectDosen() {
+            const select = document.getElementById('selectDosen');
+            select.innerHTML = '<option value="">-- Pilih Dosen --</option>';
+            dosenData.forEach(dosen => {
+                const option = document.createElement('option');
+                option.value = dosen.nidn;
+                option.textContent = `${dosen.nama} (${dosen.nidn})`;
+                select.appendChild(option);
+            });
+        }
+
+        // Dashboard Update
+        function updateDashboard() {
+            let eligible = 0, notEligible = 0, pending = 0;
+
+            dosenData.forEach(dosen => {
+                const evaluation = evaluateDosen(dosen);
+                if (evaluation.status === 'eligible') eligible++;
+                else if (evaluation.status === 'not-eligible') notEligible++;
+                else pending++;
+            });
+
+            document.getElementById('countEligible').textContent = eligible;
+            document.getElementById('countNotEligible').textContent = notEligible;
+            document.getElementById('countPending').textContent = pending;
+            document.getElementById('countTotal').textContent = dosenData.length;
+
+            // Update chart
+            const total = dosenData.length || 1;
+            const maxHeight = 200;
+            document.getElementById('chartEligible').style.height = (eligible / total * maxHeight) + 'px';
+            document.getElementById('chartPending').style.height = (pending / total * maxHeight) + 'px';
+            document.getElementById('chartNotEligible').style.height = (notEligible / total * maxHeight) + 'px';
+        }
+
+        // Export to Excel
+        function exportToExcel() {
+            const workbook = XLSX.utils.book_new();
+            const data = [];
+
+            data.push(['EVALUASI SERTIFIKASI DOSEN (SERDOS) 2026', '', '', '', '', '', '', '']);
+            data.push(['Universitas Cordova', '', '', '', '', '', '', '']);
+            data.push(['']);
+            data.push(['No', 'Nama Dosen', 'NIDN', 'Jabatan', 'Masa Kerja', 'Status', 'Kriteria Terpenuhi', 'Alasan']);
+
+            dosenData.forEach((dosen, index) => {
+                const evaluation = evaluateDosen(dosen);
+                const alasan = [];
+                
+                for (let i = 1; i <= 7; i++) {
+                    const crit = evaluation.criteria[i];
+                    if (!crit.pass) {
+                        alasan.push(`- ${crit.label}`);
+                    }
+                }
+
+                data.push([
+                    index + 1,
+                    dosen.nama,
+                    dosen.nidn,
+                    dosen.jabatan,
+                    dosen.masaKerja,
+                    getStatusLabel(evaluation.status),
+                    `${evaluation.passCount}/7`,
+                    alasan.join('\n')
+                ]);
+            });
+
+            const worksheet = XLSX.utils.aoa_to_sheet(data);
+            worksheet['!cols'] = [
+                { wch: 5 },
+                { wch: 25 },
+                { wch: 12 },
+                { wch: 18 },
+                { wch: 15 },
+                { wch: 15 },
+                { wch: 15 },
+                { wch: 35 }
+            ];
+
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Evaluasi Serdos');
+            XLSX.writeFile(workbook, 'Evaluasi_Serdos_2026.xlsx');
+        }
+
+        // Print
+        function printResults() {
+            const printWindow = window.open('', '', 'height=600,width=800');
+            let htmlContent = `
+                <html>
+                <head>
+                    <title>Evaluasi Sertifikasi Dosen 2026</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 20px; }
+                        h1 { text-align: center; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                        th, td { border: 1px solid #333; padding: 8px; text-align: left; }
+                        th { background-color: #f0f0f0; }
+                        .status-eligible { color: green; }
+                        .status-not-eligible { color: red; }
+                        .status-pending { color: orange; }
+                    </style>
+                </head>
+                <body>
+                    <h1>Evaluasi Sertifikasi Dosen (Serdos) 2026</h1>
+                    <p><strong>Universitas Cordova</strong></p>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Nama Dosen</th>
+                                <th>NIDN</th>
+                                <th>Jabatan</th>
+                                <th>Masa Kerja</th>
+                                <th>Status</th>
+                                <th>Kriteria</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            dosenData.forEach((dosen, index) => {
+                const evaluation = evaluateDosen(dosen);
+                htmlContent += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${dosen.nama}</td>
+                        <td>${dosen.nidn}</td>
+                        <td>${dosen.jabatan}</td>
+                        <td>${dosen.masaKerja}</td>
+                        <td class="status-${evaluation.status}">${getStatusLabel(evaluation.status)}</td>
+                        <td>${evaluation.passCount}/7</td>
+                    </tr>
+                `;
+            });
+
+            htmlContent += `
+                        </tbody>
+                    </table>
+                </body>
+                </html>
+            `;
+
+            printWindow.document.write(htmlContent);
+            printWindow.document.close();
+            printWindow.print();
+        }
+
+        // Clear All Data
+        function clearAllData() {
+            if (confirm('Apakah Anda yakin ingin menghapus semua data? Tindakan ini tidak dapat dibatalkan.')) {
+                dosenData = [];
+                publikasiData = {};
+                tugasData = {};
+                localStorage.clear();
+                location.reload();
+            }
+        }
+
+        // Close modal when clicking outside
+        document.addEventListener('click', function(event) {
+            const modal = document.getElementById('detailModal');
+            if (event.target === modal) {
+                closeModal();
+            }
         });
     </script>
 </body>
