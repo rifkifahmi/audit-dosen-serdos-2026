@@ -538,6 +538,7 @@
             <button class="tab-btn active" onclick="switchTab('dashboard')">📊 Dashboard</button>
             <button class="tab-btn" onclick="switchTab('data')">📥 Data & Evaluasi</button>
             <button class="tab-btn" onclick="switchTab('detail')">🔍 Detail Dosen</button>
+            <button class="tab-btn" onclick="switchTab('sync')">☁️ Sinkronisasi Google Sheets</button>
         </div>
 
         <!-- TAB 1: DASHBOARD -->
@@ -736,6 +737,125 @@
 
                 <div id="selectPrompt" class="empty-state" style="padding: 40px 20px;">
                     <p>Pilih dosen dari list di atas untuk tambah/edit data publikasi dan status tugas belajar.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: SINKRONISASI GOOGLE SHEETS -->
+        <div id="sync" class="tab-content">
+            <div class="input-section">
+                <h3>☁️ Sinkronisasi Data ke Google Sheets</h3>
+                <p style="color: #7f8c8d; margin-bottom: 15px; font-size: 13px;">
+                    Simpan dan sinkronisasi data evaluasi dosen Anda ke Google Sheets secara otomatis.
+                </p>
+
+                <div class="alert alert-info">
+                    <strong>📌 Cara Setup (3 Step):</strong><br>
+                    1. Buat Google Apps Script (lihat panduan di bawah)<br>
+                    2. Copy URL Web App ke field di bawah<br>
+                    3. Klik "Sinkronisasi" untuk mulai
+                </div>
+
+                <div class="input-section">
+                    <h3>🔗 Konfigurasi Google Apps Script</h3>
+                    
+                    <div class="form-group">
+                        <label>URL Google Apps Script (Web App URL)</label>
+                        <input type="text" id="scriptUrl" placeholder="https://script.google.com/macros/d/.../usercontent" style="width: 100%; padding: 10px; border: 1px solid #bdc3c7; border-radius: 4px; font-family: monospace; font-size: 12px;">
+                        <p style="font-size: 12px; color: #7f8c8d; margin-top: 8px;">Contoh: https://script.google.com/macros/d/1234567890ABCDEFG/usercontent</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label>ID Google Sheet (Opsional)</label>
+                        <input type="text" id="sheetId" placeholder="Pastekan ID dari URL Google Sheet Anda" style="width: 100%; padding: 10px; border: 1px solid #bdc3c7; border-radius: 4px; font-family: monospace; font-size: 12px;">
+                        <p style="font-size: 12px; color: #7f8c8d; margin-top: 8px;">Contoh ID dari: https://docs.google.com/spreadsheets/d/<strong>1234567890</strong>/edit</p>
+                    </div>
+
+                    <div class="button-group">
+                        <button class="btn-success" onclick="testGoogleAppsScript()">🧪 Test Koneksi</button>
+                        <button class="btn-primary" onclick="syncToGoogleSheets()">☁️ Sinkronisasi Data Sekarang</button>
+                        <button class="btn-secondary" onclick="enableAutoSync()">🔄 Aktifkan Auto-Sync</button>
+                    </div>
+
+                    <div id="syncStatus" style="margin-top: 20px;"></div>
+                </div>
+
+                <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin-top: 30px;">
+                    <h4 style="color: #2c3e50; margin-bottom: 15px;">📋 Panduan Setup Google Apps Script</h4>
+                    
+                    <div style="background: white; padding: 15px; border-radius: 4px; margin-bottom: 15px;">
+                        <p style="font-weight: 600; margin-bottom: 10px;">STEP 1: Buat Google Sheet Baru</p>
+                        <ol style="font-size: 13px; color: #2c3e50; line-height: 1.8;">
+                            <li>Buka <a href="https://sheets.google.com" target="_blank" style="color: #3498db;">Google Sheets</a></li>
+                            <li>Klik "Buat spreadsheet baru"</li>
+                            <li>Beri nama: "Serdos 2026 - Data Evaluasi"</li>
+                            <li>Copy ID dari URL (bagian setelah /d/)</li>
+                        </ol>
+                    </div>
+
+                    <div style="background: white; padding: 15px; border-radius: 4px; margin-bottom: 15px;">
+                        <p style="font-weight: 600; margin-bottom: 10px;">STEP 2: Buat Google Apps Script</p>
+                        <ol style="font-size: 13px; color: #2c3e50; line-height: 1.8;">
+                            <li>Di Sheet yang baru, buka Tools → Script editor</li>
+                            <li>Copy-paste kode di bawah ke Apps Script editor</li>
+                            <li>Klik Save (Ctrl+S)</li>
+                            <li>Klik "Deploy" → "New deployment"</li>
+                            <li>Pilih type: "Web app"</li>
+                            <li>Execute as: Pilih akun Google Anda</li>
+                            <li>Who has access: "Anyone"</li>
+                            <li>Klik Deploy → Copy URL yang muncul</li>
+                        </ol>
+                    </div>
+
+                    <div style="background: #fff3cd; padding: 15px; border-radius: 4px; margin-bottom: 15px; border-left: 4px solid #ffc107;">
+                        <p style="font-weight: 600; margin-bottom: 10px; color: #856404;">⚙️ Kode Google Apps Script:</p>
+                        <textarea id="scriptCode" style="width: 100%; height: 300px; padding: 10px; border: 1px solid #bdc3c7; border-radius: 4px; font-family: monospace; font-size: 11px; background: white;" readonly>function doPost(e) {
+  const sheet = SpreadsheetApp.getActiveSheet();
+  const data = JSON.parse(e.postData.contents);
+  
+  // Clear existing data
+  sheet.clearContents();
+  
+  // Add headers
+  const headers = ['No', 'Nama Dosen', 'NIDN', 'Jabatan', 'Masa Kerja', 'Program Studi', 'Status Serdos', 'Rekomendasi', 'Publikasi', 'Tugas Belajar'];
+  sheet.appendRow(headers);
+  
+  // Add data
+  data.forEach((row, index) => {
+    sheet.appendRow([
+      index + 1,
+      row.nama,
+      row.nidn,
+      row.jabatan,
+      row.masaKerja,
+      row.prodi,
+      row.status,
+      row.rekomendasi,
+      row.publikasi,
+      row.tugas
+    ]);
+  });
+  
+  return ContentService.createTextOutput(JSON.stringify({success: true, count: data.length}))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function doGet(e) {
+  return ContentService.createTextOutput(JSON.stringify({status: 'Apps Script ready'}))
+    .setMimeType(ContentService.MimeType.JSON);
+}</textarea>
+                        <button class="btn-secondary" onclick="copyScriptCode()" style="margin-top: 10px;">📋 Copy Kode</button>
+                    </div>
+
+                    <div style="background: white; padding: 15px; border-radius: 4px;">
+                        <p style="font-weight: 600; margin-bottom: 10px;">STEP 3: Input URL ke Aplikasi</p>
+                        <ol style="font-size: 13px; color: #2c3e50; line-height: 1.8;">
+                            <li>Copy URL dari Google Apps Script deployment</li>
+                            <li>Paste ke field "URL Google Apps Script" di atas</li>
+                            <li>Klik "Test Koneksi" untuk verifikasi</li>
+                            <li>Klik "Sinkronisasi Data" untuk mulai</li>
+                        </ol>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1399,15 +1519,17 @@
             // Update chart
             const total = dosenData.length || 1;
             const maxHeight = 200;
-            document.getElementById('chartEligible').style.height = (eligible / total * maxHeight) + 'px';
-            document.getElementById('chartPending').style.height = (pending / total * maxHeight) + 'px';
-            document.getElementById('chartNotEligible').style.height = (notEligible / total * maxHeight) + 'px';
-
-            // Update grafik per program studi dan jabatan
+            
+            // Delay chart creation untuk memastikan Canvas sudah siap
             setTimeout(() => {
-                createProdiChart();
-                createJabatanChart();
-            }, 100);
+                try {
+                    createProdiChart();
+                    createJabatanChart();
+                    console.log('Charts created successfully');
+                } catch (error) {
+                    console.error('Error updating charts:', error);
+                }
+            }, 500);
         }
 
         // Extract Program Studi from homebase
@@ -1469,148 +1591,289 @@
             return jabatanMap;
         }
 
-        // Create Prodi Chart
-        function createProdiChart() {
-            const prodiData = getProdiData();
-            const labels = Object.keys(prodiData);
-            const eligibleData = labels.map(label => prodiData[label].eligible);
-            const notEligibleData = labels.map(label => prodiData[label].notEligible);
-            const pendingData = labels.map(label => prodiData[label].pending);
-
-            const ctx = document.getElementById('chartProdi');
-            if (!ctx) return;
-
-            // Destroy existing chart if any
-            if (window.chartProdiInstance) {
-                window.chartProdiInstance.destroy();
-            }
-
-            window.chartProdiInstance = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: '✓ Eligible',
-                            data: eligibleData,
-                            backgroundColor: '#27ae60',
-                            borderColor: '#1e8449',
-                            borderWidth: 1
-                        },
-                        {
-                            label: '⚠️ Pending',
-                            data: pendingData,
-                            backgroundColor: '#f39c12',
-                            borderColor: '#d68910',
-                            borderWidth: 1
-                        },
-                        {
-                            label: '✗ Tidak Eligible',
-                            data: notEligibleData,
-                            backgroundColor: '#e74c3c',
-                            borderColor: '#c0392b',
-                            borderWidth: 1
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                font: { size: 12 },
-                                padding: 15,
-                                usePointStyle: true
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            stacked: false,
-                            ticks: { font: { size: 11 } }
-                        },
-                        y: {
-                            stacked: false,
-                            beginAtZero: true,
-                            ticks: { font: { size: 11 } }
-                        }
-                    }
-                }
+        // Google Sheets Sync Functions
+        function copyScriptCode() {
+            const code = document.getElementById('scriptCode').value;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('✓ Kode Google Apps Script berhasil dicopy!');
+            }).catch(() => {
+                alert('❌ Gagal copy. Coba manual select & copy kode.');
             });
         }
 
-        // Create Jabatan Chart
-        function createJabatanChart() {
-            const jabatanData = getJabatanData();
-            const labels = Object.keys(jabatanData).sort();
-            const eligibleData = labels.map(label => jabatanData[label].eligible);
-            const notEligibleData = labels.map(label => jabatanData[label].notEligible);
-            const pendingData = labels.map(label => jabatanData[label].pending);
-
-            const ctx = document.getElementById('chartJabatan');
-            if (!ctx) return;
-
-            // Destroy existing chart if any
-            if (window.chartJabatanInstance) {
-                window.chartJabatanInstance.destroy();
+        function testGoogleAppsScript() {
+            const scriptUrl = document.getElementById('scriptUrl').value.trim();
+            if (!scriptUrl) {
+                alert('⚠️ Silakan input URL Google Apps Script terlebih dahulu!');
+                return;
             }
 
-            window.chartJabatanInstance = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: '✓ Eligible',
-                            data: eligibleData,
-                            backgroundColor: '#27ae60',
-                            borderColor: '#1e8449',
-                            borderWidth: 1
+            const statusDiv = document.getElementById('syncStatus');
+            statusDiv.innerHTML = '🔄 Testing koneksi...';
+
+            fetch(scriptUrl)
+                .then(response => response.json())
+                .then(data => {
+                    statusDiv.innerHTML = '<div class="alert alert-success">✅ Koneksi berhasil! Apps Script siap menerima data.</div>';
+                    // Save script URL to localStorage
+                    localStorage.setItem('googleScriptUrl', scriptUrl);
+                })
+                .catch(error => {
+                    statusDiv.innerHTML = `<div class="alert" style="background: #fadbd8; border-left: 4px solid #e74c3c; color: #a93226; padding: 12px; border-radius: 4px;">❌ Koneksi gagal: ${error.message}<br><br>Pastikan:<br>1. URL sudah benar<br>2. Google Apps Script sudah ter-deploy<br>3. "Who has access" diset ke "Anyone"</div>`;
+                });
+        }
+
+        function syncToGoogleSheets() {
+            const scriptUrl = document.getElementById('scriptUrl').value.trim();
+            if (!scriptUrl) {
+                alert('⚠️ Silakan input URL Google Apps Script terlebih dahulu!');
+                return;
+            }
+
+            if (dosenData.length === 0) {
+                alert('⚠️ Tidak ada data dosen untuk disinkronisasi!');
+                return;
+            }
+
+            const statusDiv = document.getElementById('syncStatus');
+            statusDiv.innerHTML = '🔄 Sedang menyinkronisasi ' + dosenData.length + ' dosen...';
+
+            // Format data untuk dikirim
+            const dataToSync = dosenData.map((dosen, index) => {
+                const evaluation = evaluateDosen(dosen);
+                const jabatan = extractJabatan(dosen.jabatan);
+                const publikasi = publikasiData[dosen.nidn] ? publikasiData[dosen.nidn].publikasi : 'Belum ada data';
+                const tugas = tugasData[dosen.nidn] ? tugasData[dosen.nidn].tugas : 'Belum ada data';
+                
+                // Generate rekomendasi text
+                let rekomendasi = '';
+                if (jabatan.includes('Asisten Ahli')) {
+                    rekomendasi = evaluation.status === 'eligible' ? 'Siap naik ke Lektor' : 'Lengkapi kriteria Serdos';
+                } else if (jabatan.includes('Lektor') && !jabatan.includes('Kepala')) {
+                    rekomendasi = 'Perluas publikasi untuk naik Lektor Kepala';
+                } else {
+                    rekomendasi = 'Pertahankan posisi';
+                }
+
+                return {
+                    nama: dosen.nama,
+                    nidn: dosen.nidn,
+                    jabatan: jabatan,
+                    masaKerja: dosen.masaKerja,
+                    prodi: extractProdi(dosen.homebase),
+                    status: getStatusLabel(evaluation.status),
+                    rekomendasi: rekomendasi,
+                    publikasi: publikasi,
+                    tugas: tugas
+                };
+            });
+
+            // Send data to Google Apps Script
+            fetch(scriptUrl, {
+                method: 'POST',
+                body: JSON.stringify(dataToSync)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    statusDiv.innerHTML = `<div class="alert alert-success">✅ Sinkronisasi berhasil!<br>${data.count} data dosen berhasil disimpan ke Google Sheets.<br><br>Silakan buka Google Sheet Anda untuk verifikasi.</div>`;
+                    // Save last sync time
+                    const now = new Date().toLocaleString('id-ID');
+                    localStorage.setItem('lastSyncTime', now);
+                    alert('✓ ' + data.count + ' dosen berhasil disinkronisasi ke Google Sheets!');
+                } else {
+                    throw new Error('Response tidak valid');
+                }
+            })
+            .catch(error => {
+                statusDiv.innerHTML = `<div class="alert" style="background: #fadbd8; border-left: 4px solid #e74c3c; color: #a93226; padding: 12px; border-radius: 4px;">❌ Sinkronisasi gagal: ${error.message}<br><br>Coba:<br>1. Verifikasi URL Apps Script<br>2. Pastikan Google Sheet ter-share dengan Apps Script<br>3. Coba test koneksi dulu sebelum sinkronisasi</div>`;
+            });
+        }
+
+        function enableAutoSync() {
+            const scriptUrl = localStorage.getItem('googleScriptUrl');
+            if (!scriptUrl) {
+                alert('⚠️ Silakan setup Google Apps Script URL terlebih dahulu!');
+                return;
+            }
+
+            // Enable auto-sync every 5 minutes
+            const autoSyncInterval = setInterval(() => {
+                syncToGoogleSheets();
+            }, 5 * 60 * 1000); // 5 minutes
+
+            localStorage.setItem('autoSyncEnabled', 'true');
+            alert('✓ Auto-sync diaktifkan! Data akan disinkronisasi otomatis setiap 5 menit ke Google Sheets.');
+        }
+
+        // Create Prodi Chart dengan better error handling
+        function createProdiChart() {
+            try {
+                const ctx = document.getElementById('chartProdi');
+                if (!ctx) {
+                    console.warn('chartProdi element not found');
+                    return;
+                }
+
+                const prodiData = getProdiData();
+                const labels = Object.keys(prodiData);
+                
+                if (labels.length === 0) {
+                    console.warn('No prodi data available');
+                    return;
+                }
+
+                const eligibleData = labels.map(label => prodiData[label].eligible);
+                const notEligibleData = labels.map(label => prodiData[label].notEligible);
+                const pendingData = labels.map(label => prodiData[label].pending);
+
+                // Destroy existing chart if any
+                if (window.chartProdiInstance) {
+                    window.chartProdiInstance.destroy();
+                }
+
+                window.chartProdiInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: '✓ Eligible',
+                                data: eligibleData,
+                                backgroundColor: '#27ae60',
+                                borderColor: '#1e8449',
+                                borderWidth: 1
+                            },
+                            {
+                                label: '⚠️ Pending',
+                                data: pendingData,
+                                backgroundColor: '#f39c12',
+                                borderColor: '#d68910',
+                                borderWidth: 1
+                            },
+                            {
+                                label: '✗ Tidak Eligible',
+                                data: notEligibleData,
+                                backgroundColor: '#e74c3c',
+                                borderColor: '#c0392b',
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    font: { size: 12 },
+                                    padding: 15,
+                                    usePointStyle: true
+                                }
+                            }
                         },
-                        {
-                            label: '⚠️ Pending',
-                            data: pendingData,
-                            backgroundColor: '#f39c12',
-                            borderColor: '#d68910',
-                            borderWidth: 1
-                        },
-                        {
-                            label: '✗ Tidak Eligible',
-                            data: notEligibleData,
-                            backgroundColor: '#e74c3c',
-                            borderColor: '#c0392b',
-                            borderWidth: 1
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                font: { size: 12 },
-                                padding: 15,
-                                usePointStyle: true
+                        scales: {
+                            x: {
+                                stacked: false,
+                                ticks: { font: { size: 11 } }
+                            },
+                            y: {
+                                stacked: false,
+                                beginAtZero: true,
+                                ticks: { font: { size: 11 } }
                             }
                         }
+                    }
+                });
+            } catch (error) {
+                console.error('Error creating prodi chart:', error);
+            }
+        }
+
+        // Create Jabatan Chart dengan better error handling
+        function createJabatanChart() {
+            try {
+                const ctx = document.getElementById('chartJabatan');
+                if (!ctx) {
+                    console.warn('chartJabatan element not found');
+                    return;
+                }
+
+                const jabatanData = getJabatanData();
+                const labels = Object.keys(jabatanData).sort();
+                
+                if (labels.length === 0) {
+                    console.warn('No jabatan data available');
+                    return;
+                }
+
+                const eligibleData = labels.map(label => jabatanData[label].eligible);
+                const notEligibleData = labels.map(label => jabatanData[label].notEligible);
+                const pendingData = labels.map(label => jabatanData[label].pending);
+
+                // Destroy existing chart if any
+                if (window.chartJabatanInstance) {
+                    window.chartJabatanInstance.destroy();
+                }
+
+                window.chartJabatanInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: '✓ Eligible',
+                                data: eligibleData,
+                                backgroundColor: '#27ae60',
+                                borderColor: '#1e8449',
+                                borderWidth: 1
+                            },
+                            {
+                                label: '⚠️ Pending',
+                                data: pendingData,
+                                backgroundColor: '#f39c12',
+                                borderColor: '#d68910',
+                                borderWidth: 1
+                            },
+                            {
+                                label: '✗ Tidak Eligible',
+                                data: notEligibleData,
+                                backgroundColor: '#e74c3c',
+                                borderColor: '#c0392b',
+                                borderWidth: 1
+                            }
+                        ]
                     },
-                    scales: {
-                        x: {
-                            stacked: false,
-                            ticks: { font: { size: 11 } }
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    font: { size: 12 },
+                                    padding: 15,
+                                    usePointStyle: true
+                                }
+                            }
                         },
-                        y: {
-                            stacked: false,
-                            beginAtZero: true,
-                            ticks: { font: { size: 11 } }
+                        scales: {
+                            x: {
+                                stacked: false,
+                                ticks: { font: { size: 11 } }
+                            },
+                            y: {
+                                stacked: false,
+                                beginAtZero: true,
+                                ticks: { font: { size: 11 } }
+                            }
                         }
                     }
-                }
-            });
+                });
+            } catch (error) {
+                console.error('Error creating jabatan chart:', error);
+            }
         }
 
         // Export to Excel
