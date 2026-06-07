@@ -536,6 +536,7 @@
         <!-- TABS -->
         <div class="tabs">
             <button class="tab-btn active" onclick="switchTab('dashboard')">📊 Dashboard</button>
+            <button class="tab-btn" onclick="switchTab('analysis')">📈 Analisis Status Sertifikasi</button>
             <button class="tab-btn" onclick="switchTab('data')">📥 Data & Evaluasi</button>
             <button class="tab-btn" onclick="switchTab('detail')">🔍 Detail Dosen</button>
             <button class="tab-btn" onclick="switchTab('sync')">☁️ Sinkronisasi Google Sheets</button>
@@ -577,7 +578,97 @@
             </div>
         </div>
 
-        <!-- TAB 2: DATA & EVALUASI -->
+        <!-- TAB 2: ANALISIS STATUS SERTIFIKASI -->
+        <div id="analysis" class="tab-content">
+            <div class="dashboard">
+                <div class="stat-card eligible">
+                    <div class="stat-number" id="analysisSudahSertifikasi">0</div>
+                    <div class="stat-label">Sudah Sertifikasi</div>
+                </div>
+                <div class="stat-card not-eligible">
+                    <div class="stat-number" id="analysisBelumSertifikasi">0</div>
+                    <div class="stat-label">Belum Sertifikasi</div>
+                </div>
+                <div class="stat-card pending">
+                    <div class="stat-number" id="analysisProses">0</div>
+                    <div class="stat-label">Dalam Proses</div>
+                </div>
+            </div>
+
+            <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                <h3 style="color: #2c3e50; margin-bottom: 20px;">📊 Distribusi Status Sertifikasi</h3>
+                <div style="position: relative; height: 400px;">
+                    <canvas id="chartSertifikasi"></canvas>
+                </div>
+            </div>
+
+            <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                <h3 style="color: #2c3e50; margin-bottom: 20px;">⚠️ Ringkasan Kendala Dosen Belum Sertifikasi</h3>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                    <div style="background: #fadbd8; padding: 15px; border-radius: 8px; border-left: 4px solid #e74c3c;">
+                        <div style="font-size: 24px; font-weight: bold; color: #e74c3c;" id="kendalaJabatan">0</div>
+                        <div style="font-size: 12px; color: #2c3e50; margin-top: 5px;">Kekurangan Jabatan Akademik</div>
+                    </div>
+                    <div style="background: #fadbd8; padding: 15px; border-radius: 8px; border-left: 4px solid #e74c3c;">
+                        <div style="font-size: 24px; font-weight: bold; color: #e74c3c;" id="kendalaMasaKerja">0</div>
+                        <div style="font-size: 12px; color: #2c3e50; margin-top: 5px;">Masa Kerja Kurang</div>
+                    </div>
+                    <div style="background: #fadbd8; padding: 15px; border-radius: 8px; border-left: 4px solid #e74c3c;">
+                        <div style="font-size: 24px; font-weight: bold; color: #e74c3c;" id="kendalaPekerti">0</div>
+                        <div style="font-size: 12px; color: #2c3e50; margin-top: 5px;">Tanpa Sertifikat PEKERTI/AA</div>
+                    </div>
+                    <div style="background: #fadbd8; padding: 15px; border-radius: 8px; border-left: 4px solid #e74c3c;">
+                        <div style="font-size: 24px; font-weight: bold; color: #e74c3c;" id="kendalaBKD">0</div>
+                        <div style="font-size: 12px; color: #2c3e50; margin-top: 5px;">BKD 4 Semester Belum Lengkap</div>
+                    </div>
+                    <div style="background: #fadbd8; padding: 15px; border-radius: 8px; border-left: 4px solid #e74c3c;">
+                        <div style="font-size: 24px; font-weight: bold; color: #e74c3c;" id="kendalaPublikasi">0</div>
+                        <div style="font-size: 12px; color: #2c3e50; margin-top: 5px;">Tanpa Publikasi Ilmiah</div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <h3 style="color: #2c3e50; margin-bottom: 20px;">📋 Detail Dosen Belum Sertifikasi & Kendala</h3>
+                
+                <div class="search-filter">
+                    <input type="text" id="searchKendala" placeholder="Cari nama dosen..." onkeyup="filterKendalaTable()">
+                    <select id="filterKendala" onchange="filterKendalaTable()">
+                        <option value="">Semua Kendala</option>
+                        <option value="jabatan">Jabatan Akademik</option>
+                        <option value="masaker">Masa Kerja</option>
+                        <option value="pekerti">PEKERTI/AA</option>
+                        <option value="bkd">BKD 4 Semester</option>
+                        <option value="publikasi">Publikasi Ilmiah</option>
+                    </select>
+                </div>
+
+                <div class="table-wrapper">
+                    <table id="kendalaTable">
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Nama Dosen</th>
+                                <th>NIDN</th>
+                                <th>Jabatan Saat Ini</th>
+                                <th>Masa Kerja</th>
+                                <th>Kendala Utama</th>
+                                <th>Syarat yang Kurang</th>
+                                <th>Action Plan</th>
+                            </tr>
+                        </thead>
+                        <tbody id="kendalaTableBody"></tbody>
+                    </table>
+                </div>
+
+                <div class="button-group" style="margin-top: 20px;">
+                    <button class="btn-success" onclick="exportKendalaToExcel()">📥 Export Laporan Kendala</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: DATA & EVALUASI -->
         <div id="data" class="tab-content">
             <div class="input-section">
                 <h3>📥 Impor Data Dosen</h3>
@@ -946,6 +1037,7 @@ function doGet(e) {
         // Initialize
         window.addEventListener('load', function() {
             updateDashboard();
+            updateAnalysisDashboard();
             updateSelectDosen();
             if (dosenData.length > 0) {
                 displayResults();
@@ -1122,6 +1214,7 @@ function doGet(e) {
             
             displayResults();
             updateDashboard();
+            updateAnalysisDashboard();
             updateSelectDosen();
             
             alert(`✅ ${dosenData.length} dosen berhasil diimpor dari file!`);
@@ -1543,6 +1636,7 @@ function doGet(e) {
             alert('✓ Data berhasil disimpan!');
             displayResults();
             updateDashboard();
+            updateAnalysisDashboard();
             cancelEdit();
         }
 
@@ -1656,7 +1750,265 @@ function doGet(e) {
             return jabatanMap;
         }
 
-        // Google Sheets Sync Functions
+        // Analisis Kendala Sertifikasi
+        function generateKendalaAnalysis(dosen, evaluation) {
+            const kendala = [];
+            const syarat = [];
+            
+            // Cek setiap kriteria
+            if (!dosen.nidn || dosen.nidn === '' || dosen.nidn === '-') {
+                kendala.push('Belum ada NIDN/NUPTK');
+                syarat.push('Dapatkan NIDN sebagai dosen tetap');
+            }
+            
+            const jabatan = extractJabatan(dosen.jabatan);
+            if (!jabatan.includes('Asisten Ahli') && !jabatan.includes('Lektor')) {
+                kendala.push('jabatan');
+                syarat.push(`Jabatan saat ini: ${jabatan || 'Belum ada'}. Butuh minimal Asisten Ahli`);
+            }
+            
+            const masaKerja = parseMasaKerja(dosen.masaKerja);
+            if (masaKerja < 2) {
+                kendala.push('masaker');
+                syarat.push(`Masa kerja ${masaKerja} tahun. Butuh minimal 2 tahun pengalaman`);
+            }
+            
+            if (dosen.pekerti !== 'Ada') {
+                kendala.push('pekerti');
+                syarat.push('Ikuti program PEKERTI atau Applied Approach (AA)');
+            }
+            
+            if (dosen.bkd !== 'Melaporkan BKD 4 semester') {
+                kendala.push('bkd');
+                syarat.push('Lengkapi laporan BKD/LKD selama 4 semester berturut-turut');
+            }
+            
+            if (!publikasiData[dosen.nidn] || publikasiData[dosen.nidn].publikasi !== 'ya') {
+                kendala.push('publikasi');
+                syarat.push('Publikasikan minimal 1 artikel di Jurnal Nasional Terakreditasi atau Internasional');
+            }
+            
+            const tugas = tugasData[dosen.nidn];
+            if (tugas && tugas.tugas === 'ada') {
+                kendala.push('tugas');
+                syarat.push('Selesaikan tugas belajar terlebih dahulu');
+            }
+            
+            return {
+                kendala: kendala,
+                syarat: syarat,
+                totalKendala: kendala.length,
+                kendalaUtama: kendala.length > 0 ? kendala[0] : 'Tidak ada',
+                statusSertifikasi: dosen.status || 'Belum Sertifikasi'
+            };
+        }
+
+        function getKendalaLabel(kendala) {
+            const labels = {
+                'jabatan': 'Jabatan Akademik',
+                'masaker': 'Masa Kerja Kurang',
+                'pekerti': 'Tanpa PEKERTI/AA',
+                'bkd': 'BKD Belum Lengkap',
+                'publikasi': 'Tanpa Publikasi',
+                'tugas': 'Sedang Tugas Belajar'
+            };
+            return labels[kendala] || kendala;
+        }
+
+        function updateAnalysisDashboard() {
+            let sudahSertifikasi = 0;
+            let belumSertifikasi = 0;
+            let dalamProses = 0;
+            
+            const kendalaCount = {
+                jabatan: 0,
+                masaker: 0,
+                pekerti: 0,
+                bkd: 0,
+                publikasi: 0
+            };
+
+            dosenData.forEach(dosen => {
+                const status = dosen.status || 'Belum Sertifikasi';
+                
+                if (status.includes('2017') || status.includes('2018') || status.includes('2019') || status.includes('2020') || status.includes('2021') || status.includes('2022') || status.includes('2023') || status.includes('2024') || status.includes('2025')) {
+                    sudahSertifikasi++;
+                } else if (dosen.bkd === 'Melaporkan BKD 4 semester' && dosen.pekerti === 'Ada') {
+                    dalamProses++;
+                } else {
+                    belumSertifikasi++;
+                }
+            });
+
+            // Hitung kendala
+            dosenData.forEach(dosen => {
+                const status = dosen.status || 'Belum Sertifikasi';
+                if (!status.includes('20')) { // Belum sertifikasi
+                    const analisis = generateKendalaAnalysis(dosen, evaluateDosen(dosen));
+                    analisis.kendala.forEach(k => {
+                        if (kendalaCount.hasOwnProperty(k)) {
+                            kendalaCount[k]++;
+                        }
+                    });
+                }
+            });
+
+            document.getElementById('analysisSudahSertifikasi').textContent = sudahSertifikasi;
+            document.getElementById('analysisBelumSertifikasi').textContent = belumSertifikasi;
+            document.getElementById('analysisProses').textContent = dalamProses;
+            
+            document.getElementById('kendalaJabatan').textContent = kendalaCount.jabatan;
+            document.getElementById('kendalaMasaKerja').textContent = kendalaCount.masaker;
+            document.getElementById('kendalaPekerti').textContent = kendalaCount.pekerti;
+            document.getElementById('kendalaBKD').textContent = kendalaCount.bkd;
+            document.getElementById('kendalaPublikasi').textContent = kendalaCount.publikasi;
+
+            setTimeout(() => {
+                createSertifikasiChart(sudahSertifikasi, belumSertifikasi, dalamProses);
+                displayKendalaTable();
+            }, 300);
+        }
+
+        function createSertifikasiChart(sudah, belum, proses) {
+            try {
+                const ctx = document.getElementById('chartSertifikasi');
+                if (!ctx) return;
+
+                if (window.chartSertifikasiInstance) {
+                    window.chartSertifikasiInstance.destroy();
+                }
+
+                window.chartSertifikasiInstance = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Sudah Sertifikasi', 'Belum Sertifikasi', 'Dalam Proses'],
+                        datasets: [{
+                            data: [sudah, belum, proses],
+                            backgroundColor: ['#27ae60', '#e74c3c', '#f39c12'],
+                            borderColor: ['#1e8449', '#c0392b', '#d68910'],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    font: { size: 12 },
+                                    padding: 15,
+                                    usePointStyle: true
+                                }
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Error creating sertifikasi chart:', error);
+            }
+        }
+
+        function displayKendalaTable() {
+            const tbody = document.getElementById('kendalaTableBody');
+            tbody.innerHTML = '';
+
+            let no = 1;
+            dosenData.forEach(dosen => {
+                const status = dosen.status || 'Belum Sertifikasi';
+                // Hanya tampilkan yang belum sertifikasi
+                if (!status.includes('20')) {
+                    const analisis = generateKendalaAnalysis(dosen, evaluateDosen(dosen));
+                    
+                    const row = document.createElement('tr');
+                    const actionPlan = analisis.syarat.slice(0, 2).join(' → ');
+                    
+                    row.innerHTML = `
+                        <td>${no}</td>
+                        <td><strong>${dosen.nama}</strong></td>
+                        <td>${dosen.nidn || '-'}</td>
+                        <td>${extractJabatan(dosen.jabatan)}</td>
+                        <td>${dosen.masaKerja}</td>
+                        <td>${getKendalaLabel(analisis.kendalaUtama)}</td>
+                        <td style="font-size: 12px; max-width: 200px;">${analisis.syarat.join(' • ')}</td>
+                        <td style="font-size: 12px; max-width: 150px;">${actionPlan}</td>
+                    `;
+                    
+                    row.setAttribute('data-kendala', analisis.kendala.join(' '));
+                    tbody.appendChild(row);
+                    no++;
+                }
+            });
+
+            if (no === 1) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 30px; color: #7f8c8d;">✓ Semua dosen sudah sertifikasi!</td></tr>';
+            }
+        }
+
+        function filterKendalaTable() {
+            const search = document.getElementById('searchKendala').value.toLowerCase();
+            const filter = document.getElementById('filterKendala').value;
+            const rows = document.querySelectorAll('#kendalaTableBody tr');
+
+            rows.forEach(row => {
+                if (row.children.length === 1) return; // Skip empty state
+
+                const nama = row.children[1].textContent.toLowerCase();
+                const kendala = row.getAttribute('data-kendala') || '';
+
+                let show = nama.includes(search);
+                if (filter) {
+                    show = show && kendala.includes(filter);
+                }
+
+                row.style.display = show ? '' : 'none';
+            });
+        }
+
+        function exportKendalaToExcel() {
+            const workbook = XLSX.utils.book_new();
+            const data = [];
+
+            data.push(['LAPORAN KENDALA SERTIFIKASI DOSEN', '', '', '', '', '', '', '']);
+            data.push(['Universitas Cordova', '', '', '', '', '', '', '']);
+            data.push(['']);
+            data.push(['No', 'Nama Dosen', 'NIDN', 'Jabatan', 'Masa Kerja', 'Kendala Utama', 'Syarat yang Kurang', 'Action Plan']);
+
+            let no = 1;
+            dosenData.forEach(dosen => {
+                const status = dosen.status || 'Belum Sertifikasi';
+                if (!status.includes('20')) {
+                    const analisis = generateKendalaAnalysis(dosen, evaluateDosen(dosen));
+                    
+                    data.push([
+                        no,
+                        dosen.nama,
+                        dosen.nidn,
+                        extractJabatan(dosen.jabatan),
+                        dosen.masaKerja,
+                        getKendalaLabel(analisis.kendalaUtama),
+                        analisis.syarat.join('\n'),
+                        analisis.syarat.slice(0, 2).join(' → ')
+                    ]);
+                    no++;
+                }
+            });
+
+            const worksheet = XLSX.utils.aoa_to_sheet(data);
+            worksheet['!cols'] = [
+                { wch: 5 },
+                { wch: 25 },
+                { wch: 12 },
+                { wch: 18 },
+                { wch: 15 },
+                { wch: 25 },
+                { wch: 35 },
+                { wch: 30 }
+            ];
+
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Kendala Sertifikasi');
+            XLSX.writeFile(workbook, 'Laporan_Kendala_Sertifikasi_Dosen.xlsx');
+        }
         function copyScriptCode() {
             const code = document.getElementById('scriptCode').value;
             navigator.clipboard.writeText(code).then(() => {
