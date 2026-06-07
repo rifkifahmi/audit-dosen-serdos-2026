@@ -521,6 +521,45 @@
             }
         }
     </style>
+    
+    <!-- INLINE SCRIPT - Define switchTab sebelum buttons HTML -->
+    <script>
+        function switchTab(tabName) {
+            console.log('Switching to tab:', tabName);
+            
+            // Hide semua tab content
+            var allTabs = document.getElementsByClassName('tab-content');
+            for (var i = 0; i < allTabs.length; i++) {
+                allTabs[i].classList.remove('active');
+            }
+            
+            // Remove active dari semua buttons
+            var allButtons = document.getElementsByClassName('tab-btn');
+            for (var i = 0; i < allButtons.length; i++) {
+                allButtons[i].classList.remove('active');
+            }
+            
+            // Show selected tab
+            var selectedTab = document.getElementById(tabName);
+            if (selectedTab) {
+                selectedTab.classList.add('active');
+                console.log('✓ Tab shown:', tabName);
+            } else {
+                console.error('❌ Tab not found:', tabName);
+            }
+            
+            // Highlight selected button
+            var buttons = document.querySelectorAll('button[onclick*="switchTab"]');
+            for (var i = 0; i < buttons.length; i++) {
+                var onclickAttr = buttons[i].getAttribute('onclick');
+                if (onclickAttr && onclickAttr.includes("'" + tabName + "'")) {
+                    buttons[i].classList.add('active');
+                    console.log('✓ Button highlighted');
+                    break;
+                }
+            }
+        }
+    </script>
 </head>
 <body>
     <div class="container">
@@ -535,11 +574,11 @@
 
         <!-- TABS -->
         <div class="tabs">
-            <button class="tab-btn active" data-tab="dashboard">📊 Dashboard</button>
-            <button class="tab-btn" data-tab="analysis">📈 Analisis Status Sertifikasi</button>
-            <button class="tab-btn" data-tab="data">📥 Data & Evaluasi</button>
-            <button class="tab-btn" data-tab="detail">🔍 Detail Dosen</button>
-            <button class="tab-btn" data-tab="sync">☁️ Sinkronisasi Google Sheets</button>
+            <button class="tab-btn active" onclick="switchTab('dashboard')">📊 Dashboard</button>
+            <button class="tab-btn" onclick="switchTab('analysis')">📈 Analisis Status Sertifikasi</button>
+            <button class="tab-btn" onclick="switchTab('data')">📥 Data & Evaluasi</button>
+            <button class="tab-btn" onclick="switchTab('detail')">🔍 Detail Dosen</button>
+            <button class="tab-btn" onclick="switchTab('sync')">☁️ Sinkronisasi Google Sheets</button>
         </div>
 
         <!-- TAB 1: DASHBOARD -->
@@ -1175,60 +1214,6 @@ function doGet(e) {
         });
 
         // Switch Tabs
-        function switchTab(tab) {
-            // Hide all tabs by removing active class
-            document.querySelectorAll('.tab-content').forEach(el => {
-                el.classList.remove('active');
-            });
-            
-            // Remove active from all buttons
-            document.querySelectorAll('.tab-btn').forEach(el => {
-                el.classList.remove('active');
-            });
-            
-            // Show selected tab
-            const selectedTab = document.getElementById(tab);
-            if (selectedTab) {
-                selectedTab.classList.add('active');
-                console.log(`✓ Tab switched to: ${tab}`);
-            } else {
-                console.error(`❌ Tab not found: ${tab}`);
-            }
-        }
-
-        // Initialize tab button handlers
-        document.addEventListener('DOMContentLoaded', function() {
-            // Tab navigation with data-tab attribute
-            const tabButtons = document.querySelectorAll('.tabs .tab-btn[data-tab]');
-            
-            tabButtons.forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    
-                    const tabName = this.getAttribute('data-tab');
-                    
-                    // Remove active from all buttons and tabs
-                    document.querySelectorAll('.tabs .tab-btn').forEach(b => {
-                        b.classList.remove('active');
-                    });
-                    document.querySelectorAll('.tab-content').forEach(t => {
-                        t.classList.remove('active');
-                    });
-                    
-                    // Add active to clicked button and corresponding tab
-                    this.classList.add('active');
-                    const targetTab = document.getElementById(tabName);
-                    if (targetTab) {
-                        targetTab.classList.add('active');
-                        console.log(`✓ Tab clicked: ${tabName}`);
-                    }
-                });
-            });
-            
-            console.log(`✓ Tab buttons initialized: ${tabButtons.length} buttons found`);
-        });
-
         // Import Tab Switch
         function switchImportTab(tab) {
             if (tab === 'upload') {
