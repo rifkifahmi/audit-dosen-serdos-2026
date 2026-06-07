@@ -619,6 +619,8 @@
     
     <!-- HANDLER GLOBALS - Ensure accessible from onclick -->
     <script>
+    <!-- HANDLER GLOBALS - Ensure accessible from onclick -->
+    <script>
         // File selection handler
         document.addEventListener('DOMContentLoaded', function() {
             var fileInput = document.getElementById('fileInput');
@@ -634,6 +636,115 @@
                 });
             }
         });
+        
+        // ===== IMPORT DATA FROM FILE - GLOBAL SCOPE =====
+        function importDataFromFile() {
+            console.log('importDataFromFile called!');
+            
+            var fileInput = document.getElementById('fileInput');
+            if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+                alert('Silakan pilih file terlebih dahulu!');
+                return;
+            }
+
+            var file = fileInput.files[0];
+            console.log('Processing file:', file.name);
+            
+            var reader = new FileReader();
+
+            reader.onload = function(e) {
+                try {
+                    console.log('File loaded, starting parse...');
+                    var data = e.target.result;
+                    var rows = [];
+
+                    // Handle Excel files
+                    if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+                        console.log('Parsing Excel...');
+                        var workbook = XLSX.read(data, { type: 'binary' });
+                        var sheetName = workbook.SheetNames[0];
+                        var worksheet = workbook.Sheets[sheetName];
+                        rows = XLSX.utils.sheet_to_json(worksheet);
+                        console.log('Excel parsed:', rows.length, 'rows');
+                    } 
+                    // Handle CSV files
+                    else if (file.name.endsWith('.csv')) {
+                        console.log('Parsing CSV...');
+                        var text = typeof data === 'string' ? data : new TextDecoder().decode(new Uint8Array(data));
+                        var lines = text.split('\n').map(function(line) { return line.trim(); }).filter(function(line) { return line && line.length > 0; });
+                        
+                        if (lines.length < 2) {
+                            throw new Error('File CSV harus memiliki minimal header dan 1 baris data');
+                        }
+                        
+                        var headers = lines[0].split(',').map(function(h) { return h.trim(); }).filter(function(h) { return h.length > 0; });
+                        console.log('Headers:', headers.join(', '));
+                        
+                        for (var i = 1; i < lines.length; i++) {
+                            if (!lines[i] || lines[i].length === 0) continue;
+                            
+                            var values = lines[i].split(',').map(function(v) { return v.trim(); });
+                            if (values.length > 0 && values[0]) {
+                                var obj = {};
+                                for (var h = 0; h < headers.length; h++) {
+                                    if (headers[h] && headers[h].length > 0) {
+                                        obj[headers[h]] = values[h] || '';
+                                    }
+                                }
+                                if (Object.keys(obj).length > 0) {
+                                    rows.push(obj);
+                                }
+                            }
+                        }
+                        console.log('CSV parsed:', rows.length, 'rows');
+                    }
+                    
+                    if (rows.length === 0) {
+                        throw new Error('File tidak memiliki data yang valid');
+                    }
+                    
+                    // Parse data menggunakan function global
+                    console.log('Calling parseImportedData...');
+                    parseImportedData(rows);
+                    
+                    console.log('✓ Parse complete! dosenData.length =', dosenData.length);
+                    alert('✅ ' + dosenData.length + ' dosen berhasil diimpor!');
+                    
+                    // Update UI
+                    document.getElementById('rowCount').textContent = dosenData.length + ' baris';
+                    
+                    // Save to localStorage
+                    localStorage.setItem('dosenData', JSON.stringify(dosenData));
+                    console.log('✓ Data saved to localStorage');
+                    
+                    // Switch to dashboard - call updateDashboard if exists
+                    setTimeout(function() {
+                        if (typeof updateDashboard === 'function') {
+                            updateDashboard();
+                        }
+                        switchTab('dashboard');
+                    }, 300);
+                    
+                } catch (error) {
+                    console.error('❌ Import error:', error);
+                    alert('❌ Gagal membaca file.\n\nPastikan:\n1. File adalah Excel (.xlsx) atau CSV\n2. Baris pertama adalah header (Nama, NIDN, dll)\n3. Ada minimal 1 baris data\n\nError: ' + error.message);
+                }
+            };
+
+            reader.onerror = function() {
+                console.error('❌ File read error');
+                alert('❌ Gagal membaca file. Coba lagi.');
+            };
+
+            // Read file dengan method yang tepat
+            if (file.name.endsWith('.csv')) {
+                console.log('Reading as TEXT...');
+                reader.readAsText(file, 'UTF-8');
+            } else {
+                console.log('Reading as BINARY...');
+                reader.readAsBinaryString(file);
+            }
+        }
     </script>
 </head>
 <body>
