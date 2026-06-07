@@ -3,698 +3,3176 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Sertifikasi Dosen 2026 - Universitas Cordova</title>
+    <title>Audit & Evaluasi Dosen - Universitas Cordova</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
-        .container { max-width: 1600px; margin: 0 auto; padding: 20px; }
-        
-        header { 
-            background: white; padding: 30px; border-radius: 8px; margin-bottom: 20px; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        header h1 { color: #2c3e50; margin-bottom: 5px; font-size: 32px; }
-        header p { color: #7f8c8d; }
-        
-        .tabs { 
-            display: flex; gap: 10px; margin-bottom: 20px; 
-            background: white; padding: 10px; border-radius: 8px; 
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 20px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        .tab-btn { 
-            padding: 12px 20px; background: none; border: none; cursor: pointer; 
-            font-size: 14px; font-weight: 500; color: #7f8c8d; 
-            border-bottom: 3px solid transparent; transition: all 0.3s;
+
+        header h1 {
+            color: #2c3e50;
+            margin-bottom: 5px;
+            font-size: 28px;
         }
-        .tab-btn:hover { color: #2c3e50; }
-        .tab-btn.active { color: #3498db; border-bottom-color: #3498db; }
-        
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        
-        .card { 
-            background: white; padding: 25px; border-radius: 8px; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px;
+
+        header p {
+            color: #7f8c8d;
+            font-size: 14px;
         }
-        
-        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
-        .kpi-card { 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-            color: white; padding: 20px; border-radius: 8px; text-align: center;
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ecf0f1;
+            background: white;
+            padding: 0 20px;
+            border-radius: 8px 8px 0 0;
         }
-        .kpi-number { font-size: 40px; font-weight: bold; }
-        .kpi-label { font-size: 13px; opacity: 0.9; margin-top: 5px; }
-        .kpi-percent { font-size: 14px; margin-top: 8px; background: rgba(255,255,255,0.2); padding: 5px 10px; border-radius: 4px; display: inline-block; }
-        
-        .metrics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
-        .metric { background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #3498db; }
-        .metric-value { font-size: 28px; font-weight: bold; color: #2c3e50; }
-        .metric-label { font-size: 12px; color: #7f8c8d; margin-top: 5px; }
-        
-        .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
-        .chart-container { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .chart-container canvas { max-height: 350px; }
-        
-        h2 { color: #2c3e50; margin-bottom: 20px; font-size: 24px; }
-        h3 { color: #2c3e50; margin: 20px 0 15px 0; font-size: 18px; }
-        
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        thead { background: #f9f9f9; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ecf0f1; }
-        th { font-weight: 600; color: #2c3e50; }
-        tr:hover { background: #f5f5f5; }
-        
-        .status-eligible { color: #27ae60; font-weight: 600; }
-        .status-not { color: #e74c3c; font-weight: 600; }
-        
-        .recommendation { 
-            background: #d5f4e6; border-left: 4px solid #27ae60; 
-            padding: 15px; border-radius: 4px; margin: 10px 0;
-        }
-        .recommendation.urgent { 
-            background: #fadbd8; border-left-color: #e74c3c; 
-        }
-        
-        .btn { 
-            padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; 
-            font-size: 14px; font-weight: 500; margin-right: 10px;
-        }
-        .btn-primary { background: #3498db; color: white; }
-        .btn-primary:hover { background: #2980b9; }
-        .btn-success { background: #27ae60; color: white; }
-        .btn-success:hover { background: #229954; }
-        .btn-danger { background: #e74c3c; color: white; }
-        
-        .upload-area { 
-            border: 2px dashed #3498db; border-radius: 8px; padding: 40px; 
-            text-align: center; background: #ecf0f1; cursor: pointer; 
+
+        .tab-btn {
+            padding: 15px 25px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+            color: #7f8c8d;
+            border-bottom: 3px solid transparent;
             transition: all 0.3s;
         }
-        .upload-area:hover { background: #d6eaf8; border-color: #2980b9; }
-        
-        .barrier-item {
-            background: #fef5e7; border-left: 4px solid #f39c12; 
-            padding: 12px 15px; margin: 8px 0; border-radius: 4px;
+
+        .tab-btn.active {
+            color: #3498db;
+            border-bottom-color: #3498db;
         }
-        
-        .summary-box {
-            background: #ecf0f1; padding: 15px; border-radius: 6px; 
-            border-left: 4px solid #3498db; margin: 15px 0;
+
+        .tab-btn:hover {
+            color: #2c3e50;
         }
-        
-        .note { color: #7f8c8d; font-size: 13px; font-style: italic; margin-top: 10px; }
+
+        .tab-content {
+            display: none;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            padding: 25px;
+            border-radius: 8px;
+            color: white;
+            text-align: center;
+        }
+
+        .stat-card.eligible {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+        }
+
+        .stat-card.not-eligible {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+
+        .stat-card.pending {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+        }
+
+        .stat-card.total {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+        }
+
+        .stat-number {
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .input-section {
+            margin-bottom: 25px;
+        }
+
+        .input-section h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #2c3e50;
+            font-size: 14px;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="number"],
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-success {
+            background-color: #27ae60;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #229954;
+        }
+
+        .btn-secondary {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #7f8c8d;
+        }
+
+        .btn-danger {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+
+        .search-filter {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .search-filter input,
+        .search-filter select {
+            padding: 10px;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .search-filter input {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        thead {
+            background-color: #ecf0f1;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #2c3e50;
+            border-bottom: 2px solid #bdc3c7;
+            font-size: 13px;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #ecf0f1;
+            font-size: 13px;
+        }
+
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-eligible {
+            background-color: #d5f4e6;
+            color: #27ae60;
+        }
+
+        .status-not-eligible {
+            background-color: #fadbd8;
+            color: #e74c3c;
+        }
+
+        .status-pending {
+            background-color: #fdebd0;
+            color: #f39c12;
+        }
+
+        .criteria-badge {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 20px;
+            font-size: 11px;
+            font-weight: bold;
+            margin: 2px;
+        }
+
+        .criteria-badge.pass {
+            background-color: #27ae60;
+            color: white;
+        }
+
+        .criteria-badge.fail {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .criteria-badge.pending {
+            background-color: #f39c12;
+            color: white;
+        }
+
+        .detail-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .detail-modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 8px;
+            max-width: 700px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 30px;
+            width: 100%;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 15px;
+        }
+
+        .modal-header h2 {
+            color: #2c3e50;
+            font-size: 20px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #7f8c8d;
+        }
+
+        .criteria-list {
+            margin-top: 20px;
+        }
+
+        .criteria-item {
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid #ecf0f1;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+        }
+
+        .criteria-item.pass {
+            border-left-color: #27ae60;
+            background-color: #f0fdf4;
+        }
+
+        .criteria-item.fail {
+            border-left-color: #e74c3c;
+            background-color: #fef2f2;
+        }
+
+        .criteria-item.pending {
+            border-left-color: #f39c12;
+            background-color: #fffbf0;
+        }
+
+        .criteria-title {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .criteria-description {
+            font-size: 13px;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .action-buttons button {
+            padding: 8px 12px;
+            font-size: 12px;
+        }
+
+        .icon {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            text-align: center;
+            line-height: 20px;
+            font-weight: bold;
+        }
+
+        .icon.pass {
+            color: #27ae60;
+        }
+
+        .icon.fail {
+            color: #e74c3c;
+        }
+
+        .icon.pending {
+            color: #f39c12;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        .alert-info {
+            background-color: #d6eaf8;
+            color: #1a5490;
+            border-left: 4px solid #3498db;
+        }
+
+        .alert-success {
+            background-color: #d5f4e6;
+            color: #0b5345;
+            border-left: 4px solid #27ae60;
+        }
+
+        .alert-warning {
+            background-color: #fdebd0;
+            color: #7d6608;
+            border-left: 4px solid #f39c12;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #7f8c8d;
+        }
+
+        .empty-state h3 {
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs {
+                overflow-x: auto;
+            }
+
+            .search-filter {
+                flex-direction: column;
+            }
+
+            .search-filter input,
+            .search-filter select {
+                width: 100%;
+            }
+
+            table {
+                font-size: 12px;
+            }
+
+            th, td {
+                padding: 10px;
+            }
+        }
     </style>
+    
+    <!-- INLINE SCRIPT - Define switchTab sebelum buttons HTML -->
+    <script>
+        function switchTab(tabName) {
+            console.log('Switching to tab:', tabName);
+            
+            // Hide semua tab content
+            var allTabs = document.getElementsByClassName('tab-content');
+            for (var i = 0; i < allTabs.length; i++) {
+                allTabs[i].classList.remove('active');
+            }
+            
+            // Remove active dari semua buttons
+            var allButtons = document.getElementsByClassName('tab-btn');
+            for (var i = 0; i < allButtons.length; i++) {
+                allButtons[i].classList.remove('active');
+            }
+            
+            // Show selected tab
+            var selectedTab = document.getElementById(tabName);
+            if (selectedTab) {
+                selectedTab.classList.add('active');
+                console.log('✓ Tab shown:', tabName);
+            } else {
+                console.error('❌ Tab not found:', tabName);
+            }
+            
+            // Highlight selected button
+            var buttons = document.querySelectorAll('button[onclick*="switchTab"]');
+            for (var i = 0; i < buttons.length; i++) {
+                var onclickAttr = buttons[i].getAttribute('onclick');
+                if (onclickAttr && onclickAttr.includes("'" + tabName + "'")) {
+                    buttons[i].classList.add('active');
+                    console.log('✓ Button highlighted');
+                    break;
+                }
+            }
+        }
+        
+        // Initialize file input handler saat DOM siap
+        function initializeFileInput() {
+            const fileInput = document.getElementById('fileInput');
+            if (!fileInput) {
+                console.error('File input element not found');
+                return;
+            }
+            
+            fileInput.addEventListener('change', function(e) {
+                console.log('File selected:', e.target.files[0]?.name);
+                if (e.target.files.length > 0) {
+                    const fileName = e.target.files[0].name;
+                    document.getElementById('fileName').textContent = fileName;
+                    document.getElementById('fileNameDisplay').style.display = 'block';
+                    document.getElementById('importFileBtn').style.display = 'inline-block';
+                    console.log('✓ File input ready for import');
+                }
+            });
+            
+            // Handle drag & drop
+            const uploadArea = document.querySelector('#uploadTab > div:first-child');
+            if (uploadArea) {
+                uploadArea.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    uploadArea.style.background = '#c8e6c9';
+                    uploadArea.style.borderColor = '#1b5e20';
+                });
+
+                uploadArea.addEventListener('dragleave', function(e) {
+                    e.preventDefault();
+                    uploadArea.style.background = '#f0fdf4';
+                    uploadArea.style.borderColor = '#27ae60';
+                });
+
+                uploadArea.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    uploadArea.style.background = '#f0fdf4';
+                    uploadArea.style.borderColor = '#27ae60';
+                    
+                    if (e.dataTransfer.files.length > 0) {
+                        fileInput.files = e.dataTransfer.files;
+                        const event = new Event('change', { bubbles: true });
+                        fileInput.dispatchEvent(event);
+                        console.log('✓ Files dropped and ready');
+                    }
+                });
+            }
+        }
+        
+        // Initialize when document is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeFileInput);
+        } else {
+            initializeFileInput();
+        }
+    </script>
 </head>
 <body>
     <div class="container">
         <!-- HEADER -->
         <header>
-            <h1>🎓 Dashboard Sertifikasi Dosen 2026</h1>
-            <p>Universitas Cordova - Sistem Monitoring Kelayakan Sertifikasi Dosen</p>
-            <div style="margin-top: 15px; padding: 12px; background: #d6eaf8; border-radius: 6px; border-left: 4px solid #3498db;">
-                <strong>📊 Status:</strong> <span id="statusText">Menunggu data...</span>
+            <h1>🎓 Audit & Evaluasi Dosen</h1>
+            <p>Sistem Penilaian Komprehensif Dosen - Universitas Cordova</p>
+            <div style="background: #d6eaf8; border-left: 4px solid #3498db; padding: 12px; margin-top: 15px; border-radius: 4px; font-size: 13px;">
+                <strong>💾 Data Anda Aman!</strong> Semua data dosen dan evaluasi tersimpan secara lokal di browser Anda dan <strong>tidak akan hilang</strong> meskipun aplikasi diperbarui atau browser ditutup.
             </div>
         </header>
 
         <!-- TABS -->
         <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('import')">📥 IMPORT DATA</button>
-            <button class="tab-btn" onclick="switchTab('dashboard')">📊 DASHBOARD</button>
-            <button class="tab-btn" onclick="switchTab('laporan')">📋 LAPORAN DETAIL</button>
-            <button class="tab-btn" onclick="switchTab('rekomendasi')">💡 REKOMENDASI AKSI</button>
+            <button class="tab-btn active" onclick="switchTab('dashboard')">📊 Dashboard</button>
+            <button class="tab-btn" onclick="switchTab('analysis')">📈 Analisis Status Sertifikasi</button>
+            <button class="tab-btn" onclick="switchTab('data')">📥 Data & Evaluasi</button>
+            <button class="tab-btn" onclick="switchTab('detail')">🔍 Detail Dosen</button>
+            <button class="tab-btn" onclick="switchTab('sync')">☁️ Sinkronisasi Google Sheets</button>
         </div>
 
-        <!-- TAB 1: IMPORT -->
-        <div id="import" class="tab-content active">
-            <div class="card">
-                <h2>📥 Import Data Dosen</h2>
-                <p style="color: #7f8c8d; margin-bottom: 20px;">Upload file Excel (.xlsx) atau CSV dengan data dosen dari Google Sheets</p>
-                
-                <div class="upload-area" onclick="document.getElementById('fileInput').click()">
-                    <div style="font-size: 48px; margin-bottom: 10px;">📊</div>
-                    <p style="font-size: 18px; color: #2c3e50; font-weight: 500;">Klik atau Drag File di Sini</p>
-                    <p style="color: #7f8c8d; margin-top: 10px;">Format: Excel (.xlsx) atau CSV</p>
+        <!-- TAB 1: DASHBOARD -->
+        <div id="dashboard" class="tab-content active">
+            <!-- EXECUTIVE SUMMARY -->
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; border-radius: 8px; margin-bottom: 20px;">
+                <h2 style="margin: 0 0 10px 0; font-size: 24px;">📊 RINGKASAN EKSEKUTIF SERTIFIKASI DOSEN 2026</h2>
+                <p style="margin: 0; opacity: 0.9; font-size: 13px;">Dapatkan insight komprehensif untuk strategic decision making</p>
+            </div>
+
+            <!-- KPI CARDS -->
+            <div class="dashboard">
+                <div class="stat-card eligible">
+                    <div class="stat-number" id="countEligible">0</div>
+                    <div class="stat-label">Eligible / Siap</div>
+                    <div style="font-size: 11px; color: rgba(255,255,255,0.8); margin-top: 5px;" id="percentEligible">0%</div>
                 </div>
-                
-                <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display: none;">
-                
-                <div id="fileStatus" style="margin-top: 20px; display: none;">
-                    <div style="background: #d5f4e6; border-left: 4px solid #27ae60; padding: 15px; border-radius: 6px;">
-                        ✓ File: <strong id="fileName"></strong> | <span id="rowCount"></span> baris siap import
+                <div class="stat-card not-eligible">
+                    <div class="stat-number" id="countNotEligible">0</div>
+                    <div class="stat-label">Tidak Eligible</div>
+                    <div style="font-size: 11px; color: rgba(255,255,255,0.8); margin-top: 5px;" id="percentNotEligible">0%</div>
+                </div>
+                <div class="stat-card pending">
+                    <div class="stat-number" id="countPending">0</div>
+                    <div class="stat-label">Pending / Data Lengkap</div>
+                    <div style="font-size: 11px; color: rgba(255,255,255,0.8); margin-top: 5px;" id="percentPending">0%</div>
+                </div>
+                <div class="stat-card total">
+                    <div class="stat-number" id="countTotal">0</div>
+                    <div class="stat-label">Total Dosen</div>
+                    <div style="font-size: 11px; color: rgba(255,255,255,0.8); margin-top: 5px;" id="targetAchievement">Target: 75%</div>
+                </div>
+            </div>
+
+            <!-- GRAFIK UTAMA -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <h3 style="color: #2c3e50; margin-bottom: 20px; margin-top: 0;">Status Kelayakan Dosen</h3>
+                    <div style="position: relative; height: 300px;">
+                        <canvas id="chartStatus"></canvas>
                     </div>
                 </div>
-                
-                <div style="margin-top: 20px;">
-                    <button class="btn btn-success" onclick="importFile()" style="display: none;" id="importBtn">
-                        📤 IMPORT DATA SEKARANG
-                    </button>
-                    <button class="btn btn-danger" onclick="resetImport()">❌ RESET</button>
+
+                <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <h3 style="color: #2c3e50; margin-bottom: 20px; margin-top: 0;">Quick Metrics</h3>
+                    <div style="font-size: 13px; color: #2c3e50; line-height: 2;">
+                        <div style="display: flex; justify-content: space-between; padding: 10px; background: #f9f9f9; border-radius: 4px; margin-bottom: 8px;">
+                            <span>Target Sertifikasi (75%)</span>
+                            <strong id="targetPercent">0/0 (0%)</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 10px; background: #f9f9f9; border-radius: 4px; margin-bottom: 8px;">
+                            <span>Rata-rata Kriteria Terpenuhi</span>
+                            <strong id="avgCriteria">0/7</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 10px; background: #f9f9f9; border-radius: 4px; margin-bottom: 8px;">
+                            <span>Dosen Siap Proses</span>
+                            <strong id="readyToProcess" style="color: #27ae60;">0 orang</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 10px; background: #f9f9f9; border-radius: 4px; margin-bottom: 8px;">
+                            <span>Butuh Bantuan Urgent</span>
+                            <strong id="needHelp" style="color: #e74c3c;">0 orang</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 10px; background: #f9f9f9; border-radius: 4px;">
+                            <span>Estimated Completion</span>
+                            <strong id="estimatedDate" style="color: #f39c12;">TBD</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SMART RECOMMENDATIONS -->
+            <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                <h3 style="color: #2c3e50; margin-bottom: 20px; margin-top: 0;">💡 Rekomendasi Strategis untuk Decision Maker</h3>
+                <div id="smartRecommendations" style="font-size: 13px; color: #2c3e50; line-height: 2;">
+                    <!-- Isi otomatis dari JavaScript -->
+                </div>
+            </div>
+
+            <!-- PRIORITY MATRIX -->
+            <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                <h3 style="color: #2c3e50; margin-bottom: 20px; margin-top: 0;">🎯 Priority Matrix - Dosen Mana yang Perlu Fokus?</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 12px;">
+                    <div style="background: #d5f4e6; border: 2px solid #27ae60; padding: 15px; border-radius: 8px;">
+                        <h4 style="color: #27ae60; margin-top: 0;">✓ QUICK WINS (Prioritas 1)</h4>
+                        <p style="margin-bottom: 10px;">Dosen yang tinggal 1-2 kriteria untuk eligible:</p>
+                        <div id="quickWins" style="background: white; padding: 10px; border-radius: 4px; min-height: 60px;"></div>
+                        <p style="font-size: 11px; color: #1e8449; margin-bottom: 0;"><strong>Action:</strong> Fokus di sini untuk hasil cepat!</p>
+                    </div>
+
+                    <div style="background: #fdebd0; border: 2px solid #f39c12; padding: 15px; border-radius: 8px;">
+                        <h4 style="color: #d68910; margin-top: 0;">⚠️ MEDIUM PRIORITY (Prioritas 2)</h4>
+                        <p style="margin-bottom: 10px;">Dosen dengan 3-4 kriteria terpenuhi:</p>
+                        <div id="mediumPriority" style="background: white; padding: 10px; border-radius: 4px; min-height: 60px;"></div>
+                        <p style="font-size: 11px; color: #7d6608; margin-bottom: 0;"><strong>Action:</strong> Butuh program bantuan terstruktur</p>
+                    </div>
+
+                    <div style="background: #fadbd8; border: 2px solid #e74c3c; padding: 15px; border-radius: 8px;">
+                        <h4 style="color: #c0392b; margin-top: 0;">🚨 HIGH PRIORITY (Prioritas 3)</h4>
+                        <p style="margin-bottom: 10px;">Dosen dengan &lt;3 kriteria terpenuhi:</p>
+                        <div id="highPriority" style="background: white; padding: 10px; border-radius: 4px; min-height: 60px;"></div>
+                        <p style="font-size: 11px; color: #922b21; margin-bottom: 0;"><strong>Action:</strong> Intervensi intensive & mentoring</p>
+                    </div>
+
+                    <div style="background: #d6eaf8; border: 2px solid #3498db; padding: 15px; border-radius: 8px;">
+                        <h4 style="color: #2980b9; margin-top: 0;">📊 PROGRAM RECOMMENDATIONS</h4>
+                        <div id="programRecs" style="background: white; padding: 10px; border-radius: 4px; min-height: 60px; font-size: 11px;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GRAFIK PER PRODI & JABATAN -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <h3 style="color: #2c3e50; margin-bottom: 20px; margin-top: 0;">📚 Dosen Per Program Studi</h3>
+                    <div style="position: relative; height: 350px;">
+                        <canvas id="chartProdi"></canvas>
+                    </div>
+                </div>
+
+                <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <h3 style="color: #2c3e50; margin-bottom: 20px; margin-top: 0;">👔 Dosen Per Jabatan Akademik</h3>
+                    <div style="position: relative; height: 350px;">
+                        <canvas id="chartJabatan"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RISK ANALYSIS -->
+            <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                <h3 style="color: #2c3e50; margin-bottom: 20px; margin-top: 0;">⚠️ Risk Analysis & Barriers</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;" id="riskAnalysis">
+                    <!-- Isi otomatis dari JavaScript -->
+                </div>
+            </div>
+
+            <!-- GRAFIK SERTIFIKASI STATUS -->
+            <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                <h3 style="color: #2c3e50; margin-bottom: 20px; margin-top: 0;">📜 Status Sertifikasi Dosen Per Program Studi</h3>
+                <div style="position: relative; height: 400px;">
+                    <canvas id="chartSertifikasiProdi"></canvas>
+                </div>
+            </div>
+
+            <!-- REKOMENDASI PENTING -->
+            <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                <h3 style="color: #2c3e50; margin-bottom: 20px; margin-top: 0;">🎓 Rekomendasi Transfer Program Studi (Untuk Dosen Belum Sertifikasi)</h3>
+                <p style="color: #7f8c8d; font-size: 13px; margin-bottom: 15px;">
+                    Rekomendasi dosen belum sertifikasi untuk pindah ke program studi dengan persiapan lebih baik:
+                </p>
+                <div id="rekomendasiTransfer" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px;">
+                    <!-- Isi otomatis dari JavaScript -->
+                </div>
+            </div>
+
+            <!-- REKOMENDASI NAIK JABATAN -->
+            <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                <h3 style="color: #2c3e50; margin-bottom: 20px; margin-top: 0;">📈 Rekomendasi Naik Jabatan Fungsional</h3>
+                <p style="color: #7f8c8d; font-size: 13px; margin-bottom: 15px;">
+                    Dosen yang qualified untuk naik ke jabatan berikutnya:
+                </p>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div id="rekomendasiNaikJabatan" style="grid-column: 1 / -1;">
+                        <!-- Isi otomatis dari JavaScript -->
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- TAB 2: DASHBOARD -->
-        <div id="dashboard" class="tab-content">
-            <!-- KPI CARDS -->
-            <div class="kpi-grid">
-                <div class="kpi-card">
-                    <div class="kpi-number" id="kpiTotal">0</div>
-                    <div class="kpi-label">Total Dosen</div>
+        <!-- TAB 2: ANALISIS STATUS SERTIFIKASI -->
+        <div id="analysis" class="tab-content">
+            <div class="dashboard">
+                <div class="stat-card eligible">
+                    <div class="stat-number" id="analysisSudahSertifikasi">0</div>
+                    <div class="stat-label">Sudah Sertifikasi</div>
                 </div>
-                <div class="kpi-card">
-                    <div class="kpi-number" id="kpiEligible">0</div>
-                    <div class="kpi-label">Eligible ✓</div>
-                    <div class="kpi-percent" id="kpiEligiblePct">0%</div>
+                <div class="stat-card not-eligible">
+                    <div class="stat-number" id="analysisBelumSertifikasi">0</div>
+                    <div class="stat-label">Belum Sertifikasi</div>
                 </div>
-                <div class="kpi-card">
-                    <div class="kpi-number" id="kpiNotEligible">0</div>
-                    <div class="kpi-label">Tidak Eligible</div>
-                    <div class="kpi-percent" id="kpiNotEligiblePct">0%</div>
-                </div>
-                <div class="kpi-card">
-                    <div class="kpi-number" id="kpiGap">0%</div>
-                    <div class="kpi-label">Gap vs Target 75%</div>
+                <div class="stat-card pending">
+                    <div class="stat-number" id="analysisProses">0</div>
+                    <div class="stat-label">Dalam Proses</div>
                 </div>
             </div>
 
-            <!-- METRICS -->
-            <div class="metrics-grid">
-                <div class="metric">
-                    <div class="metric-value" id="metricAvg">0/7</div>
-                    <div class="metric-label">Rata-rata Kriteria</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-value" id="metricQuickWins">0</div>
-                    <div class="metric-label">Quick Wins (1-2 kriteria)</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-value" id="metricMedium">0</div>
-                    <div class="metric-label">Medium Priority (3-4)</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-value" id="metricHigh">0</div>
-                    <div class="metric-label">High Priority (<3)</div>
+            <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                <h3 style="color: #2c3e50; margin-bottom: 20px;">📊 Distribusi Status Sertifikasi</h3>
+                <div style="position: relative; height: 400px;">
+                    <canvas id="chartSertifikasi"></canvas>
                 </div>
             </div>
 
-            <!-- CHARTS -->
-            <div class="chart-grid">
-                <div class="chart-container">
-                    <h3>Status Eligibility</h3>
-                    <canvas id="chartStatus"></canvas>
-                </div>
-                <div class="chart-container">
-                    <h3>Distribusi Kriteria Terpenuhi</h3>
-                    <canvas id="chartCriteria"></canvas>
+            <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                <h3 style="color: #2c3e50; margin-bottom: 20px;">⚠️ Ringkasan Kendala Dosen Belum Sertifikasi</h3>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                    <div style="background: #fadbd8; padding: 15px; border-radius: 8px; border-left: 4px solid #e74c3c;">
+                        <div style="font-size: 24px; font-weight: bold; color: #e74c3c;" id="kendalaJabatan">0</div>
+                        <div style="font-size: 12px; color: #2c3e50; margin-top: 5px;">Kekurangan Jabatan Akademik</div>
+                    </div>
+                    <div style="background: #fadbd8; padding: 15px; border-radius: 8px; border-left: 4px solid #e74c3c;">
+                        <div style="font-size: 24px; font-weight: bold; color: #e74c3c;" id="kendalaMasaKerja">0</div>
+                        <div style="font-size: 12px; color: #2c3e50; margin-top: 5px;">Masa Kerja Kurang</div>
+                    </div>
+                    <div style="background: #fadbd8; padding: 15px; border-radius: 8px; border-left: 4px solid #e74c3c;">
+                        <div style="font-size: 24px; font-weight: bold; color: #e74c3c;" id="kendalaPekerti">0</div>
+                        <div style="font-size: 12px; color: #2c3e50; margin-top: 5px;">Tanpa Sertifikat PEKERTI/AA</div>
+                    </div>
+                    <div style="background: #fadbd8; padding: 15px; border-radius: 8px; border-left: 4px solid #e74c3c;">
+                        <div style="font-size: 24px; font-weight: bold; color: #e74c3c;" id="kendalaBKD">0</div>
+                        <div style="font-size: 12px; color: #2c3e50; margin-top: 5px;">BKD 4 Semester Belum Lengkap</div>
+                    </div>
+                    <div style="background: #fadbd8; padding: 15px; border-radius: 8px; border-left: 4px solid #e74c3c;">
+                        <div style="font-size: 24px; font-weight: bold; color: #e74c3c;" id="kendalaPublikasi">0</div>
+                        <div style="font-size: 12px; color: #2c3e50; margin-top: 5px;">Tanpa Publikasi Ilmiah</div>
+                    </div>
                 </div>
             </div>
 
-            <!-- BARRIERS -->
-            <div class="card">
-                <h3>⚠️ Kendala Utama (Top 5)</h3>
-                <div id="barriersList"></div>
-                <p class="note">Fokus program pengembangan pada kendala-kendala ini untuk hasil maksimal</p>
-            </div>
+            <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <h3 style="color: #2c3e50; margin-bottom: 20px;">📋 Detail Dosen Belum Sertifikasi & Kendala</h3>
+                
+                <div class="search-filter">
+                    <input type="text" id="searchKendala" placeholder="Cari nama dosen..." onkeyup="filterKendalaTable()">
+                    <select id="filterKendala" onchange="filterKendalaTable()">
+                        <option value="">Semua Kendala</option>
+                        <option value="jabatan">Jabatan Akademik</option>
+                        <option value="masaker">Masa Kerja</option>
+                        <option value="pekerti">PEKERTI/AA</option>
+                        <option value="bkd">BKD 4 Semester</option>
+                        <option value="publikasi">Publikasi Ilmiah</option>
+                    </select>
+                </div>
 
-            <!-- QUICK STATS -->
-            <div class="card">
-                <h3>📈 Estimasi Pencapaian Target</h3>
-                <div class="summary-box">
-                    <p><strong>Target Sertifikasi:</strong> 75% dari total dosen</p>
-                    <p><strong>Status Saat Ini:</strong> <span id="summaryStatus">0%</span></p>
-                    <p><strong>Dosen yang Perlu Eligible:</strong> <span id="summaryNeeded">0</span> orang</p>
-                    <p><strong>Estimasi Waktu:</strong> <span id="summaryTime">-</span></p>
+                <div class="table-wrapper">
+                    <table id="kendalaTable">
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Nama Dosen</th>
+                                <th>NIDN</th>
+                                <th>Jabatan Saat Ini</th>
+                                <th>Masa Kerja</th>
+                                <th>Kendala Utama</th>
+                                <th>Syarat yang Kurang</th>
+                                <th>Action Plan</th>
+                            </tr>
+                        </thead>
+                        <tbody id="kendalaTableBody"></tbody>
+                    </table>
+                </div>
+
+                <div class="button-group" style="margin-top: 20px;">
+                    <button class="btn-success" onclick="exportKendalaToExcel()">📥 Export Laporan Kendala</button>
                 </div>
             </div>
         </div>
 
-        <!-- TAB 3: LAPORAN DETAIL -->
-        <div id="laporan" class="tab-content">
-            <div class="card">
-                <h2>📋 Laporan Detail Evaluasi Dosen</h2>
-                
-                <div style="margin-bottom: 20px;">
-                    <input type="text" id="searchInput" placeholder="🔍 Cari nama dosen..." 
-                        style="padding: 10px 15px; width: 300px; border: 1px solid #bdc3c7; border-radius: 6px; font-size: 14px;">
-                    <button class="btn btn-success" onclick="exportToExcel()" style="margin-left: 10px;">
-                        📥 Export ke Excel
-                    </button>
+        <!-- TAB 3: DATA & EVALUASI -->
+        <div id="data" class="tab-content">
+            <div class="input-section">
+                <h3>📥 Impor Data Dosen</h3>
+                <p style="color: #7f8c8d; margin-bottom: 15px; font-size: 13px;">
+                    Pilih salah satu cara import:
+                </p>
+
+                <!-- TAB UPLOAD FILE vs PASTE -->
+                <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #ecf0f1; padding-bottom: 10px;">
+                    <button id="tabUpload" class="tab-btn" style="border-bottom: 3px solid #3498db; color: #3498db;" onclick="switchImportTab('upload')">📁 Upload File</button>
+                    <button id="tabPaste" class="tab-btn" onclick="switchImportTab('paste')">📋 Copy-Paste</button>
                 </div>
-                
-                <div id="dosenTable" style="overflow-x: auto;"></div>
+
+                <!-- UPLOAD FILE TAB -->
+                <div id="uploadTab" style="display: block;">
+                    <div style="background: #f0fdf4; border: 2px dashed #27ae60; border-radius: 8px; padding: 40px; text-align: center; margin-bottom: 20px;">
+                        <div style="font-size: 36px; margin-bottom: 10px;">📊</div>
+                        <p style="color: #2c3e50; font-weight: 500; margin-bottom: 10px;">Upload File Excel atau CSV</p>
+                        <p style="color: #7f8c8d; font-size: 13px; margin-bottom: 20px;">Support format: .xlsx, .xls, .csv</p>
+                        <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display: none;">
+                        <button class="btn-success" style="padding: 15px 30px; font-size: 15px;" onclick="document.getElementById('fileInput').click()">
+                            🖱️ Pilih File atau Drag & Drop
+                        </button>
+                        <p style="color: #7f8c8d; font-size: 12px; margin-top: 15px;">
+                            Tips: Export spreadsheet Google Sheets Anda sebagai Excel (.xlsx) terlebih dahulu
+                        </p>
+                    </div>
+                    <div id="fileNameDisplay" style="color: #27ae60; font-weight: 500; margin-bottom: 15px; display: none;">
+                        ✓ File dipilih: <span id="fileName"></span>
+                    </div>
+                    <div class="button-group">
+                        <button class="btn-primary" id="importFileBtn" onclick="importDataFromFile()" style="display: none;">📤 Impor Data dari File</button>
+                        <button class="btn-secondary" onclick="clearAllData()">🗑️ Hapus Semua Data</button>
+                    </div>
+                </div>
+
+                <!-- PASTE TAB -->
+                <div id="pasteTab" style="display: none;">
+                    <p style="color: #7f8c8d; margin-bottom: 15px; font-size: 13px;">
+                        Copy seluruh tabel dari Google Sheets (termasuk header) dan paste di bawah:
+                    </p>
+                    <textarea id="dataInput" placeholder="Paste data dari spreadsheet di sini..." style="width: 100%; height: 200px; padding: 15px; border: 2px dashed #3498db; border-radius: 4px; font-family: monospace; font-size: 12px;"></textarea>
+                    <div class="button-group">
+                        <button class="btn-primary" onclick="importData()">📤 Impor Data</button>
+                        <button class="btn-secondary" onclick="clearAllData()">🗑️ Hapus Semua Data</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="evaluationResults" style="display: none;">
+                <div class="alert alert-success">
+                    ✓ Data berhasil diimpor. Scroll ke bawah untuk melihat hasil evaluasi.
+                </div>
+
+                <div class="input-section">
+                    <h3>🔍 Cari & Filter</h3>
+                    <div class="search-filter">
+                        <input type="text" id="searchInput" placeholder="Cari nama atau NIDN..." onkeyup="filterTable()">
+                        <select id="statusFilter" onchange="filterTable()">
+                            <option value="">Semua Status</option>
+                            <option value="eligible">Eligible</option>
+                            <option value="not-eligible">Tidak Eligible</option>
+                            <option value="pending">Pending</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="input-section">
+                    <h3>📊 Tabel Evaluasi Dosen</h3>
+                    <div class="table-wrapper">
+                        <table id="dosenTable">
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Nama Dosen</th>
+                                    <th>NIDN</th>
+                                    <th>Jabatan</th>
+                                    <th>Masa Kerja</th>
+                                    <th>Program Studi</th>
+                                    <th>Status</th>
+                                    <th>Rekomendasi Naik Level</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-success" onclick="exportToExcel()">📥 Export ke Excel</button>
+                    <button class="btn-secondary" onclick="printResults()">🖨️ Print</button>
+                </div>
+            </div>
+
+            <div id="emptyState" class="empty-state">
+                <h3>📭 Belum Ada Data</h3>
+                <p>Impor data dosen terlebih dahulu untuk mulai evaluasi.</p>
             </div>
         </div>
 
-        <!-- TAB 4: REKOMENDASI -->
-        <div id="rekomendasi" class="tab-content">
-            <div class="card">
-                <h2>💡 Rekomendasi Aksi Strategis</h2>
-                <div id="rekomendasiContent"></div>
+        <!-- TAB 3: DETAIL DOSEN -->
+        <div id="detail" class="tab-content">
+            <div class="input-section">
+                <h3>👤 Tambah/Edit Data Publikasi & Status Tugas Belajar</h3>
+                <p style="color: #7f8c8d; margin-bottom: 15px; font-size: 13px;">
+                    Gunakan form di bawah untuk menambahkan informasi publikasi dan status tugas belajar dosen:
+                </p>
+                
+                <div class="form-group">
+                    <label>Pilih Dosen</label>
+                    <select id="selectDosen" style="width: 100%; padding: 10px; border: 1px solid #bdc3c7; border-radius: 4px; font-size: 14px;">
+                        <option value="">-- Pilih Dosen --</option>
+                    </select>
+                </div>
+
+                <div style="background: #f9f9f9; padding: 20px; border-radius: 4px; margin-top: 20px; display: none;" id="dosenFormSection">
+                    <div class="form-group">
+                        <label>Nama Dosen</label>
+                        <input type="text" id="dosenNama" readonly style="background: #ecf0f1;">
+                    </div>
+
+                    <div class="form-group">
+                        <label>NIDN</label>
+                        <input type="text" id="dosenNIDN" readonly style="background: #ecf0f1;">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Memiliki Publikasi di Jurnal Terakreditasi/Internasional?</label>
+                        <select id="publikasi">
+                            <option value="">-- Pilih --</option>
+                            <option value="ya">Ya, memiliki publikasi</option>
+                            <option value="tidak">Tidak memiliki publikasi</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Detail Publikasi (Judul, Jurnal, Tahun)</label>
+                        <textarea id="detailPublikasi" placeholder="Contoh: Judul: 'Model Digital Marketing', Jurnal: 'Jurnal Manajemen Nasional', Tahun: 2025, Penulis: Pertama/Anggota"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Status Tugas Belajar</label>
+                        <div style="margin-top: 10px;">
+                            <input type="radio" id="tugasAda" name="tugas_belajar" value="ada" onchange="updateTugasStatus()"> 
+                            <label for="tugasAda" style="display: inline; margin-right: 20px;">⚠️ Sedang Tugas Belajar (Tidak Eligible)</label>
+                            <input type="radio" id="tugasTidak" name="tugas_belajar" value="tidak" onchange="updateTugasStatus()" checked> 
+                            <label for="tugasTidak" style="display: inline;">✓ Tidak Sedang Tugas Belajar (Eligible)</label>
+                        </div>
+                    </div>
+
+                    <div class="button-group">
+                        <button class="btn-success" onclick="saveDosen()">💾 Simpan Data</button>
+                        <button class="btn-secondary" onclick="cancelEdit()">❌ Batal</button>
+                    </div>
+                </div>
+
+                <div id="selectPrompt" class="empty-state" style="padding: 40px 20px;">
+                    <p>Pilih dosen dari list di atas untuk tambah/edit data publikasi dan status tugas belajar.</p>
+                </div>
             </div>
+        </div>
+
+        <!-- TAB 4: SINKRONISASI GOOGLE SHEETS -->
+        <div id="sync" class="tab-content">
+            <div class="input-section">
+                <h3>☁️ Sinkronisasi Data ke Google Sheets</h3>
+                <p style="color: #7f8c8d; margin-bottom: 15px; font-size: 13px;">
+                    Simpan dan sinkronisasi data audit & evaluasi dosen Anda ke Google Sheets secara otomatis.
+                </p>
+
+                <div class="alert alert-info">
+                    <strong>📌 Cara Setup (3 Step):</strong><br>
+                    1. Buat Google Apps Script (lihat panduan di bawah)<br>
+                    2. Copy URL Web App ke field di bawah<br>
+                    3. Klik "Sinkronisasi" untuk mulai
+                </div>
+
+                <div class="input-section">
+                    <h3>🔗 Konfigurasi Google Apps Script</h3>
+                    
+                    <div class="form-group">
+                        <label>URL Google Apps Script (Web App URL)</label>
+                        <input type="text" id="scriptUrl" placeholder="https://script.google.com/macros/d/.../usercontent" style="width: 100%; padding: 10px; border: 1px solid #bdc3c7; border-radius: 4px; font-family: monospace; font-size: 12px;">
+                        <p style="font-size: 12px; color: #7f8c8d; margin-top: 8px;">Contoh: https://script.google.com/macros/d/1234567890ABCDEFG/usercontent</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label>ID Google Sheet (Opsional)</label>
+                        <input type="text" id="sheetId" placeholder="Pastekan ID dari URL Google Sheet Anda" style="width: 100%; padding: 10px; border: 1px solid #bdc3c7; border-radius: 4px; font-family: monospace; font-size: 12px;">
+                        <p style="font-size: 12px; color: #7f8c8d; margin-top: 8px;">Contoh ID dari: https://docs.google.com/spreadsheets/d/<strong>1234567890</strong>/edit</p>
+                    </div>
+
+                    <div class="button-group">
+                        <button class="btn-success" onclick="testGoogleAppsScript()">🧪 Test Koneksi</button>
+                        <button class="btn-primary" onclick="syncToGoogleSheets()">☁️ Sinkronisasi Data Sekarang</button>
+                        <button class="btn-secondary" onclick="enableAutoSync()">🔄 Aktifkan Auto-Sync</button>
+                    </div>
+
+                    <div id="syncStatus" style="margin-top: 20px;"></div>
+                </div>
+
+                <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin-top: 30px;">
+                    <h4 style="color: #2c3e50; margin-bottom: 15px;">📋 Panduan Setup Google Apps Script</h4>
+                    
+                    <div style="background: white; padding: 15px; border-radius: 4px; margin-bottom: 15px;">
+                        <p style="font-weight: 600; margin-bottom: 10px;">STEP 1: Buat Google Sheet Baru</p>
+                        <ol style="font-size: 13px; color: #2c3e50; line-height: 1.8;">
+                            <li>Buka <a href="https://sheets.google.com" target="_blank" style="color: #3498db;">Google Sheets</a></li>
+                            <li>Klik "Buat spreadsheet baru"</li>
+                            <li>Beri nama: "Audit & Evaluasi Dosen"</li>
+                            <li>Copy ID dari URL (bagian setelah /d/)</li>
+                        </ol>
+                    </div>
+
+                    <div style="background: white; padding: 15px; border-radius: 4px; margin-bottom: 15px;">
+                        <p style="font-weight: 600; margin-bottom: 10px;">STEP 2: Buat Google Apps Script</p>
+                        <ol style="font-size: 13px; color: #2c3e50; line-height: 1.8;">
+                            <li>Di Sheet yang baru, buka Tools → Script editor</li>
+                            <li>Copy-paste kode di bawah ke Apps Script editor</li>
+                            <li>Klik Save (Ctrl+S)</li>
+                            <li>Klik "Deploy" → "New deployment"</li>
+                            <li>Pilih type: "Web app"</li>
+                            <li>Execute as: Pilih akun Google Anda</li>
+                            <li>Who has access: "Anyone"</li>
+                            <li>Klik Deploy → Copy URL yang muncul</li>
+                        </ol>
+                    </div>
+
+                    <div style="background: #fff3cd; padding: 15px; border-radius: 4px; margin-bottom: 15px; border-left: 4px solid #ffc107;">
+                        <p style="font-weight: 600; margin-bottom: 10px; color: #856404;">📋 CARA COPY KODE (PENTING!):</p>
+                        <ol style="font-size: 12px; color: #2c3e50; line-height: 2;">
+                            <li>Klik tombol <strong>"📋 Copy Kode"</strong> di bawah</li>
+                            <li>Klik di dalam textarea kode (area putih)</li>
+                            <li>Tekan <strong>Ctrl+A</strong> untuk select semua</li>
+                            <li>Tekan <strong>Ctrl+C</strong> untuk copy</li>
+                            <li>Buka Google Apps Script editor di tab lain</li>
+                            <li>Delete semua kode yang ada (Ctrl+A → Delete)</li>
+                            <li>Paste kode baru (Ctrl+V)</li>
+                            <li>Tekan <strong>Ctrl+S</strong> untuk save</li>
+                        </ol>
+                    </div>
+
+                        <p style="font-weight: 600; margin-bottom: 10px; color: #856404;">⚙️ Kode Google Apps Script (LENGKAP - COPY SEMUA):</p>
+                        <textarea id="scriptCode" style="width: 100%; height: 500px; padding: 10px; border: 1px solid #bdc3c7; border-radius: 4px; font-family: monospace; font-size: 10px; background: #f5f5f5; line-height: 1.4;" readonly>function doPost(e) {
+  try {
+    const sheet = SpreadsheetApp.getActiveSheet();
+    const rawData = e.postData.contents;
+    
+    let data = JSON.parse(rawData);
+    
+    if (!Array.isArray(data)) {
+      return ContentService.createTextOutput(JSON.stringify({
+        success: false,
+        error: 'Data harus berupa array'
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    sheet.clearContents();
+    
+    const headers = ['No', 'Nama Dosen', 'NIDN', 'Jabatan', 'Masa Kerja', 'Program Studi', 'Status Evaluasi', 'Rekomendasi', 'Publikasi', 'Tugas Belajar'];
+    sheet.appendRow(headers);
+    
+    const headerRange = sheet.getRange(1, 1, 1, headers.length);
+    headerRange.setBackground('#3498db');
+    headerRange.setFontColor('#ffffff');
+    headerRange.setFontWeight('bold');
+    
+    let rowCount = 0;
+    data.forEach((row, index) => {
+      sheet.appendRow([
+        index + 1,
+        row.nama || '',
+        row.nidn || '',
+        row.jabatan || '',
+        row.masaKerja || '',
+        row.prodi || '',
+        row.status || '',
+        row.rekomendasi || '',
+        row.publikasi || '',
+        row.tugas || ''
+      ]);
+      rowCount++;
+    });
+    
+    try {
+      sheet.autoResizeColumns(1, headers.length);
+    } catch(e) {}
+    
+    return ContentService.createTextOutput(JSON.stringify({
+      success: true,
+      count: rowCount,
+      total: data.length,
+      message: rowCount + ' data berhasil disimpan',
+      timestamp: new Date().toLocaleString('id-ID')
+    })).setMimeType(ContentService.MimeType.JSON);
+    
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({
+      success: false,
+      error: error.toString(),
+      message: 'Error: ' + error.message
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function doGet(e) {
+  return ContentService.createTextOutput(JSON.stringify({
+    status: 'ready',
+    message: 'Google Apps Script siap menerima data',
+    timestamp: new Date().toLocaleString('id-ID')
+  })).setMimeType(ContentService.MimeType.JSON);
+}</textarea>
+                        <button class="btn-secondary" onclick="copyScriptCode()" style="margin-top: 10px; width: 100%;">📋 COPY SEMUA KODE (Click ini!)</button>
+
+                    <div style="background: #fff3cd; padding: 15px; border-radius: 4px; margin-top: 30px; border-left: 4px solid #ffc107;">
+                        <p style="font-weight: 600; margin-bottom: 10px; color: #856404;">❓ Troubleshooting Jika Ada Error</p>
+                        <div style="font-size: 12px; color: #2c3e50; line-height: 1.8;">
+                            <p><strong>Error: "Authorization required"</strong></p>
+                            <ul style="margin-left: 20px;">
+                                <li>→ Di Apps Script editor, klik tombol "Run" untuk authorize</li>
+                                <li>→ Pilih akun Google Anda</li>
+                                <li>→ Klik "Allow"</li>
+                            </ul>
+                            
+                            <p style="margin-top: 10px;"><strong>Error: "Exceeds size limit"</strong></p>
+                            <ul style="margin-left: 20px;">
+                                <li>→ Data terlalu besar untuk satu kali upload</li>
+                                <li>→ Bagi data menjadi beberapa batch (max ~500 dosen per upload)</li>
+                            </ul>
+                            
+                            <p style="margin-top: 10px;"><strong>Error: "Cannot find method clearContents"</strong></p>
+                            <ul style="margin-left: 20px;">
+                                <li>→ Ini adalah error versi Apps Script</li>
+                                <li>→ Ganti "clearContents()" dengan "clear()"</li>
+                            </ul>
+                            
+                            <p style="margin-top: 10px;"><strong>Koneksi timeout / blank response</strong></p>
+                            <ul style="margin-left: 20px;">
+                                <li>→ Refresh page dan coba lagi</li>
+                                <li>→ Cek apakah Apps Script masih aktif (jangan dihapus)</li>
+                                <li>→ Deploy hanya sekali (jangan multiple deploy)</li>
+                            </ul>
+                        </div>
+                    </div>
+        </div>
+    </div>
+
+    <!-- DETAIL MODAL -->
+    <div class="detail-modal" id="detailModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Detail Dosen</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div id="modalBody"></div>
         </div>
     </div>
 
     <script>
-        // ===== GLOBAL DATA =====
-        let dosenData = [];
-        let selectedFile = null;
+        // Data Management
+        let dosenData = JSON.parse(localStorage.getItem('dosenData')) || [];
+        let publikasiData = JSON.parse(localStorage.getItem('publikasiData')) || {};
+        let tugasData = JSON.parse(localStorage.getItem('tugasData')) || {};
 
-        // ===== TAB SWITCHING =====
-        function switchTab(tab) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-            document.getElementById(tab).classList.add('active');
-            event.target.classList.add('active');
-            
-            if (tab === 'dashboard') updateDashboard();
-            if (tab === 'laporan') showLaporan();
-            if (tab === 'rekomendasi') showRekomendasi();
-        }
-
-        // ===== FILE HANDLING =====
-        document.getElementById('fileInput').addEventListener('change', function(e) {
-            selectedFile = e.target.files[0];
-            if (selectedFile) {
-                document.getElementById('fileStatus').style.display = 'block';
-                document.getElementById('fileName').textContent = selectedFile.name;
-                document.getElementById('importBtn').style.display = 'inline-block';
+        // Initialize
+        window.addEventListener('load', function() {
+            updateDashboard();
+            updateAnalysisDashboard();
+            updateSelectDosen();
+            if (dosenData.length > 0) {
+                displayResults();
             }
         });
 
-        function importFile() {
-            if (!selectedFile) {
-                alert('Pilih file terlebih dahulu!');
+        // Switch Tabs
+        // Import Tab Switch
+        function switchImportTab(tab) {
+            if (tab === 'upload') {
+                document.getElementById('uploadTab').style.display = 'block';
+                document.getElementById('pasteTab').style.display = 'none';
+                document.getElementById('tabUpload').style.borderBottomColor = '#3498db';
+                document.getElementById('tabUpload').style.color = '#3498db';
+                document.getElementById('tabPaste').style.borderBottomColor = 'transparent';
+                document.getElementById('tabPaste').style.color = '#7f8c8d';
+            } else {
+                document.getElementById('uploadTab').style.display = 'none';
+                document.getElementById('pasteTab').style.display = 'block';
+                document.getElementById('tabUpload').style.borderBottomColor = 'transparent';
+                document.getElementById('tabUpload').style.color = '#7f8c8d';
+                document.getElementById('tabPaste').style.borderBottomColor = '#3498db';
+                document.getElementById('tabPaste').style.color = '#3498db';
+            }
+        }
+
+        // Import Data from File
+        function importDataFromFile() {
+            const fileInput = document.getElementById('fileInput');
+            
+            if (!fileInput.files || fileInput.files.length === 0) {
+                alert('Silakan pilih file terlebih dahulu!');
                 return;
             }
-            
+
+            const file = fileInput.files[0];
             const reader = new FileReader();
+
             reader.onload = function(e) {
                 try {
-                    let rows = [];
-                    
-                    if (selectedFile.name.endsWith('.csv')) {
-                        // CSV PARSING - More robust
-                        const text = typeof e.target.result === 'string' 
-                            ? e.target.result 
-                            : new TextDecoder().decode(new Uint8Array(e.target.result));
+                    const data = e.target.result;
+                    let workbook;
+
+                    // Handle Excel files
+                    if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+                        workbook = XLSX.read(data, { type: 'binary' });
+                        const sheetName = workbook.SheetNames[0];
+                        const worksheet = workbook.Sheets[sheetName];
+                        const rows = XLSX.utils.sheet_to_json(worksheet);
                         
-                        const lines = text.split('\n').filter(l => l && l.trim());
+                        parseImportedData(rows);
+                    } 
+                    // Handle CSV files
+                    else if (file.name.endsWith('.csv')) {
+                        // Proper handling untuk CSV - data adalah text string
+                        const text = typeof data === 'string' ? data : new TextDecoder().decode(new Uint8Array(data));
+                        const lines = text.split('\n').map(line => line.trim()).filter(line => line && line.length > 0);
+                        
                         if (lines.length < 2) {
-                            throw new Error('File CSV harus memiliki minimal 2 baris (header + 1 data)');
+                            throw new Error('File CSV harus memiliki minimal header dan 1 baris data');
                         }
                         
-                        const headers = lines[0].split(',').map(h => h.trim());
+                        const headers = lines[0].split(',').map(h => h.trim()).filter(h => h.length > 0);
                         
+                        const rows = [];
                         for (let i = 1; i < lines.length; i++) {
-                            if (!lines[i].trim()) continue;
+                            if (!lines[i] || lines[i].length === 0) continue;
                             
                             const values = lines[i].split(',').map(v => v.trim());
-                            const obj = {};
-                            
-                            headers.forEach((h, idx) => {
-                                if (h && h.length > 0) {
-                                    obj[h] = values[idx] || '';
+                            if (values.length > 0 && values[0]) {
+                                const obj = {};
+                                headers.forEach((header, idx) => {
+                                    if (header && header.length > 0) {
+                                        obj[header] = values[idx] || '';
+                                    }
+                                });
+                                if (Object.keys(obj).length > 0) {
+                                    rows.push(obj);
                                 }
-                            });
-                            
-                            if (Object.keys(obj).length > 0) {
-                                rows.push(obj);
                             }
                         }
                         
-                    } else {
-                        // EXCEL PARSING
-                        const workbook = XLSX.read(e.target.result, { type: 'binary' });
-                        const sheet = workbook.Sheets[workbook.SheetNames[0]];
-                        rows = XLSX.utils.sheet_to_json(sheet);
+                        if (rows.length === 0) {
+                            throw new Error('File CSV tidak memiliki data yang valid');
+                        }
+                        
+                        parseImportedData(rows);
                     }
-                    
-                    if (rows.length === 0) {
-                        throw new Error('File tidak memiliki data yang valid');
-                    }
-                    
-                    document.getElementById('rowCount').textContent = rows.length + ' baris';
-                    parseData(rows);
-                    
-                    if (dosenData.length === 0) {
-                        throw new Error('Tidak ada data dosen yang berhasil diparse');
-                    }
-                    
-                    alert(`✅ ${dosenData.length} dosen berhasil diimpor!`);
-                    document.getElementById('statusText').textContent = `${dosenData.length} dosen ter-import | ${new Date().toLocaleString('id-ID')}`;
-                    
-                    setTimeout(() => {
-                        switchTab('dashboard');
-                    }, 500);
-                    
                 } catch (error) {
-                    console.error('Import error:', error);
-                    alert(`❌ Gagal import: ${error.message}\n\nPastikan:\n- File format benar (.xlsx atau .csv)\n- Ada header row\n- Ada minimal satu baris data`);
+                    console.error('Error:', error);
+                    alert('❌ Gagal membaca file. Pastikan format file benar.\n\nPastikan:\n1. File adalah Excel (.xlsx/.xls) atau CSV\n2. Baris pertama adalah header (Nama, NIDN, Jabatan, dll)\n3. File tidak kosong\n\nError: ' + error.message);
                 }
             };
-            
-            reader.onerror = function(error) {
-                alert(`❌ Gagal membaca file: ${error}`);
+
+            reader.onerror = function() {
+                alert('❌ Gagal membaca file. Coba lagi.');
             };
-            
-            if (selectedFile.name.endsWith('.csv')) {
-                reader.readAsText(selectedFile, 'UTF-8');
+
+            // Read file based on type - CRITICAL FIX
+            if (file.name.endsWith('.csv')) {
+                reader.readAsText(file, 'UTF-8');  // CSV harus readAsText bukan readAsArrayBuffer!
             } else {
-                reader.readAsBinaryString(selectedFile);
+                reader.readAsBinaryString(file);
             }
         }
 
-        // ===== PARSE DATA =====
-        function parseData(rows) {
+        // Parse Imported Data
+        function parseImportedData(rows) {
             dosenData = [];
+
             rows.forEach(row => {
-                if (row.Nama || row.nama) {
+                // Map CSV/Excel columns to data structure
+                // Column headers might be: Nama, NIDN, Jabatan Fungsional, Masa Kerja, BKD 4 Semester, PEKERTI/AA, Publikasi, Homebase, Pendidikan, Status
+                
+                const nama = row['Nama'] || row['nama'] || '';
+                if (nama.trim()) {
                     dosenData.push({
-                        nama: (row.Nama || row.nama || '').trim(),
-                        nidn: (row.NIDN || row.nidn || '').trim(),
-                        jabatan: (row['Jabatan Fungsional'] || row.Jabatan || row.jabatan || '').trim(),
-                        masaKerja: (row['Masa Kerja'] || row.masa_kerja || '').trim(),
-                        bkd: (row['BKD 4 Semester'] || row.BKD || '').trim(),
-                        pekerti: (row['PEKERTI/AA'] || row.PEKERTI || '').trim(),
-                        publikasi: (row.Publikasi || row.publikasi || '').trim(),
-                        homebase: (row.Homebase || row.homebase || '').trim(),
-                        pendidikan: (row.Pendidikan || row.pendidikan || '').trim(),
-                        status: (row.Status || row.status || '').trim()
+                        nama: nama.trim(),
+                        nidn: (row['NIDN'] || row['nidn'] || '').trim(),
+                        jabatan: (row['Jabatan Fungsional'] || row['jabatan'] || row['Jabatan'] || '').trim(),
+                        masaKerja: (row['Masa Kerja'] || row['masa_kerja'] || '').trim(),
+                        bkd: (row['BKD 4 Semester'] || row['BKD'] || row['bkd'] || '').trim(),
+                        pekerti: (row['PEKERTI/AA'] || row['PEKERTI'] || row['pekerti'] || '').trim(),
+                        publikasi: (row['Publikasi'] || row['publikasi'] || '').trim(),
+                        homebase: (row['Homebase'] || row['homebase'] || '').trim(),
+                        pendidikan: (row['Pendidikan'] || row['pendidikan'] || '').trim(),
+                        status: (row['Status'] || row['status'] || '').trim()
                     });
                 }
             });
+
+            if (dosenData.length === 0) {
+                alert('❌ Tidak ada data yang ditemukan. Periksa kembali format file.');
+                return;
+            }
+
             localStorage.setItem('dosenData', JSON.stringify(dosenData));
+            document.getElementById('fileInput').value = '';
+            document.getElementById('fileNameDisplay').style.display = 'none';
+            document.getElementById('importFileBtn').style.display = 'none';
+            
+            displayResults();
+            updateDashboard();
+            updateAnalysisDashboard();
+            updateSelectDosen();
+            
+            alert(`✅ ${dosenData.length} dosen berhasil diimpor dari file!`);
+            
+            // Switch to data tab
+            switchTab('data');
         }
 
-        // ===== EVALUATE DOSEN =====
-        function evaluate(dosen) {
-            let criteria = [];
+        // Import Data (Paste Mode)
+        function importData() {
+            const input = document.getElementById('dataInput').value.trim();
+            if (!input) {
+                alert('Silakan paste data terlebih dahulu!');
+                return;
+            }
+
+            const lines = input.split('\n').map(line => line.trim()).filter(line => line);
             
-            // 1. NIDN
-            criteria.push({
-                name: 'NIDN/Status Tetap',
-                pass: dosen.nidn && dosen.nidn !== '-'
+            if (lines.length < 2) {
+                alert('❌ Data tidak valid. Pastikan Anda copy termasuk header dan minimal 1 baris data.');
+                return;
+            }
+
+            const headers = lines[0].split('\t').map(h => h.trim());
+            
+            dosenData = [];
+            for (let i = 1; i < lines.length; i++) {
+                const values = lines[i].split('\t').map(v => v.trim());
+                if (values[0]) { // Check if name is not empty
+                    dosenData.push({
+                        nama: values[0] || '',
+                        nidn: values[1] || '',
+                        jabatan: values[2] || '',
+                        masaKerja: values[3] || '',
+                        bkd: values[4] || '',
+                        pekerti: values[5] || '',
+                        publikasi: values[6] || '',
+                        homebase: values[7] || '',
+                        pendidikan: values[8] || '',
+                        status: values[9] || ''
+                    });
+                }
+            }
+
+            if (dosenData.length === 0) {
+                alert('❌ Tidak ada data yang ditemukan. Pastikan Anda copy termasuk baris data (bukan hanya header).');
+                return;
+            }
+
+            localStorage.setItem('dosenData', JSON.stringify(dosenData));
+            document.getElementById('dataInput').value = '';
+            displayResults();
+            updateDashboard();
+            updateSelectDosen();
+            
+            alert(`✅ ${dosenData.length} dosen berhasil diimpor!`);
+            switchTab('data');
+        }
+
+        // Evaluation Logic
+        function evaluateDosen(dosen) {
+            const criteria = {
+                1: { pass: dosen.nidn !== '' && dosen.nidn !== '-', label: 'Status Dosen Tetap & NUPTK' },
+                2: { pass: dosen.jabatan.includes('Asisten Ahli') || dosen.jabatan.includes('Lektor'), label: 'Jabatan Akademik (min. Asisten Ahli)' },
+                3: { pass: parseMasaKerja(dosen.masaKerja) >= 2, label: 'Masa Kerja (min. 2 tahun)' },
+                4: { pass: dosen.pekerti === 'Ada', label: 'Sertifikat PEKERTI/AA' },
+                5: { pass: dosen.bkd === 'Melaporkan BKD 4 semester', label: 'BKD 4 Semester Berturut-turut' },
+                6: { pass: publikasiData[dosen.nidn] && publikasiData[dosen.nidn].publikasi === 'ya', label: 'Karya Ilmiah/Publikasi', pending: !publikasiData[dosen.nidn] },
+                7: { pass: tugasData[dosen.nidn] ? tugasData[dosen.nidn].tugas !== 'ada' : true, label: 'Tidak Sedang Tugas Belajar', pending: !publikasiData[dosen.nidn] }
+            };
+
+            const passCount = Object.values(criteria).filter(c => c.pass).length;
+            const pendingCount = Object.values(criteria).filter(c => c.pending).length;
+            const totalRequired = 7;
+
+            let status = 'eligible';
+            if (pendingCount > 0) {
+                status = 'pending';
+            } else if (passCount < totalRequired) {
+                status = 'not-eligible';
+            }
+
+            return { criteria, status, passCount, pendingCount };
+        }
+
+        function parseMasaKerja(masaKerjaStr) {
+            const match = masaKerjaStr.match(/(\d+)\s*Tahun/);
+            return match ? parseInt(match[1]) : 0;
+        }
+
+        // Display Results
+        function displayResults() {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            dosenData.forEach((dosen, index) => {
+                const evaluation = evaluateDosen(dosen);
+                const nextLevel = extractJabatan(dosen.jabatan).includes('Asisten Ahli') ? 'Lektor' : 
+                                  (extractJabatan(dosen.jabatan).includes('Lektor') && !extractJabatan(dosen.jabatan).includes('Kepala') ? 'Lektor Kepala' : 'Sudah Tingkat Tertinggi');
+                
+                let recommendationText = '';
+                if (nextLevel === 'Lektor') {
+                    recommendationText = evaluation.status === 'eligible' ? '✓ Siap naik ke Lektor' : '⚠️ Perlu lengkapi kriteria';
+                } else if (nextLevel === 'Lektor Kepala') {
+                    recommendationText = '⚠️ Perluas publikasi & pengabdian';
+                } else {
+                    recommendationText = '🎓 Pertahankan posisi';
+                }
+
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td><strong>${dosen.nama}</strong></td>
+                    <td>${dosen.nidn || '-'}</td>
+                    <td>${extractJabatan(dosen.jabatan)}</td>
+                    <td>${dosen.masaKerja}</td>
+                    <td style="font-size: 12px;">${extractProdi(dosen.homebase)}</td>
+                    <td><span class="status-badge status-${evaluation.status}">${getStatusLabel(evaluation.status)}</span></td>
+                    <td style="font-size: 12px; max-width: 150px;">${recommendationText}</td>
+                    <td class="action-buttons">
+                        <button class="btn-primary" onclick="showDetail('${dosen.nidn}')">Detail</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
             });
-            
-            // 2. Jabatan
-            criteria.push({
-                name: 'Jabatan Akademik',
-                pass: dosen.jabatan && (dosen.jabatan.includes('Asisten') || dosen.jabatan.includes('Lektor') || dosen.jabatan.includes('Kepala'))
+
+            document.getElementById('evaluationResults').style.display = 'block';
+            document.getElementById('emptyState').style.display = 'none';
+        }
+
+        function getStatusLabel(status) {
+            const labels = {
+                'eligible': '✓ Eligible',
+                'not-eligible': '✗ Tidak Eligible',
+                'pending': '⚠️ Pending'
+            };
+            return labels[status] || status;
+        }
+
+        // Filter Table
+        function filterTable() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+            const rows = document.querySelectorAll('#tableBody tr');
+
+            rows.forEach(row => {
+                const nama = row.cells[1].textContent.toLowerCase();
+                const nidn = row.cells[2].textContent.toLowerCase();
+                const rowStatus = row.cells[5].textContent.toLowerCase();
+
+                let showRow = (nama.includes(searchTerm) || nidn.includes(searchTerm));
+                if (statusFilter) {
+                    showRow = showRow && rowStatus.includes(statusFilter);
+                }
+
+                row.style.display = showRow ? '' : 'none';
             });
+        }
+
+        // Modal Functions
+        function showDetail(nidn) {
+            const dosen = dosenData.find(d => d.nidn === nidn);
+            const evaluation = evaluateDosen(dosen);
+            const recommendation = generateRecommendation(dosen, evaluation);
+
+            let criteriaHtml = '';
+            for (let i = 1; i <= 7; i++) {
+                const crit = evaluation.criteria[i];
+                let className = crit.pass ? 'pass' : (crit.pending ? 'pending' : 'fail');
+                let icon = crit.pass ? '✓' : (crit.pending ? '?' : '✗');
+                let color = crit.pass ? '#27ae60' : (crit.pending ? '#f39c12' : '#e74c3c');
+                
+                criteriaHtml += `
+                    <div class="criteria-item ${className}">
+                        <div class="criteria-title">
+                            <span class="icon ${className}" style="font-size: 16px;">${icon}</span>
+                            ${crit.label}
+                        </div>
+                        <div class="criteria-description">
+                            ${getDetailCriteria(i, dosen, crit.pass)}
+                        </div>
+                    </div>
+                `;
+            }
+
+            const modalBody = document.getElementById('modalBody');
+            modalBody.innerHTML = `
+                <div style="margin-bottom: 20px;">
+                    <h3 style="color: #2c3e50;">${dosen.nama}</h3>
+                    <p style="color: #7f8c8d; font-size: 13px;">NIDN: ${dosen.nidn}</p>
+                </div>
+
+                <div style="background: #f9f9f9; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+                    <strong>Jabatan:</strong> ${extractJabatan(dosen.jabatan)}<br>
+                    <strong>Masa Kerja:</strong> ${dosen.masaKerja}<br>
+                    <strong>Program Studi:</strong> ${extractProdi(dosen.homebase)}<br>
+                    <strong>Pendidikan:</strong> ${dosen.pendidikan}
+                </div>
+
+                <h4 style="color: #2c3e50; margin-bottom: 15px;">Hasil Evaluasi 7 Kriteria Sertifikasi Dosen:</h4>
+                <div class="criteria-list">
+                    ${criteriaHtml}
+                </div>
+
+                <div style="background: ${getStatusColor(evaluation.status)}20; border-left: 4px solid ${getStatusColor(evaluation.status)}; padding: 15px; border-radius: 4px; margin-top: 20px; margin-bottom: 20px;">
+                    <strong style="color: ${getStatusColor(evaluation.status)};">Status Serdos 2026: ${getStatusLabel(evaluation.status)}</strong>
+                    <p style="font-size: 13px; color: #7f8c8d; margin-top: 5px;">
+                        Memenuhi ${evaluation.passCount}/7 kriteria ${evaluation.pendingCount > 0 ? `(${evaluation.pendingCount} perlu data)` : ''}
+                    </p>
+                </div>
+
+                ${recommendation}
+            `;
+
+            document.getElementById('modalTitle').textContent = `Detail Evaluasi - ${dosen.nama}`;
+            document.getElementById('detailModal').classList.add('show');
+        }
+
+        function getDetailCriteria(criteriaNum, dosen, pass) {
+            const details = {
+                1: `NIDN: ${dosen.nidn || '-'} ${dosen.nidn ? '✓' : '✗'}`,
+                2: `Jabatan: ${dosen.jabatan} ${(dosen.jabatan.includes('Asisten Ahli') || dosen.jabatan.includes('Lektor')) ? '✓' : '✗'}`,
+                3: `Masa Kerja: ${dosen.masaKerja} ${parseMasaKerja(dosen.masaKerja) >= 2 ? '✓' : '✗'}`,
+                4: `Status PEKERTI/AA: ${dosen.pekerti || '-'} ${dosen.pekerti === 'Ada' ? '✓' : '✗'}`,
+                5: `Status BKD: ${dosen.bkd || '-'} ${dosen.bkd === 'Melaporkan BKD 4 semester' ? '✓' : '✗'}`,
+                6: publikasiData[dosen.nidn] ? `Publikasi: ${publikasiData[dosen.nidn].publikasi === 'ya' ? 'Ada ✓' : 'Tidak ada ✗'} - ${publikasiData[dosen.nidn].detail || ''}` : '⚠️ Belum ada data publikasi',
+                7: tugasData[dosen.nidn] ? `Status: ${tugasData[dosen.nidn].tugas === 'ada' ? 'Sedang tugas belajar ✗' : 'Tidak sedang tugas belajar ✓'}` : '⚠️ Belum ada data status tugas belajar'
+            };
+            return details[criteriaNum] || '';
+        }
+
+        function getStatusColor(status) {
+            const colors = {
+                'eligible': '#27ae60',
+                'not-eligible': '#e74c3c',
+                'pending': '#f39c12'
+            };
+            return colors[status] || '#95a5a6';
+        }
+
+        // Generate Rekomendasi Naik Level
+        function generateRecommendation(dosen, evaluation) {
+            const jabatan = extractJabatan(dosen.jabatan);
+            let recommendation = '';
+            let nextLevel = '';
+            let requirements = [];
+
+            if (jabatan.includes('Asisten Ahli') || jabatan === 'Asisten Ahli') {
+                nextLevel = 'Lektor';
+                
+                // Cek kriteria naik ke Lektor
+                if (evaluation.status !== 'eligible') {
+                    requirements.push('✗ Belum eligible untuk Serdos 2026');
+                }
+                
+                const masaKerja = parseMasaKerja(dosen.masaKerja);
+                if (masaKerja < 5) {
+                    requirements.push(`✗ Masa kerja ${masaKerja} tahun (butuh minimal 5 tahun)`);
+                } else {
+                    requirements.push(`✓ Masa kerja ${masaKerja} tahun (memenuhi)`);
+                }
+
+                const publikasiCount = publikasiData[dosen.nidn] && publikasiData[dosen.nidn].publikasi === 'ya' ? 1 : 0;
+                if (publikasiCount < 2) {
+                    requirements.push(`✗ Publikasi hanya ${publikasiCount} (butuh minimal 2-3 publikasi)`);
+                } else {
+                    requirements.push(`✓ Sudah memiliki publikasi`);
+                }
+
+                if (evaluation.criteria[5].pass) {
+                    requirements.push('✓ BKD 4 semester lengkap');
+                } else {
+                    requirements.push('✗ BKD 4 semester belum lengkap');
+                }
+
+                recommendation = `
+                    <div style="background: #e8f8f5; border-left: 4px solid #27ae60; padding: 15px; border-radius: 4px; margin-top: 15px;">
+                        <h4 style="color: #27ae60; margin-bottom: 10px;">📈 Rencana Naik Level: ${jabatan} → ${nextLevel}</h4>
+                        <p style="font-size: 13px; color: #2c3e50; margin-bottom: 10px;">Persyaratan yang harus dipenuhi:</p>
+                        <div style="font-size: 13px; color: #2c3e50;">
+                            ${requirements.map(req => `<p style="margin: 5px 0;">${req}</p>`).join('')}
+                        </div>
+                    </div>
+                `;
+            } else if (jabatan.includes('Lektor') && !jabatan.includes('Kepala')) {
+                nextLevel = 'Lektor Kepala';
+                
+                requirements.push('✓ Sudah memiliki jabatan Lektor');
+                
+                const masaKerja = parseMasaKerja(dosen.masaKerja);
+                if (masaKerja < 7) {
+                    requirements.push(`✗ Masa kerja ${masaKerja} tahun (butuh minimal 7 tahun)`);
+                } else {
+                    requirements.push(`✓ Masa kerja ${masaKerja} tahun (memenuhi)`);
+                }
+
+                requirements.push('⚠️ Publikasi minimal 5+ artikel (periksa akumulasi Anda)');
+                requirements.push('⚠️ Pengabdian masyarakat/penelitian aktif');
+                requirements.push('⚠️ Kepemimpinan atau tugas administrasi');
+
+                recommendation = `
+                    <div style="background: #fef5e7; border-left: 4px solid #f39c12; padding: 15px; border-radius: 4px; margin-top: 15px;">
+                        <h4 style="color: #d68910; margin-bottom: 10px;">📈 Rencana Naik Level: ${jabatan} → ${nextLevel}</h4>
+                        <p style="font-size: 13px; color: #2c3e50; margin-bottom: 10px;">Persyaratan yang harus dipenuhi:</p>
+                        <div style="font-size: 13px; color: #2c3e50;">
+                            ${requirements.map(req => `<p style="margin: 5px 0;">${req}</p>`).join('')}
+                        </div>
+                    </div>
+                `;
+            } else if (jabatan.includes('Lektor Kepala')) {
+                recommendation = `
+                    <div style="background: #f4ecf7; border-left: 4px solid #8e44ad; padding: 15px; border-radius: 4px; margin-top: 15px;">
+                        <h4 style="color: #8e44ad; margin-bottom: 10px;">🎓 Status: Lektor Kepala</h4>
+                        <p style="font-size: 13px; color: #2c3e50;">Anda sudah mencapai posisi Lektor Kepala. Pertahankan dan tingkatkan kontribusi akademik, penelitian, dan pengabdian masyarakat untuk aspirasi lebih lanjut.</p>
+                    </div>
+                `;
+            } else if (jabatan === 'Belum ada Jabatan' || jabatan === '') {
+                recommendation = `
+                    <div style="background: #fadbd8; border-left: 4px solid #e74c3c; padding: 15px; border-radius: 4px; margin-top: 15px;">
+                        <h4 style="color: #e74c3c; margin-bottom: 10px;">⚠️ Belum Memiliki Jabatan Fungsional</h4>
+                        <p style="font-size: 13px; color: #2c3e50;">Segera ajukan untuk mendapatkan jabatan fungsional (minimal Asisten Ahli) sesuai dengan persyaratan dan kualifikasi akademik Anda.</p>
+                    </div>
+                `;
+            }
+
+            return recommendation;
+        }
+
+        function closeModal() {
+            document.getElementById('detailModal').classList.remove('show');
+        }
+
+        // Edit Dosen
+        function editData(nidn) {
+            document.getElementById('selectDosen').value = nidn;
+            const dosen = dosenData.find(d => d.nidn === nidn);
             
-            // 3. Masa kerja
-            criteria.push({
-                name: 'Masa Kerja ≥2 tahun',
-                pass: dosen.masaKerja && parseInt(dosen.masaKerja) >= 2
+            document.getElementById('dosenNama').value = dosen.nama;
+            document.getElementById('dosenNIDN').value = dosen.nidn;
+            
+            if (publikasiData[nidn]) {
+                document.getElementById('publikasi').value = publikasiData[nidn].publikasi;
+                document.getElementById('detailPublikasi').value = publikasiData[nidn].detail;
+            } else {
+                document.getElementById('publikasi').value = '';
+                document.getElementById('detailPublikasi').value = '';
+            }
+
+            if (tugasData[nidn]) {
+                document.getElementById(`tugas${tugasData[nidn].tugas === 'ada' ? 'Ada' : 'Tidak'}`).checked = true;
+            } else {
+                document.getElementById('tugasTidak').checked = true;
+            }
+
+            document.getElementById('dosenFormSection').style.display = 'block';
+            document.getElementById('selectPrompt').style.display = 'none';
+            switchTab('detail');
+        }
+
+        // Select Dosen Change
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('selectDosen').addEventListener('change', function() {
+                if (this.value) {
+                    const dosen = dosenData.find(d => d.nidn === this.value);
+                    document.getElementById('dosenNama').value = dosen.nama;
+                    document.getElementById('dosenNIDN').value = dosen.nidn;
+                    
+                    if (publikasiData[this.value]) {
+                        document.getElementById('publikasi').value = publikasiData[this.value].publikasi;
+                        document.getElementById('detailPublikasi').value = publikasiData[this.value].detail;
+                    } else {
+                        document.getElementById('publikasi').value = '';
+                        document.getElementById('detailPublikasi').value = '';
+                    }
+
+                    if (tugasData[this.value]) {
+                        document.getElementById(`tugas${tugasData[this.value].tugas === 'ada' ? 'Ada' : 'Tidak'}`).checked = true;
+                    } else {
+                        document.getElementById('tugasTidak').checked = true;
+                    }
+
+                    document.getElementById('dosenFormSection').style.display = 'block';
+                    document.getElementById('selectPrompt').style.display = 'none';
+                } else {
+                    document.getElementById('dosenFormSection').style.display = 'none';
+                    document.getElementById('selectPrompt').style.display = 'block';
+                }
             });
-            
-            // 4. PEKERTI
-            criteria.push({
-                name: 'PEKERTI/AA',
-                pass: dosen.pekerti && dosen.pekerti.toLowerCase().includes('ada')
+        });
+
+        function updateTugasStatus() {
+            // Just a placeholder for future use
+        }
+
+        function saveDosen() {
+            const nidn = document.getElementById('dosenNIDN').value;
+            const publikasi = document.getElementById('publikasi').value;
+            const detailPublikasi = document.getElementById('detailPublikasi').value;
+            const tugasBelajar = document.querySelector('input[name="tugas_belajar"]:checked').value;
+
+            if (!publikasi) {
+                alert('Pilih status publikasi terlebih dahulu!');
+                return;
+            }
+
+            publikasiData[nidn] = {
+                publikasi: publikasi,
+                detail: detailPublikasi
+            };
+
+            tugasData[nidn] = {
+                tugas: tugasBelajar
+            };
+
+            localStorage.setItem('publikasiData', JSON.stringify(publikasiData));
+            localStorage.setItem('tugasData', JSON.stringify(tugasData));
+
+            alert('✓ Data berhasil disimpan!');
+            displayResults();
+            updateDashboard();
+            updateAnalysisDashboard();
+            cancelEdit();
+        }
+
+        function cancelEdit() {
+            document.getElementById('selectDosen').value = '';
+            document.getElementById('dosenFormSection').style.display = 'none';
+            document.getElementById('selectPrompt').style.display = 'block';
+            document.getElementById('publikasi').value = '';
+            document.getElementById('detailPublikasi').value = '';
+        }
+
+        function updateSelectDosen() {
+            const select = document.getElementById('selectDosen');
+            select.innerHTML = '<option value="">-- Pilih Dosen --</option>';
+            dosenData.forEach(dosen => {
+                const option = document.createElement('option');
+                option.value = dosen.nidn;
+                option.textContent = `${dosen.nama} (${dosen.nidn})`;
+                select.appendChild(option);
             });
-            
-            // 5. BKD
-            criteria.push({
-                name: 'BKD 4 Semester',
-                pass: dosen.bkd && dosen.bkd.toLowerCase().includes('melaporkan')
+        }
+
+        // Decision Support Analytics
+        function generateDecisionInsights() {
+            let eligible = 0, notEligible = 0, pending = 0;
+            let totalCriteria = 0;
+            let quickWinsList = [];
+            let mediumPriorityList = [];
+            let highPriorityList = [];
+            const barriersMap = {};
+
+            dosenData.forEach(dosen => {
+                const evaluation = evaluateDosen(dosen);
+                totalCriteria += evaluation.passCount;
+
+                if (evaluation.status === 'eligible') {
+                    eligible++;
+                } else if (evaluation.status === 'not-eligible') {
+                    notEligible++;
+                } else {
+                    pending++;
+                }
+
+                // Categorize by priority
+                if (evaluation.status !== 'eligible') {
+                    const missingCount = 7 - evaluation.passCount;
+
+                    if (missingCount <= 2) {
+                        quickWinsList.push({
+                            nama: dosen.nama,
+                            missing: missingCount,
+                            passCount: evaluation.passCount
+                        });
+                    } else if (missingCount <= 4) {
+                        mediumPriorityList.push({
+                            nama: dosen.nama,
+                            missing: missingCount,
+                            passCount: evaluation.passCount
+                        });
+                    } else {
+                        highPriorityList.push({
+                            nama: dosen.nama,
+                            missing: missingCount,
+                            passCount: evaluation.passCount
+                        });
+                    }
+
+                    // Count barriers
+                    for (let i = 1; i <= 7; i++) {
+                        if (!evaluation.criteria[i].pass) {
+                            barriersMap[evaluation.criteria[i].label] = (barriersMap[evaluation.criteria[i].label] || 0) + 1;
+                        }
+                    }
+                }
             });
-            
-            // 6. Publikasi
-            criteria.push({
-                name: 'Publikasi Ilmiah',
-                pass: dosen.publikasi && dosen.publikasi.toLowerCase() === 'ya'
+
+            const total = dosenData.length;
+            const percentEligible = Math.round((eligible / total) * 100);
+            const percentNotEligible = Math.round((notEligible / total) * 100);
+            const percentPending = Math.round((pending / total) * 100);
+            const avgCriteria = Math.round(totalCriteria / total * 10) / 10;
+
+            // Update KPI
+            document.getElementById('percentEligible').textContent = percentEligible + '%';
+            document.getElementById('percentNotEligible').textContent = percentNotEligible + '%';
+            document.getElementById('percentPending').textContent = percentPending + '%';
+            document.getElementById('targetAchievement').textContent = `Target: 75% | Current: ${percentEligible}%`;
+            document.getElementById('targetPercent').textContent = `${eligible}/${total} (${percentEligible}%)`;
+            document.getElementById('avgCriteria').textContent = `${avgCriteria}/7`;
+            document.getElementById('readyToProcess').textContent = `${quickWinsList.length} orang`;
+            document.getElementById('needHelp').textContent = `${highPriorityList.length} orang`;
+
+            // Estimate completion date
+            if (percentEligible >= 75) {
+                document.getElementById('estimatedDate').textContent = '✓ TARGET TERCAPAI!';
+            } else if (quickWinsList.length > 0) {
+                document.getElementById('estimatedDate').textContent = `~${Math.ceil((75 - percentEligible) / 5)} bulan`;
+            }
+
+            // Generate smart recommendations
+            generateSmartRecommendations(percentEligible, quickWinsList, mediumPriorityList, highPriorityList, barriersMap);
+
+            // Generate priority matrix
+            generatePriorityMatrix(quickWinsList, mediumPriorityList, highPriorityList);
+
+            // Generate risk analysis
+            generateRiskAnalysis(barriersMap);
+
+            // Generate resource plan
+            generateResourcePlan(quickWinsList, mediumPriorityList, highPriorityList);
+
+            // Create status chart
+            createStatusChart(eligible, notEligible, pending);
+        }
+
+        function generateSmartRecommendations(percentEligible, quickWins, medium, highPriority, barriers) {
+            const recommendations = [];
+
+            if (percentEligible >= 75) {
+                recommendations.push('✅ <strong>TARGET TERCAPAI!</strong> 75% dosen sudah eligible untuk sertifikasi. Fokus pada maintenance dan peningkatan kualitas.');
+            } else {
+                const gap = 75 - percentEligible;
+                recommendations.push(`⚠️ <strong>Gap ${gap}%:</strong> Butuh ${Math.ceil(gap / percentEligible * quickWins.length)} dosen tambahan untuk mencapai target 75%.`);
+            }
+
+            if (quickWins.length > 0) {
+                recommendations.push(`🎯 <strong>URGENT ACTION:</strong> Ada ${quickWins.length} dosen yang tinggal 1-2 kriteria untuk eligible. Fokus bantuan di sini untuk hasil cepat!`);
+            }
+
+            if (medium.length > 0) {
+                recommendations.push(`📋 <strong>MEDIUM TERM:</strong> ${medium.length} dosen memerlukan program pengembangan terstruktur (3-4 bulan) untuk mencapai eligible.`);
+            }
+
+            if (highPriority.length > 0) {
+                recommendations.push(`🚨 <strong>INTENSIVE SUPPORT:</strong> ${highPriority.length} dosen memerlukan mentoring intensive dan program pengembangan (6+ bulan).`);
+            }
+
+            const sortedBarriers = Object.entries(barriers).sort((a, b) => b[1] - a[1]);
+            if (sortedBarriers.length > 0) {
+                const topBarrier = sortedBarriers[0];
+                recommendations.push(`📌 <strong>MAIN BOTTLENECK:</strong> "${topBarrier[0]}" adalah kendala terbesar (${topBarrier[1]} dosen). Buat program khusus untuk mengatasi ini.`);
+            }
+
+            recommendations.push(`💡 <strong>STRATEGY:</strong> Gunakan Quick Wins strategy - bantu dosen dengan sedikit keperluan dulu untuk mencapai target cepat, parallel dengan program jangka menengah.`);
+
+            document.getElementById('smartRecommendations').innerHTML = recommendations.map(r => `<div style="padding: 12px; background: #f0f7ff; border-left: 4px solid #3498db; margin-bottom: 10px; border-radius: 4px;">${r}</div>`).join('');
+        }
+
+        function generatePriorityMatrix(quickWins, medium, highPriority) {
+            const formatList = (list) => {
+                if (list.length === 0) return '<div style="color: #95a5a6;">Tidak ada</div>';
+                return list.slice(0, 3).map(d => `<div style="padding: 4px 0;">• ${d.nama} (${d.passCount}/7)</div>`).join('') + (list.length > 3 ? `<div style="color: #7f8c8d; font-size: 10px;">+ ${list.length - 3} lainnya</div>` : '');
+            };
+
+            document.getElementById('quickWins').innerHTML = formatList(quickWins.sort((a, b) => b.passCount - a.passCount));
+            document.getElementById('mediumPriority').innerHTML = formatList(medium.sort((a, b) => b.passCount - a.passCount));
+            document.getElementById('highPriority').innerHTML = formatList(highPriority.sort((a, b) => b.passCount - a.passCount));
+
+            const programRecs = [
+                `<strong>Quick Wins:</strong> Fokus ${quickWins.length} dosen → Target 2-4 minggu`,
+                `<strong>Medium:</strong> Program terstruktur ${medium.length} dosen → 3-4 bulan`,
+                `<strong>Long-term:</strong> Mentoring intensive ${highPriority.length} dosen → 6+ bulan`
+            ];
+            document.getElementById('programRecs').innerHTML = programRecs.join('<br>');
+        }
+
+        function generateRiskAnalysis(barriers) {
+            const riskItems = [];
+
+            const sortedBarriers = Object.entries(barriers).sort((a, b) => b[1] - a[1]);
+
+            sortedBarriers.slice(0, 4).forEach((barrier, idx) => {
+                const riskLevel = barrier[1] > 20 ? '🔴 HIGH' : barrier[1] > 10 ? '🟡 MEDIUM' : '🟢 LOW';
+                const mitigation = getMitigationStrategy(barrier[0]);
+
+                riskItems.push(`
+                    <div style="background: ${barrier[1] > 20 ? '#fadbd8' : barrier[1] > 10 ? '#fdebd0' : '#d5f4e6'}; padding: 15px; border-radius: 8px; border-left: 4px solid ${barrier[1] > 20 ? '#e74c3c' : barrier[1] > 10 ? '#f39c12' : '#27ae60'};">
+                        <div style="font-weight: 600; margin-bottom: 5px;">${riskLevel} - ${barrier[0]}</div>
+                        <div style="font-size: 12px; color: #2c3e50; margin-bottom: 8px;">Mempengaruhi: ${barrier[1]} dosen</div>
+                        <div style="font-size: 11px; color: #555; font-style: italic;">${mitigation}</div>
+                    </div>
+                `);
             });
-            
-            // 7. Tugas belajar
-            criteria.push({
-                name: 'Tidak Tugas Belajar',
-                pass: !dosen.status || !dosen.status.toLowerCase().includes('tugas')
+
+            document.getElementById('riskAnalysis').innerHTML = riskItems.join('');
+        }
+
+        function getMitigationStrategy(barrier) {
+            const strategies = {
+                'Sertifikat PEKERTI/AA': '→ Fasilitasi peserta PEKERTI dari kampus terpercaya, budget training ~2jt per orang',
+                'BKD 4 Semester Berturut-turut': '→ Ingatkan deadline LKD/BKD, buat panduan pengisian, support administratif',
+                'Karya Ilmiah atau Seni': '→ Workshop publikasi ilmiah, mentoring artikel, fasilitasi submission ke jurnal',
+                'Masa Kerja': '→ Tunggu waktu, tidak bisa dipercepat - fokus pada kriteria lain',
+                'Jabatan Akademik': '→ Proses kenaikan jabatan formal, koordinasi dengan evaluator keahlian',
+                'Publikasi Ilmiah': '→ Workshop dan mentoring penulisan ilmiah, kolaborasi research'
+            };
+
+            return strategies[barrier] || '→ Identifikasi penyebab dan buat program khusus';
+        }
+
+        function generateResourcePlan(quickWins, medium, highPriority) {
+            const estimates = [
+                {
+                    program: '🎯 Quick Wins Program',
+                    durasi: '2-4 minggu',
+                    dosen: quickWins.length,
+                    budget: `Rp ${quickWins.length * 500}rb - 1jt`,
+                    effort: '20% tim',
+                    hasil: `Target ${quickWins.length} dosen eligible`
+                },
+                {
+                    program: '📚 Medium Priority Program',
+                    durasi: '3-4 bulan',
+                    dosen: medium.length,
+                    budget: `Rp ${medium.length * 1}jt - 2jt`,
+                    effort: '50% tim',
+                    hasil: `Target ${Math.round(medium.length * 0.6)} dosen eligible`
+                },
+                {
+                    program: '🚨 Intensive Mentoring',
+                    durasi: '6+ bulan',
+                    dosen: highPriority.length,
+                    budget: `Rp ${highPriority.length * 2}jt - 3jt`,
+                    effort: '80% tim',
+                    hasil: `Target ${Math.round(highPriority.length * 0.4)} dosen eligible`
+                },
+                {
+                    program: '📊 Overall Investment',
+                    durasi: '6-12 bulan',
+                    dosen: quickWins.length + medium.length + highPriority.length,
+                    budget: `Rp ${(quickWins.length * 1.5 + medium.length * 2 + highPriority.length * 3) / 1000}jt`,
+                    effort: '100% coordinated',
+                    hasil: `Target 75%+ sertifikasi`
+                }
+            ];
+
+            document.getElementById('resourcePlan').innerHTML = estimates.map(e => `
+                <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px solid #ecf0f1;">
+                    <div style="font-weight: 600; color: #2c3e50; margin-bottom: 10px;">${e.program}</div>
+                    <div style="font-size: 12px; color: #555; line-height: 1.8;">
+                        <div>⏱️ Durasi: ${e.durasi}</div>
+                        <div>👥 Dosen: ${e.dosen} orang</div>
+                        <div>💰 Budget: ${e.budget}</div>
+                        <div>👨‍💼 Effort: ${e.effort}</div>
+                        <div style="font-weight: 600; color: #27ae60; margin-top: 8px;">✓ ${e.hasil}</div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Generate additional recommendations
+            generateProdiRecommendations();
+            generateJabatanRecommendations();
+        }
+
+        // Analisis Sertifikasi Per Program Studi
+        function generateProdiRecommendations() {
+            const prodiAnalysis = {};
+
+            dosenData.forEach(dosen => {
+                const prodi = extractProdi(dosen.homebase);
+                if (!prodiAnalysis[prodi]) {
+                    prodiAnalysis[prodi] = {
+                        total: 0,
+                        sudahSertifikasi: 0,
+                        belumSertifikasi: 0,
+                        dosen: []
+                    };
+                }
+                prodiAnalysis[prodi].total++;
+
+                const status = dosen.status || 'Belum Sertifikasi';
+                if (status.includes('20')) {
+                    prodiAnalysis[prodi].sudahSertifikasi++;
+                } else {
+                    prodiAnalysis[prodi].belumSertifikasi++;
+                    prodiAnalysis[prodi].dosen.push(dosen.nama);
+                }
             });
+
+            // Buat grafik sertifikasi
+            createSertifikasiChart(prodiAnalysis);
+
+            // Generate rekomendasi transfer
+            const rekomendasi = [];
+            const sortedProdi = Object.entries(prodiAnalysis)
+                .map(([prodi, data]) => ({
+                    prodi,
+                    ...data,
+                    persentaseSertifikasi: Math.round((data.sudahSertifikasi / data.total) * 100)
+                }))
+                .sort((a, b) => b.persentaseSertifikasi - a.persentaseSertifikasi);
+
+            const terbaik = sortedProdi.slice(0, 3);
+            const kurang = sortedProdi.filter(p => p.persentaseSertifikasi < 50);
+
+            kurang.forEach(prodi => {
+                const rekomendasiTarget = terbaik[0];
+                rekomendasi.push(`
+                    <div style="background: #fef5e7; border: 2px solid #f39c12; padding: 15px; border-radius: 8px;">
+                        <h4 style="color: #d68910; margin-top: 0; margin-bottom: 10px;">⚠️ ${prodi.prodi}</h4>
+                        <div style="font-size: 12px; color: #2c3e50; line-height: 1.8; margin-bottom: 10px;">
+                            <div><strong>Status Saat Ini:</strong> ${prodi.sudahSertifikasi}/${prodi.total} eligible (${prodi.persentaseSertifikasi}%)</div>
+                            <div><strong>Dosen Belum Sertifikasi:</strong> ${prodi.belumSertifikasi} orang</div>
+                        </div>
+                        <div style="background: white; padding: 10px; border-radius: 4px; margin-bottom: 10px; font-size: 12px;">
+                            <strong style="color: #27ae60;">💡 Rekomendasi:</strong><br>
+                            Transfer dosen yang memenuhi kriteria ke <strong>${rekomendasiTarget.prodi}</strong> (${rekomendasiTarget.persentaseSertifikasi}% eligible) untuk mendapat mentoring lebih baik
+                        </div>
+                        <div style="font-size: 11px; color: #555;">
+                            <strong>Dosen:</strong> ${prodi.dosen.slice(0, 3).join(', ')}${prodi.dosen.length > 3 ? ' +' + (prodi.dosen.length - 3) : ''}
+                        </div>
+                    </div>
+                `);
+            });
+
+            document.getElementById('rekomendasiTransfer').innerHTML = rekomendasi.length > 0 ? rekomendasi.join('') : 
+                '<div style="padding: 20px; text-align: center; color: #7f8c8d;">✓ Semua program studi sudah memiliki tingkat sertifikasi >50%</div>';
+        }
+
+        // Create Sertifikasi Chart Per Prodi
+        function createSertifikasiChart(prodiAnalysis) {
+            try {
+                const ctx = document.getElementById('chartSertifikasiProdi');
+                if (!ctx) return;
+
+                if (window.chartSertifikasiProdiInstance) {
+                    window.chartSertifikasiProdiInstance.destroy();
+                }
+
+                const labels = Object.keys(prodiAnalysis);
+                const sudah = labels.map(prodi => prodiAnalysis[prodi].sudahSertifikasi);
+                const belum = labels.map(prodi => prodiAnalysis[prodi].belumSertifikasi);
+
+                window.chartSertifikasiProdiInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: '✓ Sudah Sertifikasi',
+                                data: sudah,
+                                backgroundColor: '#27ae60',
+                                borderColor: '#1e8449',
+                                borderWidth: 1
+                            },
+                            {
+                                label: '✗ Belum Sertifikasi',
+                                data: belum,
+                                backgroundColor: '#e74c3c',
+                                borderColor: '#c0392b',
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { font: { size: 12 }, padding: 15 }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                stacked: true,
+                                beginAtZero: true
+                            },
+                            y: {
+                                stacked: true
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Error creating sertifikasi chart:', error);
+            }
+        }
+
+        // Rekomendasi Naik Jabatan
+        function generateJabatanRecommendations() {
+            const jabatanRec = [];
+
+            // Analisis per jabatan
+            const asistenAhliSiapNaik = [];
+            const lektorSiapNaik = [];
+
+            dosenData.forEach(dosen => {
+                const jabatan = extractJabatan(dosen.jabatan);
+                const evaluation = evaluateDosen(dosen);
+                const masaKerja = parseMasaKerja(dosen.masaKerja);
+
+                if (jabatan.includes('Asisten Ahli')) {
+                    if (evaluation.status === 'eligible' && masaKerja >= 5) {
+                        asistenAhliSiapNaik.push({
+                            nama: dosen.nama,
+                            masaKerja: masaKerja,
+                            status: evaluation.status,
+                            passCount: evaluation.passCount
+                        });
+                    }
+                } else if (jabatan.includes('Lektor') && !jabatan.includes('Kepala')) {
+                    if (evaluation.passCount >= 5 && masaKerja >= 7) {
+                        lektorSiapNaik.push({
+                            nama: dosen.nama,
+                            masaKerja: masaKerja,
+                            status: evaluation.status,
+                            passCount: evaluation.passCount
+                        });
+                    }
+                }
+            });
+
+            if (asistenAhliSiapNaik.length > 0) {
+                jabatanRec.push(`
+                    <div style="background: #d5f4e6; border: 2px solid #27ae60; padding: 20px; border-radius: 8px; margin-bottom: 15px;">
+                        <h4 style="color: #27ae60; margin-top: 0; margin-bottom: 10px;">✓ Asisten Ahli → Lektor</h4>
+                        <p style="color: #2c3e50; font-size: 12px; margin-bottom: 10px;">
+                            <strong>${asistenAhliSiapNaik.length} dosen siap untuk naik ke Lektor:</strong>
+                        </p>
+                        <div style="background: white; padding: 12px; border-radius: 4px; margin-bottom: 10px;">
+                            ${asistenAhliSiapNaik.map(d => `
+                                <div style="padding: 8px 0; border-bottom: 1px solid #ecf0f1; font-size: 12px;">
+                                    <strong>${d.nama}</strong><br>
+                                    <span style="color: #7f8c8d;">Masa Kerja: ${d.masaKerja} tahun | Kriteria: ${d.passCount}/7 ✓</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div style="background: #e8f8f5; padding: 10px; border-radius: 4px; font-size: 11px; color: #1e8449;">
+                            <strong>📋 Syarat:</strong> Eligible Serdos ✓ + Masa kerja 5+ tahun ✓<br>
+                            <strong>📌 Action:</strong> Proses kenaikan jabatan formal ke evaluator keahlian
+                        </div>
+                    </div>
+                `);
+            }
+
+            if (lektorSiapNaik.length > 0) {
+                jabatanRec.push(`
+                    <div style="background: #d6eaf8; border: 2px solid #3498db; padding: 20px; border-radius: 8px; margin-bottom: 15px;">
+                        <h4 style="color: #2980b9; margin-top: 0; margin-bottom: 10px;">📈 Lektor → Lektor Kepala</h4>
+                        <p style="color: #2c3e50; font-size: 12px; margin-bottom: 10px;">
+                            <strong>${lektorSiapNaik.length} dosen siap untuk naik ke Lektor Kepala:</strong>
+                        </p>
+                        <div style="background: white; padding: 12px; border-radius: 4px; margin-bottom: 10px;">
+                            ${lektorSiapNaik.map(d => `
+                                <div style="padding: 8px 0; border-bottom: 1px solid #ecf0f1; font-size: 12px;">
+                                    <strong>${d.nama}</strong><br>
+                                    <span style="color: #7f8c8d;">Masa Kerja: ${d.masaKerja} tahun | Kriteria: ${d.passCount}/7</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div style="background: #ebf5fb; padding: 10px; border-radius: 4px; font-size: 11px; color: #1a5490;">
+                            <strong>📋 Syarat:</strong> Lektor ✓ + Masa kerja 7+ tahun ✓ + Publikasi 5+ ✓<br>
+                            <strong>📌 Action:</strong> Kumpulkan CV akademik, publikasi, pengabdian masyarakat untuk evaluasi
+                        </div>
+                    </div>
+                `);
+            }
+
+            if (asistenAhliSiapNaik.length === 0 && lektorSiapNaik.length === 0) {
+                jabatanRec.push(`
+                    <div style="background: #f0f7ff; border: 2px solid #3498db; padding: 20px; border-radius: 8px;">
+                        <h4 style="color: #2980b9; margin-top: 0;">💡 Rekomendasi Persiapan</h4>
+                        <p style="color: #2c3e50; font-size: 12px; line-height: 1.8;">
+                            <strong>Untuk Asisten Ahli:</strong> Fokus pada publikasi ilmiah & lengkapi BKD untuk eligible Serdos, 
+                            yang akan membuka jalan ke Lektor.<br><br>
+                            <strong>Untuk Lektor:</strong> Kumpulkan publikasi minimal 5 artikel + dokumentasi pengabdian masyarakat 
+                            untuk persiapan naik Lektor Kepala.
+                        </p>
+                    </div>
+                `);
+            }
+
+            document.getElementById('rekomendasiNaikJabatan').innerHTML = jabatanRec.join('');
+        }
+
+        function createStatusChart(eligible, notEligible, pending) {
+            try {
+                const ctx = document.getElementById('chartStatus');
+                if (!ctx) return;
+
+                if (window.chartStatusInstance) {
+                    window.chartStatusInstance.destroy();
+                }
+
+                window.chartStatusInstance = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Eligible', 'Pending', 'Tidak Eligible'],
+                        datasets: [{
+                            data: [eligible, pending, notEligible],
+                            backgroundColor: ['#27ae60', '#f39c12', '#e74c3c'],
+                            borderColor: ['#1e8449', '#d68910', '#c0392b'],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { font: { size: 12 }, padding: 15 }
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Error creating status chart:', error);
+            }
+        }
+            let eligible = 0, notEligible = 0, pending = 0;
+
+            dosenData.forEach(dosen => {
+                const evaluation = evaluateDosen(dosen);
+                if (evaluation.status === 'eligible') eligible++;
+                else if (evaluation.status === 'not-eligible') notEligible++;
+                else pending++;
+            });
+
+            document.getElementById('countEligible').textContent = eligible;
+            document.getElementById('countNotEligible').textContent = notEligible;
+            document.getElementById('countPending').textContent = pending;
+            document.getElementById('countTotal').textContent = dosenData.length;
+
+            // Update chart
+            const total = dosenData.length || 1;
+            const maxHeight = 200;
             
-            const passCount = criteria.filter(c => c.pass).length;
-            const barriers = criteria.filter(c => !c.pass).map(c => c.name);
+            // Delay chart creation untuk memastikan Canvas sudah siap
+            setTimeout(() => {
+                try {
+                    createProdiChart();
+                    createJabatanChart();
+                    generateDecisionInsights();
+                    console.log('Charts and insights created successfully');
+                } catch (error) {
+                    console.error('Error updating dashboard:', error);
+                }
+            }, 500);
+        }
+
+        // Dashboard Update Function
+        function updateDashboard() {
+            let eligible = 0, notEligible = 0, pending = 0;
+
+            dosenData.forEach(dosen => {
+                const evaluation = evaluateDosen(dosen);
+                if (evaluation.status === 'eligible') eligible++;
+                else if (evaluation.status === 'not-eligible') notEligible++;
+                else pending++;
+            });
+
+            document.getElementById('countEligible').textContent = eligible;
+            document.getElementById('countNotEligible').textContent = notEligible;
+            document.getElementById('countPending').textContent = pending;
+            document.getElementById('countTotal').textContent = dosenData.length;
+
+            // Delay chart creation untuk memastikan Canvas sudah siap
+            setTimeout(() => {
+                try {
+                    createProdiChart();
+                    createJabatanChart();
+                    generateDecisionInsights();
+                    console.log('Charts and insights created successfully');
+                } catch (error) {
+                    console.error('Error updating dashboard:', error);
+                }
+            }, 500);
+        }
+
+        // Extract Program Studi from homebase
+        function extractProdi(homebase) {
+            if (!homebase) return 'Tidak Terdaftar';
+            // Format: "S1 - Ekonomi Pembangunan" atau "S2 - Universitas Mataram"
+            const parts = homebase.split(' - ');
+            if (parts.length > 1) {
+                return parts[parts.length - 1].trim();
+            }
+            return homebase.trim();
+        }
+
+        // Extract Jabatan from column
+        function extractJabatan(jabatan) {
+            if (!jabatan || jabatan === '') return 'Belum ada Jabatan';
+            // Format: "Asisten Ahli-150.00" atau "Lektor-300.00" atau empty
+            const parts = jabatan.split('-');
+            return parts[0].trim() || 'Belum ada Jabatan';
+        }
+
+        // Get data for Prodi Chart
+        function getProdiData() {
+            const prodiMap = {};
+
+            dosenData.forEach(dosen => {
+                const prodi = extractProdi(dosen.homebase);
+                const evaluation = evaluateDosen(dosen);
+
+                if (!prodiMap[prodi]) {
+                    prodiMap[prodi] = { eligible: 0, notEligible: 0, pending: 0 };
+                }
+
+                if (evaluation.status === 'eligible') prodiMap[prodi].eligible++;
+                else if (evaluation.status === 'not-eligible') prodiMap[prodi].notEligible++;
+                else prodiMap[prodi].pending++;
+            });
+
+            return prodiMap;
+        }
+
+        // Get data for Jabatan Chart
+        function getJabatanData() {
+            const jabatanMap = {};
+
+            dosenData.forEach(dosen => {
+                const jabatan = extractJabatan(dosen.jabatan);
+                const evaluation = evaluateDosen(dosen);
+
+                if (!jabatanMap[jabatan]) {
+                    jabatanMap[jabatan] = { eligible: 0, notEligible: 0, pending: 0 };
+                }
+
+                if (evaluation.status === 'eligible') jabatanMap[jabatan].eligible++;
+                else if (evaluation.status === 'not-eligible') jabatanMap[jabatan].notEligible++;
+                else jabatanMap[jabatan].pending++;
+            });
+
+            return jabatanMap;
+        }
+
+        // Analisis Kendala Sertifikasi
+        function generateKendalaAnalysis(dosen, evaluation) {
+            const kendala = [];
+            const syarat = [];
+            
+            // Cek setiap kriteria
+            if (!dosen.nidn || dosen.nidn === '' || dosen.nidn === '-') {
+                kendala.push('Belum ada NIDN/NUPTK');
+                syarat.push('Dapatkan NIDN sebagai dosen tetap');
+            }
+            
+            const jabatan = extractJabatan(dosen.jabatan);
+            if (!jabatan.includes('Asisten Ahli') && !jabatan.includes('Lektor')) {
+                kendala.push('jabatan');
+                syarat.push(`Jabatan saat ini: ${jabatan || 'Belum ada'}. Butuh minimal Asisten Ahli`);
+            }
+            
+            const masaKerja = parseMasaKerja(dosen.masaKerja);
+            if (masaKerja < 2) {
+                kendala.push('masaker');
+                syarat.push(`Masa kerja ${masaKerja} tahun. Butuh minimal 2 tahun pengalaman`);
+            }
+            
+            if (dosen.pekerti !== 'Ada') {
+                kendala.push('pekerti');
+                syarat.push('Ikuti program PEKERTI atau Applied Approach (AA)');
+            }
+            
+            if (dosen.bkd !== 'Melaporkan BKD 4 semester') {
+                kendala.push('bkd');
+                syarat.push('Lengkapi laporan BKD/LKD selama 4 semester berturut-turut');
+            }
+            
+            if (!publikasiData[dosen.nidn] || publikasiData[dosen.nidn].publikasi !== 'ya') {
+                kendala.push('publikasi');
+                syarat.push('Publikasikan minimal 1 artikel di Jurnal Nasional Terakreditasi atau Internasional');
+            }
+            
+            const tugas = tugasData[dosen.nidn];
+            if (tugas && tugas.tugas === 'ada') {
+                kendala.push('tugas');
+                syarat.push('Selesaikan tugas belajar terlebih dahulu');
+            }
             
             return {
-                criteria: criteria,
-                passCount: passCount,
-                eligible: passCount >= 6,
-                barriers: barriers
+                kendala: kendala,
+                syarat: syarat,
+                totalKendala: kendala.length,
+                kendalaUtama: kendala.length > 0 ? kendala[0] : 'Tidak ada',
+                statusSertifikasi: dosen.status || 'Belum Sertifikasi'
             };
         }
 
-        // ===== UPDATE DASHBOARD =====
-        function updateDashboard() {
-            if (dosenData.length === 0) return;
-            
-            let eligible = 0, barrierCount = {}, quickWins = 0, medium = 0, high = 0;
-            const scores = [];
-            
-            dosenData.forEach(d => {
-                const eval = evaluate(d);
-                scores.push(eval.passCount);
-                
-                if (eval.eligible) eligible++;
-                else {
-                    eval.barriers.forEach(b => barrierCount[b] = (barrierCount[b] || 0) + 1);
-                }
-                
-                const missing = 7 - eval.passCount;
-                if (missing <= 2) quickWins++;
-                else if (missing <= 4) medium++;
-                else high++;
-            });
-            
-            const notEligible = dosenData.length - eligible;
-            const pctEligible = Math.round((eligible / dosenData.length) * 100);
-            const gap = 75 - pctEligible;
-            const avgScore = (scores.reduce((a, b) => a + b, 0) / dosenData.length).toFixed(1);
-            
-            // Update KPI
-            document.getElementById('kpiTotal').textContent = dosenData.length;
-            document.getElementById('kpiEligible').textContent = eligible;
-            document.getElementById('kpiEligiblePct').textContent = pctEligible + '%';
-            document.getElementById('kpiNotEligible').textContent = notEligible;
-            document.getElementById('kpiNotEligiblePct').textContent = Math.round((notEligible / dosenData.length) * 100) + '%';
-            document.getElementById('kpiGap').textContent = (gap > 0 ? '+' : '') + gap + '%';
-            
-            // Update Metrics
-            document.getElementById('metricAvg').textContent = avgScore + '/7';
-            document.getElementById('metricQuickWins').textContent = quickWins;
-            document.getElementById('metricMedium').textContent = medium;
-            document.getElementById('metricHigh').textContent = high;
-            
-            // Chart Status
-            const ctx1 = document.getElementById('chartStatus');
-            if (window.chart1) window.chart1.destroy();
-            window.chart1 = new Chart(ctx1, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Eligible ✓', 'Tidak Eligible ✗'],
-                    datasets: [{
-                        data: [eligible, notEligible],
-                        backgroundColor: ['#27ae60', '#e74c3c'],
-                        borderColor: ['#1e8449', '#c0392b'],
-                        borderWidth: 2
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
-            
-            // Chart Criteria Distribution
-            const criteriaCount = {};
-            scores.forEach(s => criteriaCount[s] = (criteriaCount[s] || 0) + 1);
-            const labels = Array.from({length: 8}, (_, i) => i);
-            const data = labels.map(i => criteriaCount[i] || 0);
-            
-            const ctx2 = document.getElementById('chartCriteria');
-            if (window.chart2) window.chart2.destroy();
-            window.chart2 = new Chart(ctx2, {
-                type: 'bar',
-                data: {
-                    labels: labels.map(i => i + ' Kriteria'),
-                    datasets: [{
-                        label: 'Jumlah Dosen',
-                        data: data,
-                        backgroundColor: '#3498db',
-                        borderColor: '#2980b9',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: { y: { beginAtZero: true } }
-                }
-            });
-            
-            // Barriers
-            const sorted = Object.entries(barrierCount).sort((a, b) => b[1] - a[1]);
-            document.getElementById('barriersList').innerHTML = sorted.slice(0, 5).map(([name, count]) => 
-                `<div class="barrier-item">
-                    <strong>${name}</strong>
-                    <div style="color: #555; font-size: 13px; margin-top: 5px;">
-                        Mempengaruhi ${count} dosen (${Math.round((count/notEligible)*100)}% dari yang tidak eligible)
-                    </div>
-                </div>`
-            ).join('');
-            
-            // Summary
-            const needed = Math.ceil((75 / 100) * dosenData.length) - eligible;
-            const estimateMonths = Math.ceil(needed / (quickWins || 1) * 0.5) + 2;
-            
-            document.getElementById('summaryStatus').textContent = pctEligible + '%';
-            document.getElementById('summaryNeeded').textContent = needed + ' orang';
-            document.getElementById('summaryTime').textContent = Math.max(1, estimateMonths) + ' bulan';
+        function getKendalaLabel(kendala) {
+            const labels = {
+                'jabatan': 'Jabatan Akademik',
+                'masaker': 'Masa Kerja Kurang',
+                'pekerti': 'Tanpa PEKERTI/AA',
+                'bkd': 'BKD Belum Lengkap',
+                'publikasi': 'Tanpa Publikasi',
+                'tugas': 'Sedang Tugas Belajar'
+            };
+            return labels[kendala] || kendala;
         }
 
-        // ===== SHOW LAPORAN =====
-        function showLaporan() {
-            if (dosenData.length === 0) {
-                document.getElementById('dosenTable').innerHTML = '<p style="color: #e74c3c;">Belum ada data. Import data terlebih dahulu!</p>';
+        function updateAnalysisDashboard() {
+            let sudahSertifikasi = 0;
+            let belumSertifikasi = 0;
+            let dalamProses = 0;
+            
+            const kendalaCount = {
+                jabatan: 0,
+                masaker: 0,
+                pekerti: 0,
+                bkd: 0,
+                publikasi: 0
+            };
+
+            dosenData.forEach(dosen => {
+                const status = dosen.status || 'Belum Sertifikasi';
+                
+                if (status.includes('2017') || status.includes('2018') || status.includes('2019') || status.includes('2020') || status.includes('2021') || status.includes('2022') || status.includes('2023') || status.includes('2024') || status.includes('2025')) {
+                    sudahSertifikasi++;
+                } else if (dosen.bkd === 'Melaporkan BKD 4 semester' && dosen.pekerti === 'Ada') {
+                    dalamProses++;
+                } else {
+                    belumSertifikasi++;
+                }
+            });
+
+            // Hitung kendala
+            dosenData.forEach(dosen => {
+                const status = dosen.status || 'Belum Sertifikasi';
+                if (!status.includes('20')) { // Belum sertifikasi
+                    const analisis = generateKendalaAnalysis(dosen, evaluateDosen(dosen));
+                    analisis.kendala.forEach(k => {
+                        if (kendalaCount.hasOwnProperty(k)) {
+                            kendalaCount[k]++;
+                        }
+                    });
+                }
+            });
+
+            document.getElementById('analysisSudahSertifikasi').textContent = sudahSertifikasi;
+            document.getElementById('analysisBelumSertifikasi').textContent = belumSertifikasi;
+            document.getElementById('analysisProses').textContent = dalamProses;
+            
+            document.getElementById('kendalaJabatan').textContent = kendalaCount.jabatan;
+            document.getElementById('kendalaMasaKerja').textContent = kendalaCount.masaker;
+            document.getElementById('kendalaPekerti').textContent = kendalaCount.pekerti;
+            document.getElementById('kendalaBKD').textContent = kendalaCount.bkd;
+            document.getElementById('kendalaPublikasi').textContent = kendalaCount.publikasi;
+
+            setTimeout(() => {
+                createSertifikasiChart(sudahSertifikasi, belumSertifikasi, dalamProses);
+                displayKendalaTable();
+            }, 300);
+        }
+
+        function createSertifikasiChart(sudah, belum, proses) {
+            try {
+                const ctx = document.getElementById('chartSertifikasi');
+                if (!ctx) return;
+
+                if (window.chartSertifikasiInstance) {
+                    window.chartSertifikasiInstance.destroy();
+                }
+
+                window.chartSertifikasiInstance = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Sudah Sertifikasi', 'Belum Sertifikasi', 'Dalam Proses'],
+                        datasets: [{
+                            data: [sudah, belum, proses],
+                            backgroundColor: ['#27ae60', '#e74c3c', '#f39c12'],
+                            borderColor: ['#1e8449', '#c0392b', '#d68910'],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    font: { size: 12 },
+                                    padding: 15,
+                                    usePointStyle: true
+                                }
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Error creating sertifikasi chart:', error);
+            }
+        }
+
+        function displayKendalaTable() {
+            const tbody = document.getElementById('kendalaTableBody');
+            tbody.innerHTML = '';
+
+            let no = 1;
+            dosenData.forEach(dosen => {
+                const status = dosen.status || 'Belum Sertifikasi';
+                // Hanya tampilkan yang belum sertifikasi
+                if (!status.includes('20')) {
+                    const analisis = generateKendalaAnalysis(dosen, evaluateDosen(dosen));
+                    
+                    const row = document.createElement('tr');
+                    const actionPlan = analisis.syarat.slice(0, 2).join(' → ');
+                    
+                    row.innerHTML = `
+                        <td>${no}</td>
+                        <td><strong>${dosen.nama}</strong></td>
+                        <td>${dosen.nidn || '-'}</td>
+                        <td>${extractJabatan(dosen.jabatan)}</td>
+                        <td>${dosen.masaKerja}</td>
+                        <td>${getKendalaLabel(analisis.kendalaUtama)}</td>
+                        <td style="font-size: 12px; max-width: 200px;">${analisis.syarat.join(' • ')}</td>
+                        <td style="font-size: 12px; max-width: 150px;">${actionPlan}</td>
+                    `;
+                    
+                    row.setAttribute('data-kendala', analisis.kendala.join(' '));
+                    tbody.appendChild(row);
+                    no++;
+                }
+            });
+
+            if (no === 1) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 30px; color: #7f8c8d;">✓ Semua dosen sudah sertifikasi!</td></tr>';
+            }
+        }
+
+        function filterKendalaTable() {
+            const search = document.getElementById('searchKendala').value.toLowerCase();
+            const filter = document.getElementById('filterKendala').value;
+            const rows = document.querySelectorAll('#kendalaTableBody tr');
+
+            rows.forEach(row => {
+                if (row.children.length === 1) return; // Skip empty state
+
+                const nama = row.children[1].textContent.toLowerCase();
+                const kendala = row.getAttribute('data-kendala') || '';
+
+                let show = nama.includes(search);
+                if (filter) {
+                    show = show && kendala.includes(filter);
+                }
+
+                row.style.display = show ? '' : 'none';
+            });
+        }
+
+        function exportKendalaToExcel() {
+            const workbook = XLSX.utils.book_new();
+            const data = [];
+
+            data.push(['LAPORAN KENDALA SERTIFIKASI DOSEN', '', '', '', '', '', '', '']);
+            data.push(['Universitas Cordova', '', '', '', '', '', '', '']);
+            data.push(['']);
+            data.push(['No', 'Nama Dosen', 'NIDN', 'Jabatan', 'Masa Kerja', 'Kendala Utama', 'Syarat yang Kurang', 'Action Plan']);
+
+            let no = 1;
+            dosenData.forEach(dosen => {
+                const status = dosen.status || 'Belum Sertifikasi';
+                if (!status.includes('20')) {
+                    const analisis = generateKendalaAnalysis(dosen, evaluateDosen(dosen));
+                    
+                    data.push([
+                        no,
+                        dosen.nama,
+                        dosen.nidn,
+                        extractJabatan(dosen.jabatan),
+                        dosen.masaKerja,
+                        getKendalaLabel(analisis.kendalaUtama),
+                        analisis.syarat.join('\n'),
+                        analisis.syarat.slice(0, 2).join(' → ')
+                    ]);
+                    no++;
+                }
+            });
+
+            const worksheet = XLSX.utils.aoa_to_sheet(data);
+            worksheet['!cols'] = [
+                { wch: 5 },
+                { wch: 25 },
+                { wch: 12 },
+                { wch: 18 },
+                { wch: 15 },
+                { wch: 25 },
+                { wch: 35 },
+                { wch: 30 }
+            ];
+
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Kendala Sertifikasi');
+            XLSX.writeFile(workbook, 'Laporan_Kendala_Sertifikasi_Dosen.xlsx');
+        }
+        function copyScriptCode() {
+            const code = document.getElementById('scriptCode').value;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('✓ Kode Google Apps Script berhasil dicopy!');
+            }).catch(() => {
+                alert('❌ Gagal copy. Coba manual select & copy kode.');
+            });
+        }
+
+        function testGoogleAppsScript() {
+            const scriptUrl = document.getElementById('scriptUrl').value.trim();
+            if (!scriptUrl) {
+                alert('⚠️ Silakan input URL Google Apps Script terlebih dahulu!');
                 return;
             }
-            
-            let html = '<table><thead><tr><th style="width:40px;">No</th><th>Nama</th><th style="width:80px;">NIDN</th><th style="width:100px;">Jabatan</th><th style="width:80px;">Kriteria</th><th style="width:100px;">Status</th><th style="width:150px;">Kendala</th></tr></thead><tbody>';
-            
-            dosenData.forEach((d, i) => {
-                const eval = evaluate(d);
-                const status = eval.eligible ? '<span class="status-eligible">✓ ELIGIBLE</span>' : '<span class="status-not">✗ TIDAK</span>';
-                const barriers = eval.barriers.slice(0, 2).join(', ') + (eval.barriers.length > 2 ? '...' : '');
-                
-                html += `<tr>
-                    <td>${i+1}</td>
-                    <td><strong>${d.nama}</strong></td>
-                    <td>${d.nidn}</td>
-                    <td>${d.jabatan}</td>
-                    <td><strong>${eval.passCount}/7</strong></td>
-                    <td>${status}</td>
-                    <td style="font-size: 12px; color: #7f8c8d;">${barriers}</td>
-                </tr>`;
-            });
-            
-            html += '</tbody></table>';
-            document.getElementById('dosenTable').innerHTML = html;
+
+            const statusDiv = document.getElementById('syncStatus');
+            statusDiv.innerHTML = '🔄 Testing koneksi...';
+
+            fetch(scriptUrl)
+                .then(response => response.json())
+                .then(data => {
+                    statusDiv.innerHTML = '<div class="alert alert-success">✅ Koneksi berhasil! Apps Script siap menerima data.</div>';
+                    // Save script URL to localStorage
+                    localStorage.setItem('googleScriptUrl', scriptUrl);
+                })
+                .catch(error => {
+                    statusDiv.innerHTML = `<div class="alert" style="background: #fadbd8; border-left: 4px solid #e74c3c; color: #a93226; padding: 12px; border-radius: 4px;">❌ Koneksi gagal: ${error.message}<br><br>Pastikan:<br>1. URL sudah benar<br>2. Google Apps Script sudah ter-deploy<br>3. "Who has access" diset ke "Anyone"</div>`;
+                });
         }
 
-        // ===== SHOW REKOMENDASI =====
-        function showRekomendasi() {
-            if (dosenData.length === 0) {
-                document.getElementById('rekomendasiContent').innerHTML = '<p style="color: #e74c3c;">Belum ada data!</p>';
+        function syncToGoogleSheets() {
+            const scriptUrl = document.getElementById('scriptUrl').value.trim();
+            if (!scriptUrl) {
+                alert('⚠️ Silakan input URL Google Apps Script terlebih dahulu!');
                 return;
             }
-            
-            let eligible = 0;
-            const quickWins = [];
-            const medium = [];
-            const high = [];
-            
-            dosenData.forEach(d => {
-                const eval = evaluate(d);
-                if (eval.eligible) eligible++;
-                else {
-                    const missing = 7 - eval.passCount;
-                    if (missing <= 2) quickWins.push({nama: d.nama, missing, barriers: eval.barriers});
-                    else if (missing <= 4) medium.push({nama: d.nama, missing, barriers: eval.barriers});
-                    else high.push({nama: d.nama, missing, barriers: eval.barriers});
+
+            if (dosenData.length === 0) {
+                alert('⚠️ Tidak ada data dosen untuk disinkronisasi!');
+                return;
+            }
+
+            const statusDiv = document.getElementById('syncStatus');
+            statusDiv.innerHTML = '🔄 Sedang menyinkronisasi ' + dosenData.length + ' dosen...';
+
+            // Format data untuk dikirim
+            const dataToSync = dosenData.map((dosen, index) => {
+                const evaluation = evaluateDosen(dosen);
+                const jabatan = extractJabatan(dosen.jabatan);
+                const publikasi = publikasiData[dosen.nidn] ? publikasiData[dosen.nidn].publikasi : 'Belum ada data';
+                const tugas = tugasData[dosen.nidn] ? tugasData[dosen.nidn].tugas : 'Belum ada data';
+                
+                // Generate rekomendasi text
+                let rekomendasi = '';
+                if (jabatan.includes('Asisten Ahli')) {
+                    rekomendasi = evaluation.status === 'eligible' ? 'Siap naik ke Lektor' : 'Lengkapi kriteria evaluasi';
+                } else if (jabatan.includes('Lektor') && !jabatan.includes('Kepala')) {
+                    rekomendasi = 'Perluas publikasi untuk naik Lektor Kepala';
+                } else {
+                    rekomendasi = 'Pertahankan posisi';
                 }
+
+                return {
+                    nama: dosen.nama,
+                    nidn: dosen.nidn,
+                    jabatan: jabatan,
+                    masaKerja: dosen.masaKerja,
+                    prodi: extractProdi(dosen.homebase),
+                    status: getStatusLabel(evaluation.status),
+                    rekomendasi: rekomendasi,
+                    publikasi: publikasi,
+                    tugas: tugas
+                };
             });
-            
-            const pctEligible = Math.round((eligible / dosenData.length) * 100);
-            const target = Math.ceil((75 / 100) * dosenData.length);
-            
-            let html = `
-                <div class="summary-box">
-                    <p><strong>Target Sertifikasi:</strong> 75% (${target} dosen dari ${dosenData.length})</p>
-                    <p><strong>Status Saat Ini:</strong> ${pctEligible}% (${eligible} dosen)</p>
-                    <p><strong>Gap:</strong> Butuh ${target - eligible} dosen eligible lagi</p>
-                </div>
-                
-                <h3>🎯 PRIORITAS 1: QUICK WINS (${quickWins.length} dosen)</h3>
-                <p style="color: #555; margin-bottom: 15px;">Tinggal 1-2 kriteria - Target selesai dalam 2-4 minggu</p>
-                ${quickWins.map(d => `
-                    <div class="recommendation">
-                        <strong>${d.nama}</strong> (${d.missing} kriteria kurang)<br>
-                        <span style="font-size: 13px;">Kendala: ${d.barriers.join(', ')}</span>
-                    </div>
-                `).join('')}
-                
-                <h3 style="margin-top: 30px;">📋 PRIORITAS 2: MEDIUM (${medium.length} dosen)</h3>
-                <p style="color: #555; margin-bottom: 15px;">3-4 kriteria - Program terstruktur 2-3 bulan</p>
-                ${medium.map(d => `
-                    <div class="recommendation">
-                        <strong>${d.nama}</strong> (${d.missing} kriteria kurang)<br>
-                        <span style="font-size: 13px;">Kendala: ${d.barriers.join(', ')}</span>
-                    </div>
-                `).join('')}
-                
-                <h3 style="margin-top: 30px;">🚨 PRIORITAS 3: HIGH (${high.length} dosen)</h3>
-                <p style="color: #555; margin-bottom: 15px;"><5 kriteria - Intensive mentoring 3-6 bulan</p>
-                ${high.map(d => `
-                    <div class="recommendation urgent">
-                        <strong>${d.nama}</strong> (${d.missing} kriteria kurang)<br>
-                        <span style="font-size: 13px;">Kendala: ${d.barriers.join(', ')}</span>
-                    </div>
-                `).join('')}
-                
-                <h3 style="margin-top: 30px;">💡 Strategi Implementasi</h3>
-                <div class="summary-box">
-                    <p><strong>1. Quick Wins (Minggu 1-4):</strong> Fokus penuh pada ${quickWins.length} dosen</p>
-                    <p><strong>2. Program Publikasi:</strong> Workshop & mentoring artikel ilmiah</p>
-                    <p><strong>3. BKD Support:</strong> Ingatkan deadline LKD, sediakan template</p>
-                    <p><strong>4. PEKERTI Fasilitasi:</strong> Daftarkan peserta ke PEKERTI terpercaya</p>
-                    <p><strong>5. Timeline Target:</strong> 75% eligible dalam 6 bulan</p>
-                    <p><strong>Budget Estimate:</strong> Rp ${(quickWins.length * 1.5 + medium.length * 2 + high.length * 3) * 1000}rb</p>
-                </div>
-            `;
-            
-            document.getElementById('rekomendasiContent').innerHTML = html;
+
+            // Send data to Google Apps Script
+            fetch(scriptUrl, {
+                method: 'POST',
+                body: JSON.stringify(dataToSync)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    statusDiv.innerHTML = `<div class="alert alert-success">✅ Sinkronisasi berhasil!<br>${data.message}<br>Jumlah data: ${data.count}/${data.total}<br>Waktu: ${data.timestamp}<br><br>Silakan buka Google Sheet Anda untuk verifikasi.</div>`;
+                    // Save last sync time
+                    localStorage.setItem('lastSyncTime', data.timestamp);
+                    alert('✓ ' + data.count + ' dosen berhasil disinkronisasi ke Google Sheets!');
+                } else {
+                    throw new Error(data.message || 'Response tidak valid');
+                }
+            })
+            .catch(error => {
+                console.error('Sync error:', error);
+                statusDiv.innerHTML = `<div class="alert" style="background: #fadbd8; border-left: 4px solid #e74c3c; color: #a93226; padding: 12px; border-radius: 4px;">
+                    ❌ Sinkronisasi gagal!<br><br>
+                    <strong>Error:</strong> ${error.message}<br><br>
+                    <strong>Solusi:</strong><br>
+                    1. Verifikasi URL Apps Script benar (copy-paste exact)<br>
+                    2. Pastikan "Who has access" diset ke "Anyone"<br>
+                    3. Coba "Test Koneksi" dulu sebelum sinkronisasi<br>
+                    4. Refresh halaman dan coba lagi<br>
+                    5. Buka browser Console (F12) untuk detail error<br><br>
+                    <strong>Catatan:</strong> Data tetap aman di localStorage aplikasi ini
+                </div>`;
+            });
         }
 
-        // ===== EXPORT EXCEL =====
+        function enableAutoSync() {
+            const scriptUrl = localStorage.getItem('googleScriptUrl');
+            if (!scriptUrl) {
+                alert('⚠️ Silakan setup Google Apps Script URL terlebih dahulu!');
+                return;
+            }
+
+            // Enable auto-sync every 5 minutes
+            const autoSyncInterval = setInterval(() => {
+                syncToGoogleSheets();
+            }, 5 * 60 * 1000); // 5 minutes
+
+            localStorage.setItem('autoSyncEnabled', 'true');
+            alert('✓ Auto-sync diaktifkan! Data akan disinkronisasi otomatis setiap 5 menit ke Google Sheets.');
+        }
+
+        // Create Prodi Chart dengan better error handling
+        function createProdiChart() {
+            try {
+                const ctx = document.getElementById('chartProdi');
+                if (!ctx) {
+                    console.warn('chartProdi element not found');
+                    return;
+                }
+
+                const prodiData = getProdiData();
+                const labels = Object.keys(prodiData);
+                
+                if (labels.length === 0) {
+                    console.warn('No prodi data available');
+                    return;
+                }
+
+                const eligibleData = labels.map(label => prodiData[label].eligible);
+                const notEligibleData = labels.map(label => prodiData[label].notEligible);
+                const pendingData = labels.map(label => prodiData[label].pending);
+
+                // Destroy existing chart if any
+                if (window.chartProdiInstance) {
+                    window.chartProdiInstance.destroy();
+                }
+
+                window.chartProdiInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: '✓ Eligible',
+                                data: eligibleData,
+                                backgroundColor: '#27ae60',
+                                borderColor: '#1e8449',
+                                borderWidth: 1
+                            },
+                            {
+                                label: '⚠️ Pending',
+                                data: pendingData,
+                                backgroundColor: '#f39c12',
+                                borderColor: '#d68910',
+                                borderWidth: 1
+                            },
+                            {
+                                label: '✗ Tidak Eligible',
+                                data: notEligibleData,
+                                backgroundColor: '#e74c3c',
+                                borderColor: '#c0392b',
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    font: { size: 12 },
+                                    padding: 15,
+                                    usePointStyle: true
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                stacked: false,
+                                ticks: { font: { size: 11 } }
+                            },
+                            y: {
+                                stacked: false,
+                                beginAtZero: true,
+                                ticks: { font: { size: 11 } }
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Error creating prodi chart:', error);
+            }
+        }
+
+        // Create Jabatan Chart dengan better error handling
+        function createJabatanChart() {
+            try {
+                const ctx = document.getElementById('chartJabatan');
+                if (!ctx) {
+                    console.warn('chartJabatan element not found');
+                    return;
+                }
+
+                const jabatanData = getJabatanData();
+                const labels = Object.keys(jabatanData).sort();
+                
+                if (labels.length === 0) {
+                    console.warn('No jabatan data available');
+                    return;
+                }
+
+                const eligibleData = labels.map(label => jabatanData[label].eligible);
+                const notEligibleData = labels.map(label => jabatanData[label].notEligible);
+                const pendingData = labels.map(label => jabatanData[label].pending);
+
+                // Destroy existing chart if any
+                if (window.chartJabatanInstance) {
+                    window.chartJabatanInstance.destroy();
+                }
+
+                window.chartJabatanInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: '✓ Eligible',
+                                data: eligibleData,
+                                backgroundColor: '#27ae60',
+                                borderColor: '#1e8449',
+                                borderWidth: 1
+                            },
+                            {
+                                label: '⚠️ Pending',
+                                data: pendingData,
+                                backgroundColor: '#f39c12',
+                                borderColor: '#d68910',
+                                borderWidth: 1
+                            },
+                            {
+                                label: '✗ Tidak Eligible',
+                                data: notEligibleData,
+                                backgroundColor: '#e74c3c',
+                                borderColor: '#c0392b',
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    font: { size: 12 },
+                                    padding: 15,
+                                    usePointStyle: true
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                stacked: false,
+                                ticks: { font: { size: 11 } }
+                            },
+                            y: {
+                                stacked: false,
+                                beginAtZero: true,
+                                ticks: { font: { size: 11 } }
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Error creating jabatan chart:', error);
+            }
+        }
+
+        // Export to Excel
         function exportToExcel() {
-            if (dosenData.length === 0) {
-                alert('Belum ada data untuk di-export');
-                return;
-            }
-            
-            let rows = [['No', 'Nama', 'NIDN', 'Jabatan', 'Masa Kerja', 'Homebase', 'Kriteria', 'Status', 'Kendala']];
-            
-            dosenData.forEach((d, i) => {
-                const eval = evaluate(d);
-                rows.push([
-                    i+1, d.nama, d.nidn, d.jabatan, d.masaKerja, d.homebase, 
-                    eval.passCount + '/7', eval.eligible ? 'ELIGIBLE' : 'TIDAK', eval.barriers.join('; ')
+            const workbook = XLSX.utils.book_new();
+            const data = [];
+
+            data.push(['AUDIT & EVALUASI DOSEN', '', '', '', '', '', '', '', '']);
+            data.push(['Universitas Cordova', '', '', '', '', '', '', '', '']);
+            data.push(['']);
+            data.push(['No', 'Nama Dosen', 'NIDN', 'Jabatan', 'Masa Kerja', 'Program Studi', 'Status Evaluasi', 'Kriteria Terpenuhi', 'Rekomendasi Naik Level', 'Action Plan']);
+
+            dosenData.forEach((dosen, index) => {
+                const evaluation = evaluateDosen(dosen);
+                const jabatan = extractJabatan(dosen.jabatan);
+                const recommendation = generateRecommendation(dosen, evaluation);
+                
+                // Extract rekomendasi text
+                let rekomendasiText = '';
+                if (jabatan.includes('Asisten Ahli')) {
+                    rekomendasiText = evaluation.status === 'eligible' ? 'Siap naik ke Lektor' : 'Perlu lengkapi kriteria Serdos';
+                } else if (jabatan.includes('Lektor') && !jabatan.includes('Kepala')) {
+                    rekomendasiText = 'Perluas publikasi dan pengabdian masyarakat untuk naik ke Lektor Kepala';
+                } else if (jabatan.includes('Lektor Kepala')) {
+                    rekomendasiText = 'Pertahankan dan tingkatkan kontribusi akademik';
+                } else {
+                    rekomendasiText = 'Segera ajukan jabatan fungsional';
+                }
+
+                const alasan = [];
+                for (let i = 1; i <= 7; i++) {
+                    const crit = evaluation.criteria[i];
+                    if (!crit.pass) {
+                        alasan.push(`- ${crit.label}`);
+                    }
+                }
+
+                const actionPlan = [];
+                if (evaluation.status !== 'eligible') {
+                    if (!evaluation.criteria[4].pass) actionPlan.push('Ikuti program PEKERTI/AA');
+                    if (!evaluation.criteria[5].pass) actionPlan.push('Lengkapi laporan BKD');
+                    if (!evaluation.criteria[6].pass) actionPlan.push('Tingkatkan publikasi ilmiah');
+                }
+                if (evaluation.pendingCount > 0) actionPlan.push('Lengkapi data publikasi dan status tugas belajar');
+
+                data.push([
+                    index + 1,
+                    dosen.nama,
+                    dosen.nidn,
+                    jabatan,
+                    dosen.masaKerja,
+                    extractProdi(dosen.homebase),
+                    getStatusLabel(evaluation.status),
+                    `${evaluation.passCount}/7`,
+                    rekomendasiText,
+                    actionPlan.length > 0 ? actionPlan.join(', ') : 'Tetap pertahankan pencapaian'
                 ]);
             });
-            
-            const ws = XLSX.utils.aoa_to_sheet(rows);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, 'Laporan Dosen');
-            XLSX.writeFile(wb, 'Laporan_Sertifikasi_Dosen_2026.xlsx');
-            alert('✓ Export berhasil!');
+
+            const worksheet = XLSX.utils.aoa_to_sheet(data);
+            worksheet['!cols'] = [
+                { wch: 5 },
+                { wch: 25 },
+                { wch: 12 },
+                { wch: 18 },
+                { wch: 15 },
+                { wch: 25 },
+                { wch: 15 },
+                { wch: 15 },
+                { wch: 30 },
+                { wch: 40 }
+            ];
+
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Audit & Evaluasi');
+            XLSX.writeFile(workbook, 'Audit_Evaluasi_Dosen.xlsx');
         }
 
-        // ===== UTILITIES =====
-        function resetImport() {
-            dosenData = [];
-            selectedFile = null;
-            localStorage.removeItem('dosenData');
-            document.getElementById('fileInput').value = '';
-            document.getElementById('fileStatus').style.display = 'none';
-            document.getElementById('importBtn').style.display = 'none';
-            document.getElementById('statusText').textContent = 'Menunggu data...';
-            alert('✓ Reset berhasil');
+        // Print
+        function printResults() {
+            const printWindow = window.open('', '', 'height=600,width=800');
+            let htmlContent = `
+                <html>
+                <head>
+                    <title>Audit & Evaluasi Dosen</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 20px; }
+                        h1 { text-align: center; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                        th, td { border: 1px solid #333; padding: 8px; text-align: left; }
+                        th { background-color: #f0f0f0; }
+                        .status-eligible { color: green; }
+                        .status-not-eligible { color: red; }
+                        .status-pending { color: orange; }
+                    </style>
+                </head>
+                <body>
+                    <h1>Audit & Evaluasi Dosen</h1>
+                    <p><strong>Universitas Cordova</strong></p>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Nama Dosen</th>
+                                <th>NIDN</th>
+                                <th>Jabatan</th>
+                                <th>Masa Kerja</th>
+                                <th>Program Studi</th>
+                                <th>Status</th>
+                                <th>Kriteria</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            dosenData.forEach((dosen, index) => {
+                const evaluation = evaluateDosen(dosen);
+                htmlContent += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${dosen.nama}</td>
+                        <td>${dosen.nidn}</td>
+                        <td>${dosen.jabatan}</td>
+                        <td>${dosen.masaKerja}</td>
+                        <td class="status-${evaluation.status}">${getStatusLabel(evaluation.status)}</td>
+                        <td>${evaluation.passCount}/7</td>
+                    </tr>
+                `;
+            });
+
+            htmlContent += `
+                        </tbody>
+                    </table>
+                </body>
+                </html>
+            `;
+
+            printWindow.document.write(htmlContent);
+            printWindow.document.close();
+            printWindow.print();
         }
 
-        // ===== LOAD ON START =====
-        window.addEventListener('load', function() {
-            const saved = localStorage.getItem('dosenData');
-            if (saved) {
-                dosenData = JSON.parse(saved);
-                document.getElementById('statusText').textContent = dosenData.length + ' dosen ter-import';
+        // Clear All Data
+        function clearAllData() {
+            if (confirm('Apakah Anda yakin ingin menghapus semua data? Tindakan ini tidak dapat dibatalkan.')) {
+                dosenData = [];
+                publikasiData = {};
+                tugasData = {};
+                localStorage.clear();
+                location.reload();
+            }
+        }
+
+        // Close modal when clicking outside
+        document.addEventListener('click', function(event) {
+            const modal = document.getElementById('detailModal');
+            if (event.target === modal) {
+                closeModal();
             }
         });
     </script>
