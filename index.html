@@ -675,11 +675,35 @@
                 </div>
             </div>
 
-            <!-- BUDGET & RESOURCE PLAN -->
-            <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                <h3 style="color: #2c3e50; margin-bottom: 20px; margin-top: 0;">💰 Estimasi Resource & Budget untuk Program</h3>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;" id="resourcePlan">
+            <!-- GRAFIK SERTIFIKASI STATUS -->
+            <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                <h3 style="color: #2c3e50; margin-bottom: 20px; margin-top: 0;">📜 Status Sertifikasi Dosen Per Program Studi</h3>
+                <div style="position: relative; height: 400px;">
+                    <canvas id="chartSertifikasiProdi"></canvas>
+                </div>
+            </div>
+
+            <!-- REKOMENDASI PENTING -->
+            <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                <h3 style="color: #2c3e50; margin-bottom: 20px; margin-top: 0;">🎓 Rekomendasi Transfer Program Studi (Untuk Dosen Belum Sertifikasi)</h3>
+                <p style="color: #7f8c8d; font-size: 13px; margin-bottom: 15px;">
+                    Rekomendasi dosen belum sertifikasi untuk pindah ke program studi dengan persiapan lebih baik:
+                </p>
+                <div id="rekomendasiTransfer" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px;">
                     <!-- Isi otomatis dari JavaScript -->
+                </div>
+            </div>
+
+            <!-- REKOMENDASI NAIK JABATAN -->
+            <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                <h3 style="color: #2c3e50; margin-bottom: 20px; margin-top: 0;">📈 Rekomendasi Naik Jabatan Fungsional</h3>
+                <p style="color: #7f8c8d; font-size: 13px; margin-bottom: 15px;">
+                    Dosen yang qualified untuk naik ke jabatan berikutnya:
+                </p>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div id="rekomendasiNaikJabatan" style="grid-column: 1 / -1;">
+                        <!-- Isi otomatis dari JavaScript -->
+                    </div>
                 </div>
             </div>
         </div>
@@ -1991,6 +2015,233 @@ function doGet(e) {
                     </div>
                 </div>
             `).join('');
+
+            // Generate additional recommendations
+            generateProdiRecommendations();
+            generateJabatanRecommendations();
+        }
+
+        // Analisis Sertifikasi Per Program Studi
+        function generateProdiRecommendations() {
+            const prodiAnalysis = {};
+
+            dosenData.forEach(dosen => {
+                const prodi = extractProdi(dosen.homebase);
+                if (!prodiAnalysis[prodi]) {
+                    prodiAnalysis[prodi] = {
+                        total: 0,
+                        sudahSertifikasi: 0,
+                        belumSertifikasi: 0,
+                        dosen: []
+                    };
+                }
+                prodiAnalysis[prodi].total++;
+
+                const status = dosen.status || 'Belum Sertifikasi';
+                if (status.includes('20')) {
+                    prodiAnalysis[prodi].sudahSertifikasi++;
+                } else {
+                    prodiAnalysis[prodi].belumSertifikasi++;
+                    prodiAnalysis[prodi].dosen.push(dosen.nama);
+                }
+            });
+
+            // Buat grafik sertifikasi
+            createSertifikasiChart(prodiAnalysis);
+
+            // Generate rekomendasi transfer
+            const rekomendasi = [];
+            const sortedProdi = Object.entries(prodiAnalysis)
+                .map(([prodi, data]) => ({
+                    prodi,
+                    ...data,
+                    persentaseSertifikasi: Math.round((data.sudahSertifikasi / data.total) * 100)
+                }))
+                .sort((a, b) => b.persentaseSertifikasi - a.persentaseSertifikasi);
+
+            const terbaik = sortedProdi.slice(0, 3);
+            const kurang = sortedProdi.filter(p => p.persentaseSertifikasi < 50);
+
+            kurang.forEach(prodi => {
+                const rekomendasiTarget = terbaik[0];
+                rekomendasi.push(`
+                    <div style="background: #fef5e7; border: 2px solid #f39c12; padding: 15px; border-radius: 8px;">
+                        <h4 style="color: #d68910; margin-top: 0; margin-bottom: 10px;">⚠️ ${prodi.prodi}</h4>
+                        <div style="font-size: 12px; color: #2c3e50; line-height: 1.8; margin-bottom: 10px;">
+                            <div><strong>Status Saat Ini:</strong> ${prodi.sudahSertifikasi}/${prodi.total} eligible (${prodi.persentaseSertifikasi}%)</div>
+                            <div><strong>Dosen Belum Sertifikasi:</strong> ${prodi.belumSertifikasi} orang</div>
+                        </div>
+                        <div style="background: white; padding: 10px; border-radius: 4px; margin-bottom: 10px; font-size: 12px;">
+                            <strong style="color: #27ae60;">💡 Rekomendasi:</strong><br>
+                            Transfer dosen yang memenuhi kriteria ke <strong>${rekomendasiTarget.prodi}</strong> (${rekomendasiTarget.persentaseSertifikasi}% eligible) untuk mendapat mentoring lebih baik
+                        </div>
+                        <div style="font-size: 11px; color: #555;">
+                            <strong>Dosen:</strong> ${prodi.dosen.slice(0, 3).join(', ')}${prodi.dosen.length > 3 ? ' +' + (prodi.dosen.length - 3) : ''}
+                        </div>
+                    </div>
+                `);
+            });
+
+            document.getElementById('rekomendasiTransfer').innerHTML = rekomendasi.length > 0 ? rekomendasi.join('') : 
+                '<div style="padding: 20px; text-align: center; color: #7f8c8d;">✓ Semua program studi sudah memiliki tingkat sertifikasi >50%</div>';
+        }
+
+        // Create Sertifikasi Chart Per Prodi
+        function createSertifikasiChart(prodiAnalysis) {
+            try {
+                const ctx = document.getElementById('chartSertifikasiProdi');
+                if (!ctx) return;
+
+                if (window.chartSertifikasiProdiInstance) {
+                    window.chartSertifikasiProdiInstance.destroy();
+                }
+
+                const labels = Object.keys(prodiAnalysis);
+                const sudah = labels.map(prodi => prodiAnalysis[prodi].sudahSertifikasi);
+                const belum = labels.map(prodi => prodiAnalysis[prodi].belumSertifikasi);
+
+                window.chartSertifikasiProdiInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: '✓ Sudah Sertifikasi',
+                                data: sudah,
+                                backgroundColor: '#27ae60',
+                                borderColor: '#1e8449',
+                                borderWidth: 1
+                            },
+                            {
+                                label: '✗ Belum Sertifikasi',
+                                data: belum,
+                                backgroundColor: '#e74c3c',
+                                borderColor: '#c0392b',
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { font: { size: 12 }, padding: 15 }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                stacked: true,
+                                beginAtZero: true
+                            },
+                            y: {
+                                stacked: true
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Error creating sertifikasi chart:', error);
+            }
+        }
+
+        // Rekomendasi Naik Jabatan
+        function generateJabatanRecommendations() {
+            const jabatanRec = [];
+
+            // Analisis per jabatan
+            const asistenAhliSiapNaik = [];
+            const lektorSiapNaik = [];
+
+            dosenData.forEach(dosen => {
+                const jabatan = extractJabatan(dosen.jabatan);
+                const evaluation = evaluateDosen(dosen);
+                const masaKerja = parseMasaKerja(dosen.masaKerja);
+
+                if (jabatan.includes('Asisten Ahli')) {
+                    if (evaluation.status === 'eligible' && masaKerja >= 5) {
+                        asistenAhliSiapNaik.push({
+                            nama: dosen.nama,
+                            masaKerja: masaKerja,
+                            status: evaluation.status,
+                            passCount: evaluation.passCount
+                        });
+                    }
+                } else if (jabatan.includes('Lektor') && !jabatan.includes('Kepala')) {
+                    if (evaluation.passCount >= 5 && masaKerja >= 7) {
+                        lektorSiapNaik.push({
+                            nama: dosen.nama,
+                            masaKerja: masaKerja,
+                            status: evaluation.status,
+                            passCount: evaluation.passCount
+                        });
+                    }
+                }
+            });
+
+            if (asistenAhliSiapNaik.length > 0) {
+                jabatanRec.push(`
+                    <div style="background: #d5f4e6; border: 2px solid #27ae60; padding: 20px; border-radius: 8px; margin-bottom: 15px;">
+                        <h4 style="color: #27ae60; margin-top: 0; margin-bottom: 10px;">✓ Asisten Ahli → Lektor</h4>
+                        <p style="color: #2c3e50; font-size: 12px; margin-bottom: 10px;">
+                            <strong>${asistenAhliSiapNaik.length} dosen siap untuk naik ke Lektor:</strong>
+                        </p>
+                        <div style="background: white; padding: 12px; border-radius: 4px; margin-bottom: 10px;">
+                            ${asistenAhliSiapNaik.map(d => `
+                                <div style="padding: 8px 0; border-bottom: 1px solid #ecf0f1; font-size: 12px;">
+                                    <strong>${d.nama}</strong><br>
+                                    <span style="color: #7f8c8d;">Masa Kerja: ${d.masaKerja} tahun | Kriteria: ${d.passCount}/7 ✓</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div style="background: #e8f8f5; padding: 10px; border-radius: 4px; font-size: 11px; color: #1e8449;">
+                            <strong>📋 Syarat:</strong> Eligible Serdos ✓ + Masa kerja 5+ tahun ✓<br>
+                            <strong>📌 Action:</strong> Proses kenaikan jabatan formal ke evaluator keahlian
+                        </div>
+                    </div>
+                `);
+            }
+
+            if (lektorSiapNaik.length > 0) {
+                jabatanRec.push(`
+                    <div style="background: #d6eaf8; border: 2px solid #3498db; padding: 20px; border-radius: 8px; margin-bottom: 15px;">
+                        <h4 style="color: #2980b9; margin-top: 0; margin-bottom: 10px;">📈 Lektor → Lektor Kepala</h4>
+                        <p style="color: #2c3e50; font-size: 12px; margin-bottom: 10px;">
+                            <strong>${lektorSiapNaik.length} dosen siap untuk naik ke Lektor Kepala:</strong>
+                        </p>
+                        <div style="background: white; padding: 12px; border-radius: 4px; margin-bottom: 10px;">
+                            ${lektorSiapNaik.map(d => `
+                                <div style="padding: 8px 0; border-bottom: 1px solid #ecf0f1; font-size: 12px;">
+                                    <strong>${d.nama}</strong><br>
+                                    <span style="color: #7f8c8d;">Masa Kerja: ${d.masaKerja} tahun | Kriteria: ${d.passCount}/7</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div style="background: #ebf5fb; padding: 10px; border-radius: 4px; font-size: 11px; color: #1a5490;">
+                            <strong>📋 Syarat:</strong> Lektor ✓ + Masa kerja 7+ tahun ✓ + Publikasi 5+ ✓<br>
+                            <strong>📌 Action:</strong> Kumpulkan CV akademik, publikasi, pengabdian masyarakat untuk evaluasi
+                        </div>
+                    </div>
+                `);
+            }
+
+            if (asistenAhliSiapNaik.length === 0 && lektorSiapNaik.length === 0) {
+                jabatanRec.push(`
+                    <div style="background: #f0f7ff; border: 2px solid #3498db; padding: 20px; border-radius: 8px;">
+                        <h4 style="color: #2980b9; margin-top: 0;">💡 Rekomendasi Persiapan</h4>
+                        <p style="color: #2c3e50; font-size: 12px; line-height: 1.8;">
+                            <strong>Untuk Asisten Ahli:</strong> Fokus pada publikasi ilmiah & lengkapi BKD untuk eligible Serdos, 
+                            yang akan membuka jalan ke Lektor.<br><br>
+                            <strong>Untuk Lektor:</strong> Kumpulkan publikasi minimal 5 artikel + dokumentasi pengabdian masyarakat 
+                            untuk persiapan naik Lektor Kepala.
+                        </p>
+                    </div>
+                `);
+            }
+
+            document.getElementById('rekomendasiNaikJabatan').innerHTML = jabatanRec.join('');
         }
 
         function createStatusChart(eligible, notEligible, pending) {
@@ -2074,6 +2325,19 @@ function doGet(e) {
             document.getElementById('countNotEligible').textContent = notEligible;
             document.getElementById('countPending').textContent = pending;
             document.getElementById('countTotal').textContent = dosenData.length;
+
+            // Delay chart creation untuk memastikan Canvas sudah siap
+            setTimeout(() => {
+                try {
+                    createProdiChart();
+                    createJabatanChart();
+                    generateDecisionInsights();
+                    console.log('Charts and insights created successfully');
+                } catch (error) {
+                    console.error('Error updating dashboard:', error);
+                }
+            }, 500);
+        }
 
         // Extract Program Studi from homebase
         function extractProdi(homebase) {
