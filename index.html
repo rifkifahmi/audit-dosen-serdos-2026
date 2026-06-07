@@ -613,8 +613,27 @@
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', initializeFileInput);
         } else {
-            initializeFileInput();
+            initializeApp();
         }
+    </script>
+    
+    <!-- HANDLER GLOBALS - Ensure accessible from onclick -->
+    <script>
+        // File selection handler
+        document.addEventListener('DOMContentLoaded', function() {
+            var fileInput = document.getElementById('fileInput');
+            if (fileInput) {
+                fileInput.addEventListener('change', function(e) {
+                    selectedFile = e.target.files[0];
+                    if (selectedFile) {
+                        console.log('✓ File selected:', selectedFile.name);
+                        document.getElementById('fileName').textContent = selectedFile.name;
+                        document.getElementById('fileNameDisplay').style.display = 'block';
+                        document.getElementById('importFileBtn').style.display = 'inline-block';
+                    }
+                });
+            }
+        });
     </script>
 </head>
 <body>
@@ -1254,10 +1273,15 @@ function doGet(e) {
     </div>
 
     <script>
-        // Data Management
-        let dosenData = JSON.parse(localStorage.getItem('dosenData')) || [];
-        let publikasiData = JSON.parse(localStorage.getItem('publikasiData')) || {};
-        let tugasData = JSON.parse(localStorage.getItem('tugasData')) || {};
+        // ===== GLOBAL DATA - ACCESSIBLE EVERYWHERE =====
+        var dosenData = JSON.parse(localStorage.getItem('dosenData')) || [];
+        var publikasiData = JSON.parse(localStorage.getItem('publikasiData')) || {};
+        var tugasData = JSON.parse(localStorage.getItem('tugasData')) || {};
+        var selectedFile = null;
+        
+        // Ensure accessible via window too
+        window.dosenData = dosenData;
+        window.selectedFile = selectedFile;
 
         // Initialize
         window.addEventListener('load', function() {
