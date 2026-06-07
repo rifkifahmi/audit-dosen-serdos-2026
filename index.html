@@ -559,6 +559,62 @@
                 }
             }
         }
+        
+        // Initialize file input handler saat DOM siap
+        function initializeFileInput() {
+            const fileInput = document.getElementById('fileInput');
+            if (!fileInput) {
+                console.error('File input element not found');
+                return;
+            }
+            
+            fileInput.addEventListener('change', function(e) {
+                console.log('File selected:', e.target.files[0]?.name);
+                if (e.target.files.length > 0) {
+                    const fileName = e.target.files[0].name;
+                    document.getElementById('fileName').textContent = fileName;
+                    document.getElementById('fileNameDisplay').style.display = 'block';
+                    document.getElementById('importFileBtn').style.display = 'inline-block';
+                    console.log('✓ File input ready for import');
+                }
+            });
+            
+            // Handle drag & drop
+            const uploadArea = document.querySelector('#uploadTab > div:first-child');
+            if (uploadArea) {
+                uploadArea.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    uploadArea.style.background = '#c8e6c9';
+                    uploadArea.style.borderColor = '#1b5e20';
+                });
+
+                uploadArea.addEventListener('dragleave', function(e) {
+                    e.preventDefault();
+                    uploadArea.style.background = '#f0fdf4';
+                    uploadArea.style.borderColor = '#27ae60';
+                });
+
+                uploadArea.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    uploadArea.style.background = '#f0fdf4';
+                    uploadArea.style.borderColor = '#27ae60';
+                    
+                    if (e.dataTransfer.files.length > 0) {
+                        fileInput.files = e.dataTransfer.files;
+                        const event = new Event('change', { bubbles: true });
+                        fileInput.dispatchEvent(event);
+                        console.log('✓ Files dropped and ready');
+                    }
+                });
+            }
+        }
+        
+        // Initialize when document is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeFileInput);
+        } else {
+            initializeFileInput();
+        }
     </script>
 </head>
 <body>
@@ -1232,48 +1288,6 @@ function doGet(e) {
                 document.getElementById('tabPaste').style.color = '#3498db';
             }
         }
-
-        // File Input Handler
-        document.addEventListener('DOMContentLoaded', function() {
-            const fileInput = document.getElementById('fileInput');
-            
-            // Handle file selection
-            fileInput.addEventListener('change', function(e) {
-                if (e.target.files.length > 0) {
-                    const fileName = e.target.files[0].name;
-                    document.getElementById('fileName').textContent = fileName;
-                    document.getElementById('fileNameDisplay').style.display = 'block';
-                    document.getElementById('importFileBtn').style.display = 'inline-block';
-                }
-            });
-
-            // Handle drag & drop
-            const uploadArea = document.querySelector('#uploadTab > div:first-child');
-            
-            uploadArea.addEventListener('dragover', function(e) {
-                e.preventDefault();
-                uploadArea.style.background = '#c8e6c9';
-                uploadArea.style.borderColor = '#1b5e20';
-            });
-
-            uploadArea.addEventListener('dragleave', function(e) {
-                e.preventDefault();
-                uploadArea.style.background = '#f0fdf4';
-                uploadArea.style.borderColor = '#27ae60';
-            });
-
-            uploadArea.addEventListener('drop', function(e) {
-                e.preventDefault();
-                uploadArea.style.background = '#f0fdf4';
-                uploadArea.style.borderColor = '#27ae60';
-                
-                if (e.dataTransfer.files.length > 0) {
-                    fileInput.files = e.dataTransfer.files;
-                    const event = new Event('change', { bubbles: true });
-                    fileInput.dispatchEvent(event);
-                }
-            });
-        });
 
         // Import Data from File
         function importDataFromFile() {
