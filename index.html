@@ -3,154 +3,265 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Audit & Evaluasi Dosen - Universitas Cordova</title>
+    <title>Dashboard Sertifikasi Dosen 2026 - Universitas Cordova</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f5f5; color: #333; }
-        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
-        header { background: white; padding: 30px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        header h1 { color: #2c3e50; margin-bottom: 10px; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        .container { max-width: 1600px; margin: 0 auto; padding: 20px; }
+        
+        header { 
+            background: white; padding: 30px; border-radius: 8px; margin-bottom: 20px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+        }
+        header h1 { color: #2c3e50; margin-bottom: 5px; font-size: 32px; }
         header p { color: #7f8c8d; }
         
-        .tabs { display: flex; gap: 10px; margin-bottom: 20px; background: white; padding: 0; border-radius: 8px; }
-        .tab-btn { padding: 15px 25px; background: none; border: none; cursor: pointer; font-size: 15px; font-weight: 500; color: #7f8c8d; border-bottom: 3px solid transparent; }
+        .tabs { 
+            display: flex; gap: 10px; margin-bottom: 20px; 
+            background: white; padding: 10px; border-radius: 8px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .tab-btn { 
+            padding: 12px 20px; background: none; border: none; cursor: pointer; 
+            font-size: 14px; font-weight: 500; color: #7f8c8d; 
+            border-bottom: 3px solid transparent; transition: all 0.3s;
+        }
         .tab-btn:hover { color: #2c3e50; }
         .tab-btn.active { color: #3498db; border-bottom-color: #3498db; }
         
-        .tab-content { display: none; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .tab-content { display: none; }
         .tab-content.active { display: block; }
         
-        .stat-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 20px; }
-        .stat-card { background: white; padding: 25px; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .stat-number { font-size: 32px; font-weight: bold; color: #2c3e50; }
-        .stat-label { color: #7f8c8d; margin-top: 10px; font-size: 14px; }
+        .card { 
+            background: white; padding: 25px; border-radius: 8px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px;
+        }
         
-        .btn { padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; }
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .kpi-card { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            color: white; padding: 20px; border-radius: 8px; text-align: center;
+        }
+        .kpi-number { font-size: 40px; font-weight: bold; }
+        .kpi-label { font-size: 13px; opacity: 0.9; margin-top: 5px; }
+        .kpi-percent { font-size: 14px; margin-top: 8px; background: rgba(255,255,255,0.2); padding: 5px 10px; border-radius: 4px; display: inline-block; }
+        
+        .metrics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
+        .metric { background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #3498db; }
+        .metric-value { font-size: 28px; font-weight: bold; color: #2c3e50; }
+        .metric-label { font-size: 12px; color: #7f8c8d; margin-top: 5px; }
+        
+        .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .chart-container { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .chart-container canvas { max-height: 350px; }
+        
+        h2 { color: #2c3e50; margin-bottom: 20px; font-size: 24px; }
+        h3 { color: #2c3e50; margin: 20px 0 15px 0; font-size: 18px; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        thead { background: #f9f9f9; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ecf0f1; }
+        th { font-weight: 600; color: #2c3e50; }
+        tr:hover { background: #f5f5f5; }
+        
+        .status-eligible { color: #27ae60; font-weight: 600; }
+        .status-not { color: #e74c3c; font-weight: 600; }
+        
+        .recommendation { 
+            background: #d5f4e6; border-left: 4px solid #27ae60; 
+            padding: 15px; border-radius: 4px; margin: 10px 0;
+        }
+        .recommendation.urgent { 
+            background: #fadbd8; border-left-color: #e74c3c; 
+        }
+        
+        .btn { 
+            padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; 
+            font-size: 14px; font-weight: 500; margin-right: 10px;
+        }
         .btn-primary { background: #3498db; color: white; }
         .btn-primary:hover { background: #2980b9; }
         .btn-success { background: #27ae60; color: white; }
         .btn-success:hover { background: #229954; }
         .btn-danger { background: #e74c3c; color: white; }
         
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ecf0f1; }
-        th { background: #f9f9f9; font-weight: 600; color: #2c3e50; }
-        tr:hover { background: #f0f0f0; }
+        .upload-area { 
+            border: 2px dashed #3498db; border-radius: 8px; padding: 40px; 
+            text-align: center; background: #ecf0f1; cursor: pointer; 
+            transition: all 0.3s;
+        }
+        .upload-area:hover { background: #d6eaf8; border-color: #2980b9; }
         
-        .alert { padding: 15px; border-radius: 6px; margin-bottom: 15px; }
-        .alert-success { background: #d5f4e6; border-left: 4px solid #27ae60; color: #1e8449; }
-        .alert-danger { background: #fadbd8; border-left: 4px solid #e74c3c; color: #922b21; }
+        .barrier-item {
+            background: #fef5e7; border-left: 4px solid #f39c12; 
+            padding: 12px 15px; margin: 8px 0; border-radius: 4px;
+        }
         
-        .upload-area { border: 2px dashed #3498db; border-radius: 8px; padding: 40px; text-align: center; background: #ecf0f1; cursor: pointer; }
-        .upload-area:hover { background: #d6eaf8; }
+        .summary-box {
+            background: #ecf0f1; padding: 15px; border-radius: 6px; 
+            border-left: 4px solid #3498db; margin: 15px 0;
+        }
         
-        .chart-container { position: relative; height: 400px; margin: 30px 0; }
+        .note { color: #7f8c8d; font-size: 13px; font-style: italic; margin-top: 10px; }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- HEADER -->
         <header>
-            <h1>🎓 Audit & Evaluasi Dosen Sertifikasi 2026</h1>
-            <p>Universitas Cordova - Sistem Evaluasi Kelayakan Sertifikasi</p>
+            <h1>🎓 Dashboard Sertifikasi Dosen 2026</h1>
+            <p>Universitas Cordova - Sistem Monitoring Kelayakan Sertifikasi Dosen</p>
+            <div style="margin-top: 15px; padding: 12px; background: #d6eaf8; border-radius: 6px; border-left: 4px solid #3498db;">
+                <strong>📊 Status:</strong> <span id="statusText">Menunggu data...</span>
+            </div>
         </header>
 
         <!-- TABS -->
         <div class="tabs">
             <button class="tab-btn active" onclick="switchTab('import')">📥 IMPORT DATA</button>
             <button class="tab-btn" onclick="switchTab('dashboard')">📊 DASHBOARD</button>
-            <button class="tab-btn" onclick="switchTab('evaluasi')">📋 EVALUASI DOSEN</button>
-            <button class="tab-btn" onclick="switchTab('rekomendasi')">💡 REKOMENDASI</button>
+            <button class="tab-btn" onclick="switchTab('laporan')">📋 LAPORAN DETAIL</button>
+            <button class="tab-btn" onclick="switchTab('rekomendasi')">💡 REKOMENDASI AKSI</button>
         </div>
 
-        <!-- TAB 1: IMPORT DATA -->
+        <!-- TAB 1: IMPORT -->
         <div id="import" class="tab-content active">
-            <h2>📥 Import Data Dosen</h2>
-            <p style="color: #7f8c8d; margin: 15px 0;">Upload file Excel (.xlsx) atau CSV dengan data dosen</p>
-            
-            <div class="upload-area" onclick="document.getElementById('fileInput').click()">
-                <div style="font-size: 48px; margin-bottom: 10px;">📊</div>
-                <p style="font-size: 18px; color: #2c3e50; font-weight: 500;">Klik atau Drag File di Sini</p>
-                <p style="color: #7f8c8d; margin-top: 10px;">Format: Excel (.xlsx) atau CSV</p>
-            </div>
-            
-            <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display: none;">
-            
-            <div id="fileStatus" style="margin-top: 20px; display: none;">
-                <div class="alert alert-success">
-                    ✓ File: <strong id="fileName"></strong> - <span id="rowCount"></span> baris
+            <div class="card">
+                <h2>📥 Import Data Dosen</h2>
+                <p style="color: #7f8c8d; margin-bottom: 20px;">Upload file Excel (.xlsx) atau CSV dengan data dosen dari Google Sheets</p>
+                
+                <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                    <div style="font-size: 48px; margin-bottom: 10px;">📊</div>
+                    <p style="font-size: 18px; color: #2c3e50; font-weight: 500;">Klik atau Drag File di Sini</p>
+                    <p style="color: #7f8c8d; margin-top: 10px;">Format: Excel (.xlsx) atau CSV</p>
                 </div>
-            </div>
-            
-            <div style="margin-top: 20px;">
-                <button class="btn btn-success" onclick="importFile()" style="display: none;" id="importBtn">
-                    📤 IMPORT DATA
-                </button>
-                <button class="btn btn-danger" onclick="resetImport()">❌ RESET</button>
-            </div>
-            
-            <div id="importLog" style="margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 6px; min-height: 100px; display: none;">
-                <strong>Log Import:</strong>
-                <pre id="logContent" style="margin-top: 10px; color: #2c3e50;"></pre>
+                
+                <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display: none;">
+                
+                <div id="fileStatus" style="margin-top: 20px; display: none;">
+                    <div style="background: #d5f4e6; border-left: 4px solid #27ae60; padding: 15px; border-radius: 6px;">
+                        ✓ File: <strong id="fileName"></strong> | <span id="rowCount"></span> baris siap import
+                    </div>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <button class="btn btn-success" onclick="importFile()" style="display: none;" id="importBtn">
+                        📤 IMPORT DATA SEKARANG
+                    </button>
+                    <button class="btn btn-danger" onclick="resetImport()">❌ RESET</button>
+                </div>
             </div>
         </div>
 
         <!-- TAB 2: DASHBOARD -->
         <div id="dashboard" class="tab-content">
-            <h2>📊 Dashboard Sertifikasi</h2>
-            
-            <div class="stat-cards">
-                <div class="stat-card">
-                    <div class="stat-number" id="statTotal">0</div>
-                    <div class="stat-label">Total Dosen</div>
+            <!-- KPI CARDS -->
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-number" id="kpiTotal">0</div>
+                    <div class="kpi-label">Total Dosen</div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="statEligible">0</div>
-                    <div class="stat-label">Eligible ✓</div>
+                <div class="kpi-card">
+                    <div class="kpi-number" id="kpiEligible">0</div>
+                    <div class="kpi-label">Eligible ✓</div>
+                    <div class="kpi-percent" id="kpiEligiblePct">0%</div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="statNotEligible">0</div>
-                    <div class="stat-label">Tidak Eligible</div>
+                <div class="kpi-card">
+                    <div class="kpi-number" id="kpiNotEligible">0</div>
+                    <div class="kpi-label">Tidak Eligible</div>
+                    <div class="kpi-percent" id="kpiNotEligiblePct">0%</div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="statPending">0</div>
-                    <div class="stat-label">Pending Data</div>
+                <div class="kpi-card">
+                    <div class="kpi-number" id="kpiGap">0%</div>
+                    <div class="kpi-label">Gap vs Target 75%</div>
                 </div>
             </div>
-            
-            <div class="chart-container">
-                <canvas id="statusChart"></canvas>
+
+            <!-- METRICS -->
+            <div class="metrics-grid">
+                <div class="metric">
+                    <div class="metric-value" id="metricAvg">0/7</div>
+                    <div class="metric-label">Rata-rata Kriteria</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value" id="metricQuickWins">0</div>
+                    <div class="metric-label">Quick Wins (1-2 kriteria)</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value" id="metricMedium">0</div>
+                    <div class="metric-label">Medium Priority (3-4)</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value" id="metricHigh">0</div>
+                    <div class="metric-label">High Priority (<3)</div>
+                </div>
             </div>
-            
-            <h3>Ringkasan Kendala Terbesar</h3>
-            <div id="barriersList" style="margin-top: 15px;"></div>
+
+            <!-- CHARTS -->
+            <div class="chart-grid">
+                <div class="chart-container">
+                    <h3>Status Eligibility</h3>
+                    <canvas id="chartStatus"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>Distribusi Kriteria Terpenuhi</h3>
+                    <canvas id="chartCriteria"></canvas>
+                </div>
+            </div>
+
+            <!-- BARRIERS -->
+            <div class="card">
+                <h3>⚠️ Kendala Utama (Top 5)</h3>
+                <div id="barriersList"></div>
+                <p class="note">Fokus program pengembangan pada kendala-kendala ini untuk hasil maksimal</p>
+            </div>
+
+            <!-- QUICK STATS -->
+            <div class="card">
+                <h3>📈 Estimasi Pencapaian Target</h3>
+                <div class="summary-box">
+                    <p><strong>Target Sertifikasi:</strong> 75% dari total dosen</p>
+                    <p><strong>Status Saat Ini:</strong> <span id="summaryStatus">0%</span></p>
+                    <p><strong>Dosen yang Perlu Eligible:</strong> <span id="summaryNeeded">0</span> orang</p>
+                    <p><strong>Estimasi Waktu:</strong> <span id="summaryTime">-</span></p>
+                </div>
+            </div>
         </div>
 
-        <!-- TAB 3: EVALUASI DOSEN -->
-        <div id="evaluasi" class="tab-content">
-            <h2>📋 Daftar Evaluasi Dosen</h2>
-            
-            <div style="margin-bottom: 20px;">
-                <input type="text" id="searchInput" placeholder="Cari nama dosen..." style="padding: 10px; width: 300px; border: 1px solid #bdc3c7; border-radius: 6px;">
+        <!-- TAB 3: LAPORAN DETAIL -->
+        <div id="laporan" class="tab-content">
+            <div class="card">
+                <h2>📋 Laporan Detail Evaluasi Dosen</h2>
+                
+                <div style="margin-bottom: 20px;">
+                    <input type="text" id="searchInput" placeholder="🔍 Cari nama dosen..." 
+                        style="padding: 10px 15px; width: 300px; border: 1px solid #bdc3c7; border-radius: 6px; font-size: 14px;">
+                    <button class="btn btn-success" onclick="exportToExcel()" style="margin-left: 10px;">
+                        📥 Export ke Excel
+                    </button>
+                </div>
+                
+                <div id="dosenTable" style="overflow-x: auto;"></div>
             </div>
-            
-            <div id="dosenTable"></div>
         </div>
 
         <!-- TAB 4: REKOMENDASI -->
         <div id="rekomendasi" class="tab-content">
-            <h2>💡 Rekomendasi Aksi</h2>
-            <div id="rekomendasiContent"></div>
+            <div class="card">
+                <h2>💡 Rekomendasi Aksi Strategis</h2>
+                <div id="rekomendasiContent"></div>
+            </div>
         </div>
     </div>
 
     <script>
-        // GLOBAL DATA
+        // ===== GLOBAL DATA =====
         let dosenData = [];
         let selectedFile = null;
 
-        // TAB SWITCHING
+        // ===== TAB SWITCHING =====
         function switchTab(tab) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
@@ -158,22 +269,20 @@
             event.target.classList.add('active');
             
             if (tab === 'dashboard') updateDashboard();
-            if (tab === 'evaluasi') showEvaluasi();
+            if (tab === 'laporan') showLaporan();
             if (tab === 'rekomendasi') showRekomendasi();
         }
 
-        // FILE INPUT HANDLER
+        // ===== FILE HANDLING =====
         document.getElementById('fileInput').addEventListener('change', function(e) {
             selectedFile = e.target.files[0];
             if (selectedFile) {
                 document.getElementById('fileStatus').style.display = 'block';
                 document.getElementById('fileName').textContent = selectedFile.name;
                 document.getElementById('importBtn').style.display = 'inline-block';
-                log(`✓ File dipilih: ${selectedFile.name}`);
             }
         });
 
-        // IMPORT FILE
         function importFile() {
             if (!selectedFile) {
                 alert('Pilih file terlebih dahulu!');
@@ -183,49 +292,81 @@
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
-                    const data = e.target.result;
                     let rows = [];
                     
                     if (selectedFile.name.endsWith('.csv')) {
-                        const text = new TextDecoder().decode(new Uint8Array(data));
-                        const lines = text.split('\n').filter(l => l.trim());
+                        // CSV PARSING - More robust
+                        const text = typeof e.target.result === 'string' 
+                            ? e.target.result 
+                            : new TextDecoder().decode(new Uint8Array(e.target.result));
+                        
+                        const lines = text.split('\n').filter(l => l && l.trim());
+                        if (lines.length < 2) {
+                            throw new Error('File CSV harus memiliki minimal 2 baris (header + 1 data)');
+                        }
+                        
                         const headers = lines[0].split(',').map(h => h.trim());
                         
                         for (let i = 1; i < lines.length; i++) {
+                            if (!lines[i].trim()) continue;
+                            
                             const values = lines[i].split(',').map(v => v.trim());
                             const obj = {};
-                            headers.forEach((h, idx) => obj[h] = values[idx] || '');
-                            rows.push(obj);
+                            
+                            headers.forEach((h, idx) => {
+                                if (h && h.length > 0) {
+                                    obj[h] = values[idx] || '';
+                                }
+                            });
+                            
+                            if (Object.keys(obj).length > 0) {
+                                rows.push(obj);
+                            }
                         }
+                        
                     } else {
-                        const workbook = XLSX.read(data, { type: 'binary' });
+                        // EXCEL PARSING
+                        const workbook = XLSX.read(e.target.result, { type: 'binary' });
                         const sheet = workbook.Sheets[workbook.SheetNames[0]];
                         rows = XLSX.utils.sheet_to_json(sheet);
                     }
                     
-                    log(`✓ Membaca ${rows.length} baris dari file`);
+                    if (rows.length === 0) {
+                        throw new Error('File tidak memiliki data yang valid');
+                    }
+                    
                     document.getElementById('rowCount').textContent = rows.length + ' baris';
-                    
                     parseData(rows);
-                    log(`✓ IMPORT BERHASIL! ${dosenData.length} dosen berhasil diimpor`);
-                    alert(`✅ ${dosenData.length} dosen berhasil diimpor!`);
                     
-                    switchTab('dashboard');
+                    if (dosenData.length === 0) {
+                        throw new Error('Tidak ada data dosen yang berhasil diparse');
+                    }
+                    
+                    alert(`✅ ${dosenData.length} dosen berhasil diimpor!`);
+                    document.getElementById('statusText').textContent = `${dosenData.length} dosen ter-import | ${new Date().toLocaleString('id-ID')}`;
+                    
+                    setTimeout(() => {
+                        switchTab('dashboard');
+                    }, 500);
                     
                 } catch (error) {
-                    log(`❌ ERROR: ${error.message}`);
-                    alert(`❌ Gagal import: ${error.message}`);
+                    console.error('Import error:', error);
+                    alert(`❌ Gagal import: ${error.message}\n\nPastikan:\n- File format benar (.xlsx atau .csv)\n- Ada header row\n- Ada minimal satu baris data`);
                 }
             };
             
+            reader.onerror = function(error) {
+                alert(`❌ Gagal membaca file: ${error}`);
+            };
+            
             if (selectedFile.name.endsWith('.csv')) {
-                reader.readAsArrayBuffer(selectedFile);
+                reader.readAsText(selectedFile, 'UTF-8');
             } else {
                 reader.readAsBinaryString(selectedFile);
             }
         }
 
-        // PARSE DATA
+        // ===== PARSE DATA =====
         function parseData(rows) {
             dosenData = [];
             rows.forEach(row => {
@@ -247,110 +388,190 @@
             localStorage.setItem('dosenData', JSON.stringify(dosenData));
         }
 
-        // EVALUATE DOSEN
+        // ===== EVALUATE DOSEN =====
         function evaluate(dosen) {
-            let score = 0;
-            let barriers = [];
+            let criteria = [];
             
             // 1. NIDN
-            if (dosen.nidn && dosen.nidn !== '-') score++;
-            else barriers.push('NIDN/Status tetap');
+            criteria.push({
+                name: 'NIDN/Status Tetap',
+                pass: dosen.nidn && dosen.nidn !== '-'
+            });
             
             // 2. Jabatan
-            if (dosen.jabatan && (dosen.jabatan.includes('Asisten') || dosen.jabatan.includes('Lektor'))) score++;
-            else barriers.push('Jabatan');
+            criteria.push({
+                name: 'Jabatan Akademik',
+                pass: dosen.jabatan && (dosen.jabatan.includes('Asisten') || dosen.jabatan.includes('Lektor') || dosen.jabatan.includes('Kepala'))
+            });
             
             // 3. Masa kerja
-            if (dosen.masaKerja && parseInt(dosen.masaKerja) >= 2) score++;
-            else barriers.push('Masa kerja');
+            criteria.push({
+                name: 'Masa Kerja ≥2 tahun',
+                pass: dosen.masaKerja && parseInt(dosen.masaKerja) >= 2
+            });
             
             // 4. PEKERTI
-            if (dosen.pekerti && dosen.pekerti.toLowerCase().includes('ada')) score++;
-            else barriers.push('PEKERTI/AA');
+            criteria.push({
+                name: 'PEKERTI/AA',
+                pass: dosen.pekerti && dosen.pekerti.toLowerCase().includes('ada')
+            });
             
             // 5. BKD
-            if (dosen.bkd && dosen.bkd.toLowerCase().includes('melaporkan')) score++;
-            else barriers.push('BKD 4 semester');
+            criteria.push({
+                name: 'BKD 4 Semester',
+                pass: dosen.bkd && dosen.bkd.toLowerCase().includes('melaporkan')
+            });
             
             // 6. Publikasi
-            if (dosen.publikasi && dosen.publikasi.toLowerCase() === 'ya') score++;
-            else barriers.push('Publikasi ilmiah');
+            criteria.push({
+                name: 'Publikasi Ilmiah',
+                pass: dosen.publikasi && dosen.publikasi.toLowerCase() === 'ya'
+            });
             
             // 7. Tugas belajar
-            if (!dosen.status || !dosen.status.toLowerCase().includes('tugas')) score++;
-            else barriers.push('Status tugas belajar');
+            criteria.push({
+                name: 'Tidak Tugas Belajar',
+                pass: !dosen.status || !dosen.status.toLowerCase().includes('tugas')
+            });
+            
+            const passCount = criteria.filter(c => c.pass).length;
+            const barriers = criteria.filter(c => !c.pass).map(c => c.name);
             
             return {
-                score: score,
-                eligible: score >= 6,
+                criteria: criteria,
+                passCount: passCount,
+                eligible: passCount >= 6,
                 barriers: barriers
             };
         }
 
-        // UPDATE DASHBOARD
+        // ===== UPDATE DASHBOARD =====
         function updateDashboard() {
             if (dosenData.length === 0) return;
             
-            let eligible = 0, notEligible = 0, pending = 0;
-            const barrierCount = {};
+            let eligible = 0, barrierCount = {}, quickWins = 0, medium = 0, high = 0;
+            const scores = [];
             
             dosenData.forEach(d => {
                 const eval = evaluate(d);
+                scores.push(eval.passCount);
+                
                 if (eval.eligible) eligible++;
                 else {
-                    notEligible++;
                     eval.barriers.forEach(b => barrierCount[b] = (barrierCount[b] || 0) + 1);
                 }
+                
+                const missing = 7 - eval.passCount;
+                if (missing <= 2) quickWins++;
+                else if (missing <= 4) medium++;
+                else high++;
             });
-            pending = dosenData.length - eligible - notEligible;
             
-            document.getElementById('statTotal').textContent = dosenData.length;
-            document.getElementById('statEligible').textContent = eligible;
-            document.getElementById('statNotEligible').textContent = notEligible;
-            document.getElementById('statPending').textContent = pending;
+            const notEligible = dosenData.length - eligible;
+            const pctEligible = Math.round((eligible / dosenData.length) * 100);
+            const gap = 75 - pctEligible;
+            const avgScore = (scores.reduce((a, b) => a + b, 0) / dosenData.length).toFixed(1);
             
-            // Chart
-            const ctx = document.getElementById('statusChart');
-            if (window.myChart) window.myChart.destroy();
-            window.myChart = new Chart(ctx, {
+            // Update KPI
+            document.getElementById('kpiTotal').textContent = dosenData.length;
+            document.getElementById('kpiEligible').textContent = eligible;
+            document.getElementById('kpiEligiblePct').textContent = pctEligible + '%';
+            document.getElementById('kpiNotEligible').textContent = notEligible;
+            document.getElementById('kpiNotEligiblePct').textContent = Math.round((notEligible / dosenData.length) * 100) + '%';
+            document.getElementById('kpiGap').textContent = (gap > 0 ? '+' : '') + gap + '%';
+            
+            // Update Metrics
+            document.getElementById('metricAvg').textContent = avgScore + '/7';
+            document.getElementById('metricQuickWins').textContent = quickWins;
+            document.getElementById('metricMedium').textContent = medium;
+            document.getElementById('metricHigh').textContent = high;
+            
+            // Chart Status
+            const ctx1 = document.getElementById('chartStatus');
+            if (window.chart1) window.chart1.destroy();
+            window.chart1 = new Chart(ctx1, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Eligible', 'Tidak Eligible', 'Pending'],
+                    labels: ['Eligible ✓', 'Tidak Eligible ✗'],
                     datasets: [{
-                        data: [eligible, notEligible, pending],
-                        backgroundColor: ['#27ae60', '#e74c3c', '#f39c12']
+                        data: [eligible, notEligible],
+                        backgroundColor: ['#27ae60', '#e74c3c'],
+                        borderColor: ['#1e8449', '#c0392b'],
+                        borderWidth: 2
                     }]
                 },
                 options: { responsive: true, maintainAspectRatio: false }
             });
             
+            // Chart Criteria Distribution
+            const criteriaCount = {};
+            scores.forEach(s => criteriaCount[s] = (criteriaCount[s] || 0) + 1);
+            const labels = Array.from({length: 8}, (_, i) => i);
+            const data = labels.map(i => criteriaCount[i] || 0);
+            
+            const ctx2 = document.getElementById('chartCriteria');
+            if (window.chart2) window.chart2.destroy();
+            window.chart2 = new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: labels.map(i => i + ' Kriteria'),
+                    datasets: [{
+                        label: 'Jumlah Dosen',
+                        data: data,
+                        backgroundColor: '#3498db',
+                        borderColor: '#2980b9',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+            
             // Barriers
             const sorted = Object.entries(barrierCount).sort((a, b) => b[1] - a[1]);
             document.getElementById('barriersList').innerHTML = sorted.slice(0, 5).map(([name, count]) => 
-                `<div style="padding: 10px; background: #fadbd8; margin: 5px 0; border-radius: 4px;">
-                    <strong>${name}</strong>: ${count} dosen
+                `<div class="barrier-item">
+                    <strong>${name}</strong>
+                    <div style="color: #555; font-size: 13px; margin-top: 5px;">
+                        Mempengaruhi ${count} dosen (${Math.round((count/notEligible)*100)}% dari yang tidak eligible)
+                    </div>
                 </div>`
             ).join('');
+            
+            // Summary
+            const needed = Math.ceil((75 / 100) * dosenData.length) - eligible;
+            const estimateMonths = Math.ceil(needed / (quickWins || 1) * 0.5) + 2;
+            
+            document.getElementById('summaryStatus').textContent = pctEligible + '%';
+            document.getElementById('summaryNeeded').textContent = needed + ' orang';
+            document.getElementById('summaryTime').textContent = Math.max(1, estimateMonths) + ' bulan';
         }
 
-        // SHOW EVALUASI
-        function showEvaluasi() {
+        // ===== SHOW LAPORAN =====
+        function showLaporan() {
             if (dosenData.length === 0) {
                 document.getElementById('dosenTable').innerHTML = '<p style="color: #e74c3c;">Belum ada data. Import data terlebih dahulu!</p>';
                 return;
             }
             
-            let html = '<table><thead><tr><th>No</th><th>Nama</th><th>NIDN</th><th>Jabatan</th><th>Kriteria</th><th>Status</th></tr></thead><tbody>';
+            let html = '<table><thead><tr><th style="width:40px;">No</th><th>Nama</th><th style="width:80px;">NIDN</th><th style="width:100px;">Jabatan</th><th style="width:80px;">Kriteria</th><th style="width:100px;">Status</th><th style="width:150px;">Kendala</th></tr></thead><tbody>';
             
             dosenData.forEach((d, i) => {
                 const eval = evaluate(d);
+                const status = eval.eligible ? '<span class="status-eligible">✓ ELIGIBLE</span>' : '<span class="status-not">✗ TIDAK</span>';
+                const barriers = eval.barriers.slice(0, 2).join(', ') + (eval.barriers.length > 2 ? '...' : '');
+                
                 html += `<tr>
                     <td>${i+1}</td>
-                    <td>${d.nama}</td>
+                    <td><strong>${d.nama}</strong></td>
                     <td>${d.nidn}</td>
                     <td>${d.jabatan}</td>
-                    <td>${eval.score}/7</td>
-                    <td>${eval.eligible ? '✓ ELIGIBLE' : '✗ TIDAK'}</td>
+                    <td><strong>${eval.passCount}/7</strong></td>
+                    <td>${status}</td>
+                    <td style="font-size: 12px; color: #7f8c8d;">${barriers}</td>
                 </tr>`;
             });
             
@@ -358,64 +579,122 @@
             document.getElementById('dosenTable').innerHTML = html;
         }
 
-        // SHOW REKOMENDASI
+        // ===== SHOW REKOMENDASI =====
         function showRekomendasi() {
             if (dosenData.length === 0) {
                 document.getElementById('rekomendasiContent').innerHTML = '<p style="color: #e74c3c;">Belum ada data!</p>';
                 return;
             }
             
-            let eligible = 0, notEligible = 0;
+            let eligible = 0;
+            const quickWins = [];
+            const medium = [];
+            const high = [];
+            
             dosenData.forEach(d => {
-                if (evaluate(d).eligible) eligible++;
-                else notEligible++;
+                const eval = evaluate(d);
+                if (eval.eligible) eligible++;
+                else {
+                    const missing = 7 - eval.passCount;
+                    if (missing <= 2) quickWins.push({nama: d.nama, missing, barriers: eval.barriers});
+                    else if (missing <= 4) medium.push({nama: d.nama, missing, barriers: eval.barriers});
+                    else high.push({nama: d.nama, missing, barriers: eval.barriers});
+                }
             });
             
-            const persenEligible = Math.round((eligible / dosenData.length) * 100);
-            const html = `
-                <div class="alert alert-success">
-                    <strong>Status Saat Ini:</strong> ${eligible}/${dosenData.length} dosen eligible (${persenEligible}%)
+            const pctEligible = Math.round((eligible / dosenData.length) * 100);
+            const target = Math.ceil((75 / 100) * dosenData.length);
+            
+            let html = `
+                <div class="summary-box">
+                    <p><strong>Target Sertifikasi:</strong> 75% (${target} dosen dari ${dosenData.length})</p>
+                    <p><strong>Status Saat Ini:</strong> ${pctEligible}% (${eligible} dosen)</p>
+                    <p><strong>Gap:</strong> Butuh ${target - eligible} dosen eligible lagi</p>
                 </div>
-                <p style="margin: 15px 0;">
-                    <strong>Target:</strong> 75% dosen eligible untuk sertifikasi<br>
-                    <strong>Gap:</strong> ${75 - persenEligible}% masih perlu dikejar
-                </p>
-                <h3 style="margin-top: 20px;">📋 Rekomendasi Aksi</h3>
-                <div style="background: #d6eaf8; padding: 15px; border-radius: 6px; margin-top: 10px;">
-                    <p>1. <strong>Quick Wins:</strong> Fokus pada dosen yang tinggal 1-2 kriteria</p>
-                    <p>2. <strong>Program Publikasi:</strong> Kendala terbesar adalah publikasi ilmiah</p>
-                    <p>3. <strong>Mentoring:</strong> Program bimbingan untuk dosen belum eligible</p>
-                    <p>4. <strong>Timeline:</strong> Target 75% dalam 6 bulan ke depan</p>
+                
+                <h3>🎯 PRIORITAS 1: QUICK WINS (${quickWins.length} dosen)</h3>
+                <p style="color: #555; margin-bottom: 15px;">Tinggal 1-2 kriteria - Target selesai dalam 2-4 minggu</p>
+                ${quickWins.map(d => `
+                    <div class="recommendation">
+                        <strong>${d.nama}</strong> (${d.missing} kriteria kurang)<br>
+                        <span style="font-size: 13px;">Kendala: ${d.barriers.join(', ')}</span>
+                    </div>
+                `).join('')}
+                
+                <h3 style="margin-top: 30px;">📋 PRIORITAS 2: MEDIUM (${medium.length} dosen)</h3>
+                <p style="color: #555; margin-bottom: 15px;">3-4 kriteria - Program terstruktur 2-3 bulan</p>
+                ${medium.map(d => `
+                    <div class="recommendation">
+                        <strong>${d.nama}</strong> (${d.missing} kriteria kurang)<br>
+                        <span style="font-size: 13px;">Kendala: ${d.barriers.join(', ')}</span>
+                    </div>
+                `).join('')}
+                
+                <h3 style="margin-top: 30px;">🚨 PRIORITAS 3: HIGH (${high.length} dosen)</h3>
+                <p style="color: #555; margin-bottom: 15px;"><5 kriteria - Intensive mentoring 3-6 bulan</p>
+                ${high.map(d => `
+                    <div class="recommendation urgent">
+                        <strong>${d.nama}</strong> (${d.missing} kriteria kurang)<br>
+                        <span style="font-size: 13px;">Kendala: ${d.barriers.join(', ')}</span>
+                    </div>
+                `).join('')}
+                
+                <h3 style="margin-top: 30px;">💡 Strategi Implementasi</h3>
+                <div class="summary-box">
+                    <p><strong>1. Quick Wins (Minggu 1-4):</strong> Fokus penuh pada ${quickWins.length} dosen</p>
+                    <p><strong>2. Program Publikasi:</strong> Workshop & mentoring artikel ilmiah</p>
+                    <p><strong>3. BKD Support:</strong> Ingatkan deadline LKD, sediakan template</p>
+                    <p><strong>4. PEKERTI Fasilitasi:</strong> Daftarkan peserta ke PEKERTI terpercaya</p>
+                    <p><strong>5. Timeline Target:</strong> 75% eligible dalam 6 bulan</p>
+                    <p><strong>Budget Estimate:</strong> Rp ${(quickWins.length * 1.5 + medium.length * 2 + high.length * 3) * 1000}rb</p>
                 </div>
             `;
+            
             document.getElementById('rekomendasiContent').innerHTML = html;
         }
 
-        // UTILITY
-        function log(msg) {
-            document.getElementById('importLog').style.display = 'block';
-            document.getElementById('logContent').textContent += msg + '\n';
-            console.log(msg);
+        // ===== EXPORT EXCEL =====
+        function exportToExcel() {
+            if (dosenData.length === 0) {
+                alert('Belum ada data untuk di-export');
+                return;
+            }
+            
+            let rows = [['No', 'Nama', 'NIDN', 'Jabatan', 'Masa Kerja', 'Homebase', 'Kriteria', 'Status', 'Kendala']];
+            
+            dosenData.forEach((d, i) => {
+                const eval = evaluate(d);
+                rows.push([
+                    i+1, d.nama, d.nidn, d.jabatan, d.masaKerja, d.homebase, 
+                    eval.passCount + '/7', eval.eligible ? 'ELIGIBLE' : 'TIDAK', eval.barriers.join('; ')
+                ]);
+            });
+            
+            const ws = XLSX.utils.aoa_to_sheet(rows);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Laporan Dosen');
+            XLSX.writeFile(wb, 'Laporan_Sertifikasi_Dosen_2026.xlsx');
+            alert('✓ Export berhasil!');
         }
 
+        // ===== UTILITIES =====
         function resetImport() {
-            selectedFile = null;
             dosenData = [];
+            selectedFile = null;
             localStorage.removeItem('dosenData');
             document.getElementById('fileInput').value = '';
             document.getElementById('fileStatus').style.display = 'none';
             document.getElementById('importBtn').style.display = 'none';
-            document.getElementById('importLog').style.display = 'none';
-            document.getElementById('logContent').textContent = '';
-            alert('✓ Reset semua data');
+            document.getElementById('statusText').textContent = 'Menunggu data...';
+            alert('✓ Reset berhasil');
         }
 
-        // LOAD DATA ON PAGE LOAD
+        // ===== LOAD ON START =====
         window.addEventListener('load', function() {
             const saved = localStorage.getItem('dosenData');
             if (saved) {
                 dosenData = JSON.parse(saved);
-                log(`✓ Data dimuat dari browser: ${dosenData.length} dosen`);
+                document.getElementById('statusText').textContent = dosenData.length + ' dosen ter-import';
             }
         });
     </script>
